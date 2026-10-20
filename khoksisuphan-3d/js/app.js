@@ -670,6 +670,33 @@
     document.getElementById('interior-bar').classList.remove('hidden');
     document.getElementById('interior-items').classList.remove('hidden');
 
+    // Floor Switcher UI (สำหรับอาคารหลายชั้น เช่น ตึกร่มโพธิ์ 3)
+    const floorSelectorEl = document.getElementById('int-floor-selector');
+    if (floorSelectorEl) {
+      if (data.floors && data.floors.length > 1) {
+        floorSelectorEl.innerHTML = '';
+        data.floors.forEach(f => {
+          const btn = document.createElement('button');
+          btn.className = 'floor-btn' + (f.num === data.currentFloor ? ' active' : '');
+          btn.innerText = f.label || `ชั้น ${f.num}`;
+          btn.title = `คลิกเพื่อสลับไปยัง ${f.label || 'ชั้น ' + f.num}`;
+          btn.onclick = () => {
+            if (f.num !== data.currentFloor) {
+              if (data.onSelectFloor) {
+                data.onSelectFloor(f.num);
+              }
+              enterInterior(b, true);
+            }
+          };
+          floorSelectorEl.appendChild(btn);
+        });
+        floorSelectorEl.classList.remove('hidden');
+      } else {
+        floorSelectorEl.innerHTML = '';
+        floorSelectorEl.classList.add('hidden');
+      }
+    }
+
     if (!keepCamera) {
       controls.maxDistance = 80;
       controls.minDistance = 3;
@@ -696,6 +723,8 @@
 
     document.getElementById('interior-bar').classList.add('hidden');
     document.getElementById('interior-items').classList.add('hidden');
+    const floorSelectorEl = document.getElementById('int-floor-selector');
+    if (floorSelectorEl) floorSelectorEl.classList.add('hidden');
 
     controls.maxDistance = 250;
     controls.minDistance = 10;
