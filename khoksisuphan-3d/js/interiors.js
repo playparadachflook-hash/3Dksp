@@ -3983,48 +3983,16 @@
       maintAt(maintWall(14.1, WH, wThick, 0x1e293b), 4.95, WH / 2, zBtmWall)
     );
 
-    // ผนังซ้ายสุด (X = xLftWall) พร้อม "ช่องจ่ายยา 1–4" หันออกไปทางซ้าย
-    // มีเสา/ผนังทึบสลับกับช่องกระจกจ่ายยาตรงกับโต๊ะคอม 1–4
+    // ผนังซ้ายสุด (X = xLftWall) แบบเคาน์เตอร์บริการช่องจ่ายยา/ห้องเก็บเงิน:
+    // - ช่วงทึบด้านบนสุด (Z: -8.5 .. -7.2)
+    // - ช่วงเคาน์เตอร์คิดเงิน/จ่ายยา (Z: -7.2 .. +6.6): กำแพงล่างใต้เคาน์เตอร์ (สูง 0.90 ม.) และคานบนเหนือช่องกระจก (สูง 0.40 ม.)
+    // - ช่วงทึบด้านล่างสุด (Z: +6.6 .. +8.5)
     g.add(
-      maintAt(maintWall(wThick, WH, 17.0, 0x1e293b), xLftWall, WH / 2, 0)
+      maintAt(maintWall(wThick, WH, 1.3, 0x1e293b), xLftWall, WH / 2, -7.85),
+      maintAt(maintWall(wThick, 0.90, 13.8, 0x1e293b), xLftWall, 0.45, -0.3),
+      maintAt(maintWall(wThick, 0.40, 13.8, 0x1e293b), xLftWall, WH - 0.20, -0.3),
+      maintAt(maintWall(wThick, WH, 1.9, 0x1e293b), xLftWall, WH / 2, 7.55)
     );
-
-    // สร้าง "ช่องจ่ายยา" 4 จุด ตรงหน้าโต๊ะคอมจ่ายยา 1–4 บนผนังซ้าย (Z = -6.4, -2.2, +2.0, +6.2)
-    const windowZs = [-6.4, -2.2, 2.0, 6.2];
-    const windowNums = [4, 3, 2, 1];
-    windowZs.forEach((wz, wIdx) => {
-      const wNum = windowNums[wIdx];
-      // ขอบเคาน์เตอร์ส่งมอบยา
-      g.add(
-        maintAt(maintBox(0.24, 0.08, 1.45, 0x0284c7), xLftWall + 0.04, 0.94, wz),
-        // แผงกระจกพร้อมช่องเปิดรับ-ส่งยา
-        maintAt(
-          new THREE.Mesh(
-            new THREE.BoxGeometry(0.04, 0.76, 1.35),
-            new THREE.MeshStandardMaterial({
-              color: 0xbae6fd,
-              transparent: true,
-              opacity: 0.55,
-              roughness: 0.15
-            })
-          ),
-          xLftWall + 0.02,
-          1.45,
-          wz
-        ),
-        // ช่องเปิดส่งมอบยาด้านล่างกระจก
-        maintAt(maintBox(0.08, 0.22, 0.55, 0x0f172a), xLftWall + 0.02, 1.05, wz)
-      );
-      L.push(
-        maintTag(
-          `🪟 ช่องจ่ายยา ${wNum}`,
-          V(xLftWall + 0.65, 1.55, wz),
-          'sub',
-          null,
-          `ช่องกระจกส่งมอบยาและให้คำแนะนำการใช้ยา ช่องที่ ${wNum}`
-        )
-      );
-    });
 
     // 3. ผนังกั้นภายในห้องยา (อยู่ในกรอบ)
     // ผนังกั้นระหว่างโซนจ่ายยา (ซ้าย) กับ โถงหลัก (X = -6.8):
@@ -4129,9 +4097,8 @@
       };
     }
 
-    // สร้างโต๊ะคอมพิวเตอร์:
-    // rotY = Math.PI / 2 -> จออยู่ซ้าย (-X) ชิดกำแพงซ้าย, เก้าอี้อยู่ขวา (+X), คนนั่งหันหน้าไปทางซ้าย (-X)
-    // rotY = Math.PI     -> จออยู่ล่าง (+Z) ชิดกำแพงล่าง, เก้าอี้อยู่บน (-Z), คนนั่งหันหน้าลงใต้ (+Z เข้าหากำแพงล่าง)
+    // สร้างโต๊ะคอมพิวเตอร์แบบเดี่ยว (สำหรับโต๊ะคอม 5, 6, 7 ที่หันหน้าเข้ากำแพงล่าง)
+    // rotY = Math.PI -> จออยู่ล่าง (+Z) ชิดกำแพงล่าง, เก้าอี้อยู่บน (-Z), คนนั่งหันหน้าลงใต้ (+Z เข้าหากำแพงล่าง)
     function createPharPcDesk(x, z, rotY, spec, labelText, personOpts = null) {
       const dg = new THREE.Group();
       dg.position.set(x, 0, z);
@@ -4176,19 +4143,203 @@
       );
     }
 
-    // โต๊ะคอมจ่ายยา 1–4: ด้านหน้าเป็นช่องจ่ายยา และโต๊ะหันหน้าไปทางซ้ายทั้งหมด (-X)
-    // rotY = Math.PI / 2 -> จออยู่ฝั่งซ้าย (-X) ชิดช่องจ่ายยา, เก้าอี้อยู่ฝั่งขวา (+X), เภสัชกรนั่งหันหน้าไปทางซ้าย (-X)
-    const pcSpec4 = makePharPcSpec(4, 'ช่องจ่ายยา 4', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก');
-    createPharPcDesk(-10.95, -6.4, Math.PI / 2, pcSpec4, 'โต๊ะคอมจ่ายยา 4', { role: 'nurse', shirtColor: 0x10b981, pose: 'sit', rotY: 0 });
+    // =========================================================================
+    // 5. เคาน์เตอร์คิดเงิน/จ่ายยา ช่อง 1–4 แบบห้องเก็บเงิน (Cashier-Style Counter)
+    // โต๊ะคอมจ่ายยา 1–4 ออกแบบเป็นแนวเคาน์เตอร์ยาวต่อเนื่องแบบเคาน์เตอร์การเงิน
+    // มีฐานเคาน์เตอร์ทึบ, ท็อปเคาน์เตอร์สีขาว, กระจกกั้นช่องพร้อมช่องส่งมอบยา,
+    // ลิ้นชักเก็บเงิน, เครื่องพิมพ์ใบเสร็จ/ฉลากยา, เครื่องสแกนบาร์โค้ด และคอมพิวเตอร์
+    // เก้าอี้และเภสัชกรอยู่ด้านใน (+X) หันหน้าไปทางซ้าย (-X) เข้าหาช่องจ่ายยา
+    // =========================================================================
+    const pharCntX0 = xLftWall + 0.06; // -11.85 (ขอบหน้าเคาน์เตอร์ชิดกำแพงซ้าย)
+    const pharCntX1 = -10.05;          // ขอบหลังของโซนเคาน์เตอร์
+    const pharCntW = pharCntX1 - pharCntX0; // 1.80 ม.
+    const pharCntCX = (pharCntX0 + pharCntX1) / 2; // -10.95
+    const pharDeskX = pharCntX0 + 0.38; // -11.47 (แนวโต๊ะเคาน์เตอร์)
+    const pharChairX = pharCntX1 - 0.48; // -10.53 (แนวเก้าอี้เภสัชกร)
 
-    const pcSpec3 = makePharPcSpec(3, 'ช่องจ่ายยา 3', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก');
-    createPharPcDesk(-10.95, -2.2, Math.PI / 2, pcSpec3, 'โต๊ะคอมจ่ายยา 3', { role: 'nurse', shirtColor: 0x0284c7, pose: 'sit', rotY: 0 });
+    const pharZ0 = -7.2; // ขอบบนของเคาน์เตอร์
+    const pharZ1 = 6.6;  // ขอบล่างของเคาน์เตอร์
+    const pharD = pharZ1 - pharZ0; // 13.8 ม.
+    const pharCZ = (pharZ0 + pharZ1) / 2; // -0.3
 
-    const pcSpec2 = makePharPcSpec(2, 'ช่องจ่ายยา 2', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก');
-    createPharPcDesk(-10.95, 2.0, Math.PI / 2, pcSpec2, 'โต๊ะคอมจ่ายยา 2', { role: 'nurse', shirtColor: 0x2563eb, pose: 'sit', rotY: 0 });
+    // พื้นโซนเคาน์เตอร์คิดเงิน/จ่ายยา (เปลี่ยนสีตามสถานะเปิด/พักให้บริการแบบห้องการเงิน)
+    const pharCntFloorCol = pharmacyState.dispensingOpen ? 0xdcfce7 : 0xfecaca;
+    g.add(maintAt(maintBox(pharCntW, 0.03, pharD, pharCntFloorCol), pharCntCX, 0.015, pharCZ));
 
-    const pcSpec1 = makePharPcSpec(1, 'ช่องจ่ายยา 1', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก');
-    createPharPcDesk(-10.95, 6.2, Math.PI / 2, pcSpec1, 'โต๊ะคอมจ่ายยา 1', { role: 'nurse', shirtColor: 0x7c3aed, pose: 'sit', rotY: 0 });
+    // ตัวเคาน์เตอร์หลักยาวแนวตั้ง ชิดฝั่งซ้าย หันหน้าออกทางซ้าย (-X) แบบห้องเก็บเงิน
+    g.add(
+      // ฐานเคาน์เตอร์ยาวต่อเนื่องสีฟ้า/น้ำเงินการเงิน
+      maintAt(maintBox(0.68, 0.92, pharD - 0.08, 0x0284c7), pharDeskX, 0.46, pharCZ),
+      // ท็อปเคาน์เตอร์สีขาวเรียบหรูยื่นรับเอกสารและยา
+      maintAt(maintBox(0.82, 0.06, pharD - 0.02, 0xf8fafc), pharDeskX - 0.04, 0.95, pharCZ),
+      // แผงกั้นปิดหัวเคาน์เตอร์ด้านบน (Z = pharZ0)
+      maintAt(maintBox(pharCntW - 0.08, 1.15, 0.16, 0x0284c7), pharCntCX, 0.575, pharZ0 + 0.08),
+      maintAt(maintBox(pharCntW - 0.04, 0.06, 0.20, 0xf8fafc), pharCntCX, 1.16, pharZ0 + 0.08),
+      // แผงกั้นปิดท้ายเคาน์เตอร์ด้านล่าง (Z = pharZ1)
+      maintAt(maintBox(pharCntW - 0.08, 1.15, 0.16, 0x0284c7), pharCntCX, 0.575, pharZ1 - 0.08),
+      maintAt(maintBox(pharCntW - 0.04, 0.06, 0.20, 0xf8fafc), pharCntCX, 1.16, pharZ1 - 0.08)
+    );
+
+    // แผงกั้นแบ่งช่องบริการ (Privacy partition dividers) ระหว่างช่อง 1, 2, 3, 4
+    const pharDividersZ = [-3.75, -0.30, 3.15];
+    pharDividersZ.forEach((dz) => {
+      g.add(
+        // แผงกั้นทึบสีน้ำเงิน
+        maintAt(maintBox(pharCntW - 0.12, 0.45, 0.06, 0x0369a1), pharCntCX, 1.18, dz),
+        // แผ่นกระจกฝ้าด้านบนแผงกั้น
+        maintAt(
+          new THREE.Mesh(
+            new THREE.BoxGeometry(pharCntW - 0.20, 0.24, 0.03),
+            new THREE.MeshStandardMaterial({
+              color: 0xbae6fd,
+              transparent: true,
+              opacity: 0.6,
+              roughness: 0.2
+            })
+          ),
+          pharCntCX,
+          1.52,
+          dz
+        )
+      );
+    });
+
+    // ป้ายสถานะรวมเคาน์เตอร์จ่ายยา ช่อง 1–4
+    L.push(
+      maintTag(
+        `💰 เคาน์เตอร์จ่ายยา ช่อง 1–4 (${pharmacyState.dispensingOpen ? '🟢 เปิดให้บริการ' : '🔴 พักให้บริการ'})`,
+        V(pharCntCX, 2.15, pharCZ),
+        'room ' + (pharmacyState.dispensingOpen ? 'free' : 'busy'),
+        'pharmacy-dispense',
+        'คลิกเพื่อสลับสถานะเคาน์เตอร์จ่ายยา'
+      )
+    );
+
+    // ข้อมูลช่องบริการ 1–4 (เรียงจากล่างขึ้นบน หรือ ช่อง 1 หน้าสุด ถึง ช่อง 4 ในสุด)
+    const pharStations = [
+      {
+        num: 4,
+        z: -5.475,
+        color: 0x10b981,
+        spec: makePharPcSpec(4, 'เคาน์เตอร์ช่อง 4', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก')
+      },
+      {
+        num: 3,
+        z: -2.025,
+        color: 0x0284c7,
+        spec: makePharPcSpec(3, 'เคาน์เตอร์ช่อง 3', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก')
+      },
+      {
+        num: 2,
+        z: 1.425,
+        color: 0x2563eb,
+        spec: makePharPcSpec(2, 'เคาน์เตอร์ช่อง 2', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก')
+      },
+      {
+        num: 1,
+        z: 4.875,
+        color: 0x7c3aed,
+        spec: makePharPcSpec(1, 'เคาน์เตอร์ช่อง 1', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก')
+      }
+    ];
+
+    pharStations.forEach((st) => {
+      const sz = st.z;
+      const sNum = st.num;
+      const spec = st.spec;
+
+      // 1. หน้าต่างกระจกช่องจ่ายยาและช่องส่งมอบยาด้านหน้า (ชิดกำแพงซ้าย X = pharCntX0 + 0.04)
+      g.add(
+        // บานกระจกกั้นช่องการเงิน/จ่ายยา
+        maintAt(
+          new THREE.Mesh(
+            new THREE.BoxGeometry(0.04, 0.78, 2.7),
+            new THREE.MeshStandardMaterial({
+              color: 0xbae6fd,
+              transparent: true,
+              opacity: 0.55,
+              roughness: 0.15
+            })
+          ),
+          pharCntX0 + 0.04,
+          1.36,
+          sz
+        ),
+        // ถาดสแตนเลสรับ-ส่งเงินและยา (Recessed Transaction Tray)
+        maintAt(maintBox(0.38, 0.04, 0.65, 0x94a3b8), pharCntX0 + 0.16, 0.97, sz),
+        // ช่องโค้งเปิดส่งมอบยาใต้กระจก
+        maintAt(maintBox(0.08, 0.20, 0.55, 0x0f172a), pharCntX0 + 0.04, 1.05, sz)
+      );
+
+      // 2. อุปกรณ์เคาน์เตอร์แบบห้องเก็บเงินบนโต๊ะ
+      g.add(
+        // ลิ้นชักเก็บเงิน (Cash Drawer) แบบห้องเก็บเงิน
+        maintAt(maintBox(0.42, 0.14, 0.44, 0x1e293b), pharDeskX + 0.04, 0.88, sz - 0.75),
+        maintAt(maintBox(0.04, 0.04, 0.16, 0x94a3b8), pharDeskX + 0.24, 0.88, sz - 0.75),
+        // เครื่องพิมพ์ใบเสร็จและฉลากยา (Receipt & Label Printer)
+        maintAt(maintBox(0.24, 0.18, 0.28, 0x334155), pharDeskX + 0.04, 1.07, sz - 0.75),
+        maintAt(maintBox(0.12, 0.02, 0.18, 0x94a3b8), pharDeskX + 0.04, 1.15, sz - 0.75),
+        // เครื่องสแกนบาร์โค้ดยา (Barcode Scanner) บนแท่นวาง
+        maintAt(maintBox(0.08, 0.22, 0.12, 0x0284c7), pharDeskX + 0.12, 1.08, sz - 0.38),
+        // ถาดจัดเรียงใบสั่งยาและแฟ้มประวัติ (Prescription Tray)
+        maintAt(maintBox(0.32, 0.08, 0.38, 0x0284c7), pharDeskX + 0.04, 1.01, sz + 0.75)
+      );
+
+      // 3. ชุดคอมพิวเตอร์ประจำเคาน์เตอร์ (หน้าจอหันเข้าหาเภสัชกรทางขวา +X)
+      const pcGrp = new THREE.Group();
+      pcGrp.add(
+        // จอคอมพิวเตอร์ 24" หันหน้าไปทางขวา (+X)
+        maintAt(maintBox(0.05, 0.36, 0.58, 0x0f172a), pharDeskX - 0.05, 1.25, sz),
+        maintAt(maintBox(0.02, 0.30, 0.52, 0x38bdf8), pharDeskX - 0.02, 1.25, sz),
+        maintAt(maintBox(0.12, 0.26, 0.14, 0x475569), pharDeskX - 0.06, 1.08, sz),
+        // คีย์บอร์ดและเมาส์วางบนเคาน์เตอร์
+        maintAt(maintBox(0.14, 0.02, 0.42, 0x1e293b), pharDeskX + 0.18, 0.99, sz),
+        maintAt(maintBox(0.08, 0.02, 0.06, 0x334155), pharDeskX + 0.18, 0.99, sz + 0.28),
+        // เคสคอมพิวเตอร์ mini-tower
+        maintAt(maintBox(0.38, 0.38, 0.18, 0x1e293b), pharDeskX - 0.05, 1.16, sz + 0.38)
+      );
+      pcGrp.traverse((child) => {
+        if (child.isMesh) child.userData.pcInfo = spec;
+      });
+      g.add(pcGrp);
+
+      // 4. เก้าอี้ทำงานของเภสัชกร (อยู่ฝั่งขวา พนักพิงอยู่ขวา หันหน้าไปทางซ้าย -X)
+      g.add(
+        maintAt(maintBox(0.48, 0.46, 0.48, 0x1e293b), pharChairX, 0.23, sz),
+        maintAt(maintBox(0.08, 0.48, 0.46, 0x1e293b), pharChairX + 0.22, 0.65, sz)
+      );
+
+      // เภสัชกรประจำช่องบริการ (หันหน้าไปทางซ้าย -X เข้าหากระจกและเคาน์เตอร์)
+      if (pharmacyState.dispensingOpen) {
+        const staff = makePerson({
+          role: 'nurse',
+          shirtColor: st.color,
+          pose: 'sit',
+          rotY: -Math.PI / 2 // หันหน้าไปทางซ้าย (-X)
+        });
+        staff.position.set(pharChairX, 0, sz);
+        g.add(staff);
+      }
+
+      // ป้ายลอย 3D คลิกดูสเปกคอมพิวเตอร์
+      L.push(
+        maintTag(
+          `🖥️ โต๊ะคอมจ่ายยา ${sNum} (เคาน์เตอร์ช่อง ${sNum})`,
+          V(pharCntCX, 1.70, sz),
+          'pc',
+          null,
+          `คลิกเพื่อดูสเปกคอมพิวเตอร์ ${spec.name} (${spec.code})`,
+          spec
+        ),
+        maintTag(
+          `🪟 ช่องจ่ายยา ${sNum}`,
+          V(pharCntX0 - 0.25, 1.45, sz),
+          'sub',
+          null,
+          `ช่องกระจกส่งมอบยาและให้คำแนะนำการใช้ยา ช่องที่ ${sNum}`
+        )
+      );
+    });
 
     // โต๊ะคอมจ่ายยา 5, 7, 6: ปรับหันหน้าเข้ากำแพงล่าง (หันหน้าลงใต้ +Z เข้าหากำแพง)
     // rotY = Math.PI -> จออยู่ชิดกำแพงล่าง (+Z), เก้าอี้อยู่ด้านบน (-Z), เภสัชกรนั่งหันหน้าลงหากำแพงล่าง
@@ -4201,22 +4352,22 @@
     const pcSpec6 = makePharPcSpec(6, 'จุดจัดเตรียมและจ่ายยาช่อง 6', 'จัดเตรียมยาผู้ป่วยนอกและบันทึกประวัติแพ้ยา');
     createPharPcDesk(8.2, 7.55, Math.PI, pcSpec6, 'โต๊ะคอมจ่ายยา 6', { role: 'nurse', shirtColor: 0xdb2777, pose: 'sit', rotY: 0 });
 
-    // 5. โต๊ะจัดยา และ ชั้นวางยา ในโซนจ่ายยาฝั่งซ้าย (อยู่ในกรอบ)
-    // (1) โต๊ะจัดยา (เกาะกลางโต๊ะยาวแนวตั้ง: X = -9.2, Z = -0.5, กว้าง 1.25 ม., ลึก 8.0 ม.)
+    // 6. โต๊ะจัดยา และ ชั้นวางยา ในโซนจ่ายยาฝั่งซ้าย (อยู่ในกรอบ)
+    // (1) โต๊ะจัดยา (เกาะกลางโต๊ะยาวแนวตั้ง: X = -8.85, Z = -0.5, กว้าง 1.25 ม., ลึก 8.0 ม.)
     const prepTable = new THREE.Group();
     prepTable.add(
-      maintAt(maintBox(1.25, 0.82, 8.0, 0xe2e8f0), -9.2, 0.41, -0.5),
-      maintAt(maintBox(1.32, 0.06, 8.08, 0xffffff), -9.2, 0.85, -0.5)
+      maintAt(maintBox(1.25, 0.82, 8.0, 0xe2e8f0), -8.85, 0.41, -0.5),
+      maintAt(maintBox(1.32, 0.06, 8.08, 0xffffff), -8.85, 0.85, -0.5)
     );
     // ถาดจัดยาและกล่องบรรจุยาบนโต๊ะจัดยา
     for (let tz = -3.8; tz <= 2.8; tz += 1.3) {
       prepTable.add(
-        maintAt(maintBox(0.48, 0.12, 0.85, 0x38bdf8), -9.45, 0.94, tz),
-        maintAt(maintBox(0.48, 0.12, 0.85, 0xfbbf24), -8.95, 0.94, tz)
+        maintAt(maintBox(0.48, 0.12, 0.85, 0x38bdf8), -9.10, 0.94, tz),
+        maintAt(maintBox(0.48, 0.12, 0.85, 0xfbbf24), -8.60, 0.94, tz)
       );
     }
     g.add(prepTable);
-    L.push(maintTag('💊 โต๊ะจัดยา', V(-9.2, 1.45, -0.5), 'room', null, 'โต๊ะจัดเตรียมยาและตรวจนับเม็ดยา'));
+    L.push(maintTag('💊 โต๊ะจัดยา', V(-8.85, 1.45, -0.5), 'room', null, 'โต๊ะจัดเตรียมยาและตรวจนับเม็ดยา'));
 
     // (2) ชั้นวางยา (ผนังด้านบนของโซนจ่ายยา: X = -9.2, Z = -7.85, กว้าง 4.6 ม., ลึก 0.65 ม.)
     const topMedShelf = makeStorageShelf(4.6, 0.65, 2.05, 0x0284c7);
