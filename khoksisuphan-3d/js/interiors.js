@@ -8326,7 +8326,11 @@
       hg.add(cBox, topPlate, glassPane, topBeam);
       g.add(hg);
 
-      L.push(maintTag('📦 ช่องจ่ายของ', V(x, 1.5, z), 'room', null, labelText));
+      L.push({
+        text: `📦 ${labelText}`,
+        pos: V(x, 1.5, z),
+        cls: 'int-label sub-tag'
+      });
     }
 
     function createSupplyPcDesk(x, z, rotY, spec, labelText, personOpts) {
@@ -8368,13 +8372,28 @@
       dg.add(deskTop, legL, legR, backPanel, monBase, monStand, monScreen, monFrame, kbd, mouse, chSeat, chBack, chPole, chBase);
 
       if (personOpts) {
-        const person = createStaffFigure(personOpts);
-        person.position.set(0, 0.46, 0.52);
-        dg.add(person);
+        const staff = makePerson({
+          role: personOpts.role || 'nurse',
+          shirtColor: personOpts.shirtColor || 0x0284c7,
+          pantsColor: personOpts.pantsColor || 0x1e293b,
+          pose: 'sit',
+          rotY: Math.PI
+        });
+        staff.position.set(0, 0.02, 0.55);
+        dg.add(staff);
       }
 
+      [deskTop, monScreen, monFrame].forEach((m) => {
+        m.userData = { pcInfo: spec };
+      });
+
       g.add(dg);
-      L.push(maintPcTag(labelText, V(x, 1.45, z), spec));
+      L.push({
+        text: labelText,
+        pos: V(x, 1.6, z),
+        cls: 'int-label pc-tag',
+        pcInfo: spec
+      });
     }
 
     // ฟังก์ชันสร้างเครื่องซักผ้าอุตสาหกรรมขนาดใหญ่ (Heavy Duty Commercial Washer)
