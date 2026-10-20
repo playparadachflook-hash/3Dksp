@@ -6270,7 +6270,7 @@
         title: 'ตึกร่มโพธิ์ 3 - ชั้น 3 (หอผู้ป่วยพิเศษ)',
         sub: 'ผังหอผู้ป่วยพิเศษ: ขยายขนาด 10-15% ห้องพิเศษ 13 ห้อง (พร้อมตู้สีเหลืองเป็นระเบียบ) • เค้าเตอร์พยาบาล • โต๊ะคอมห้องพิเศษ • โต๊ะประชุม • ลิฟต์ • ห้องพักเจ้าหน้าที่',
         floors: [
-          { num: 1, label: 'ชั้น 1 (ห้องคลอด • พัฒนาการเด็ก • ระบาดวิทยา)' },
+          { num: 1, label: 'ชั้น 1 (ห้องคลอด • ช่อง 1 พัฒนาการเด็ก • ช่อง 2 ระบาดวิทยา)' },
           { num: 2, label: 'ชั้น 2 (ศูนย์ไตเทียม)' },
           { num: 3, label: 'ชั้น 3 (หอผู้ป่วยพิเศษ)' }
         ],
@@ -6808,7 +6808,7 @@
         title: 'ตึกร่มโพธิ์ 3 - ชั้น 2 (ศูนย์ไตเทียม)',
         sub: 'ผังชั้น 2 ศูนย์ไตเทียม: ขยายขนาด 10-15% ห้องฟอกไต 17 เตียง • โต๊ะพยาบาล 1-2 • ห้องระบบน้ำ RO • ห้องล้าง/เก็บตัวกรอง • ห้องเก็บเวชภัณฑ์ • ห้องพักเจ้าหน้าที่ 1-3 • ห้องพักญาติ • ลิฟต์ • ห้องพระ',
         floors: [
-          { num: 1, label: 'ชั้น 1 (ห้องคลอด • พัฒนาการเด็ก • ระบาดวิทยา)' },
+          { num: 1, label: 'ชั้น 1 (ห้องคลอด • ช่อง 1 พัฒนาการเด็ก • ช่อง 2 ระบาดวิทยา)' },
           { num: 2, label: 'ชั้น 2 (ศูนย์ไตเทียม)' },
           { num: 3, label: 'ชั้น 3 (หอผู้ป่วยพิเศษ)' }
         ],
@@ -7261,111 +7261,161 @@
     g.add(staffSofa, staffDine, fridge, lockers);
 
     // =========================================================================
-    // 7. ส่วนต่อขยายปีกขวา: งานพัฒนาการเด็ก และ งานระบาดวิทยา (X: +13.5 .. +25.5)
+    // 7. ปีกขวาเดิม (ห้องว่างรอจัดสรรแผนก) (X: +13.5 .. +25.5, Z: -9.25 .. +9.25)
     // =========================================================================
-    // พื้นที่ทั้งสองห้อง (ความกว้าง 12.0m, ความลึกห้องละ 9.25m)
-    floor(g, 12.0, 9.25, '#fef9c3', '#fef08a', 0.6, 19.5, -4.625); // งานพัฒนาการเด็ก (บน)
-    floor(g, 12.0, 9.25, '#f0fdf4', '#bbf7d0', 0.6, 19.5, 4.625);  // งานระบาดวิทยา (ล่าง)
+    floor(g, 12.0, 18.5, '#f8fafc', '#e2e8f0', 0.6, 19.5, 0.0);
 
-    // กำแพงรอบนอกของส่วนต่อขยาย
+    // กำแพงรอบนอกของปีกขวาเดิม
     g.add(
-      // กำแพงบนส่วนต่อขยาย (Z = -9.25)
+      // กำแพงบน (Z = -9.25)
       maintAt(maintWall(12.0, WH, wThick, 0x1e293b), 19.5, WH / 2, zMin + wThick / 2),
-      // กำแพงล่างส่วนต่อขยาย (Z = +9.25)
-      maintAt(maintWall(12.0, WH, wThick, 0x1e293b), 19.5, WH / 2, zMax - wThick / 2),
       // กำแพงขวาสุด (X = +25.5) พร้อมประตูทางออกด้านข้าง
       maintAt(maintWall(wThick, WH, 8.5, 0x1e293b), 25.5 - wThick / 2, WH / 2, -5.0),
       maintAt(maintWall(wThick, 0.35, 1.2, 0x1e293b), 25.5 - wThick / 2, WH - 0.175, 0.0),
-      maintAt(maintWall(wThick, WH, 8.5, 0x1e293b), 25.5 - wThick / 2, WH / 2, 5.0)
+      maintAt(maintWall(wThick, WH, 8.5, 0x1e293b), 25.5 - wThick / 2, WH / 2, 5.0),
+      // กำแพงล่างคั่นระหว่างห้องว่างกับช่อง 1 (Z = +9.25) พร้อมประตูกลาง
+      maintAt(maintWall(5.4, WH, wThick, 0x1e293b), 16.2, WH / 2, zMax - wThick / 2),
+      maintAt(maintWall(1.2, 0.35, wThick, 0x1e293b), 19.5, WH - 0.175, zMax - wThick / 2),
+      maintAt(maintWall(5.4, WH, wThick, 0x1e293b), 22.8, WH / 2, zMax - wThick / 2)
     );
     makeRomphoDoor(25.5 - wThick / 2, 0.0, 0.45, 1.2, 0.35);
     L.push(maintTag('🚪 ประตู', V(25.5 - 0.35, 1.45, 0.0), 'room', null, 'ประตูด้านข้างอาคารปีกขวา'));
+    makeRomphoDoor(19.5, zMax - wThick / 2, 1.2, 0.45, 0.3);
+    L.push(maintTag('🚪 ประตู', V(19.5, 1.45, zMax), 'room', null, 'ประตูเชื่อมห้องว่าง - ช่อง 1 พัฒนาการเด็ก'));
 
-    // กำแพงกั้นกลางระหว่างงานพัฒนาการเด็ก และ งานระบาดวิทยา (Z = 0.0, X: +13.5 .. +25.5)
+    L.push({ text: '📦 ห้องว่าง (รอจัดสรรแผนก)', pos: V(19.5, 2.2, 0.0), cls: 'int-label zone-pcu' });
+
+    // =========================================================================
+    // 8. ทางเดินด้านหน้าห้องคลอด (Front Corridor: X: -13.5 .. +13.5, Z: +9.25 .. +11.75)
+    // =========================================================================
+    floor(g, 27.0, 2.5, '#f1f5f9', '#cbd5e1', 0.8, 0.0, 10.5);
+    // ราวกั้น / ผนังเตี้ยขอบทางเดินด้านหน้า
     g.add(
-      maintAt(maintWall(5.3, WH, wThick, 0x1e293b), 16.25, WH / 2, 0.0),
-      maintAt(maintWall(1.2, 0.35, wThick, 0x1e293b), 19.5, WH - 0.175, 0.0),
-      maintAt(maintWall(5.3, WH, wThick, 0x1e293b), 22.75, WH / 2, 0.0)
+      maintAt(maintWall(27.0, 0.9, 0.15, 0x64748b), 0.0, 0.45, 11.75),
+      maintAt(maintWall(0.15, 0.9, 2.5, 0x64748b), -13.5, 0.45, 10.5)
     );
-    makeRomphoDoor(19.5, 0.0, 1.2, 0.45, 0.3);
-    L.push(maintTag('🚪 ประตู', V(19.5, 1.45, 0.0), 'room', null, 'ประตูเชื่อมพัฒนาการเด็ก-ระบาดวิทยา'));
+    L.push({ text: '🚶 ทางเดิน', pos: V(0.0, 1.5, 10.5), cls: 'int-label sub-tag' });
 
-    // --- เฟอร์นิเจอร์และอุปกรณ์: งานพัฒนาการเด็ก ---
+    // =========================================================================
+    // 9. ช่องหมายเลข 1: งานพัฒนาการเด็ก (X: +13.5 .. +25.5, Z: +9.25 .. +18.5)
+    // =========================================================================
+    floor(g, 12.0, 9.25, '#fef9c3', '#fef08a', 0.6, 19.5, 13.875);
+
+    // กำแพงรอบช่องหมายเลข 1
+    g.add(
+      // กำแพงฝั่งตะวันตก (X = +13.5) ติดต่อกับทางเดิน มีประตูเข้า
+      maintAt(maintWall(wThick, WH, 0.65, 0x1e293b), 13.5 + wThick / 2, WH / 2, 9.575),
+      maintAt(maintWall(wThick, 0.35, 1.2, 0x1e293b), 13.5 + wThick / 2, WH - 0.175, 10.5),
+      maintAt(maintWall(wThick, WH, 7.4, 0x1e293b), 13.5 + wThick / 2, WH / 2, 14.8),
+      // กำแพงฝั่งตะวันออก (X = +25.5)
+      maintAt(maintWall(wThick, WH, 9.25, 0x1e293b), 25.5 - wThick / 2, WH / 2, 13.875),
+      // กำแพงแบ่งระหว่างช่อง 1 กับ ช่อง 2 (Z = +18.5) พร้อมประตู
+      maintAt(maintWall(5.4, WH, wThick, 0x1e293b), 16.2, WH / 2, 18.5),
+      maintAt(maintWall(1.2, 0.35, wThick, 0x1e293b), 19.5, WH - 0.175, 18.5),
+      maintAt(maintWall(5.4, WH, wThick, 0x1e293b), 22.8, WH / 2, 18.5)
+    );
+    makeRomphoDoor(13.5 + wThick / 2, 10.5, 0.45, 1.2, 0.35);
+    L.push(maintTag('🚪 ประตู', V(13.5 + 0.35, 1.45, 10.5), 'room', null, 'ทางเข้างานพัฒนาการเด็กจากทางเดิน'));
+    makeRomphoDoor(19.5, 18.5, 1.2, 0.45, 0.3);
+    L.push(maintTag('🚪 ประตู', V(19.5, 1.45, 18.5), 'room', null, 'ประตูเชื่อมช่อง 1 พัฒนาการเด็ก - ช่อง 2 ระบาดวิทยา'));
+
+    // --- เฟอร์นิเจอร์และอุปกรณ์: ช่อง 1 งานพัฒนาการเด็ก ---
     L.push({
-      text: `🧸 งานพัฒนาการเด็ก (${romphoState.childDevOccupied ? '🔴 มีเด็กรับบริการ' : '🟢 พร้อมให้บริการ'})`,
-      pos: V(19.5, 2.2, -4.625),
+      text: `🧸 ช่อง 1: งานพัฒนาการเด็ก (${romphoState.childDevOccupied ? '🔴 มีเด็กรับบริการ' : '🟢 พร้อมให้บริการ'})`,
+      pos: V(19.5, 2.2, 13.875),
       cls: `int-label ${romphoState.childDevOccupied ? 'busy' : 'free'} toggleable`,
       toggleId: 'rompho-child-dev'
     });
     // แผ่นโฟมยางปูพื้นเสริมพัฒนาการ (Sensory play mats)
-    const mat1 = maintBox(1.6, 0.04, 1.6, 0x38bdf8); mat1.position.set(16.5, 0.02, -7.0);
-    const mat2 = maintBox(1.6, 0.04, 1.6, 0xf43f5e); mat2.position.set(18.2, 0.02, -7.0);
-    const mat3 = maintBox(1.6, 0.04, 1.6, 0xfacc15); mat3.position.set(16.5, 0.02, -5.3);
-    const mat4 = maintBox(1.6, 0.04, 1.6, 0x10b981); mat4.position.set(18.2, 0.02, -5.3);
+    const mat1 = maintBox(1.6, 0.04, 1.6, 0x38bdf8); mat1.position.set(16.5, 0.02, 11.5);
+    const mat2 = maintBox(1.6, 0.04, 1.6, 0xf43f5e); mat2.position.set(18.2, 0.02, 11.5);
+    const mat3 = maintBox(1.6, 0.04, 1.6, 0xfacc15); mat3.position.set(16.5, 0.02, 13.2);
+    const mat4 = maintBox(1.6, 0.04, 1.6, 0x10b981); mat4.position.set(18.2, 0.02, 13.2);
     // บ่อบอล / คอกกั้นฝึกการเคลื่อนไหว
-    const playPen = maintBox(2.2, 0.45, 2.2, 0xec4899); playPen.position.set(17.35, 0.225, -2.5);
-    const balls = maintBox(2.0, 0.25, 2.0, 0xfbcfe8); balls.position.set(17.35, 0.28, -2.5);
+    const playPen = maintBox(2.2, 0.45, 2.2, 0xec4899); playPen.position.set(17.35, 0.225, 16.0);
+    const balls = maintBox(2.0, 0.25, 2.0, 0xfbcfe8); balls.position.set(17.35, 0.28, 16.0);
     // โต๊ะประเมินพัฒนาการทรงกลมสำหรับเด็ก
-    const kidTable = maintCyl(0.70, 0.70, 0.52, 0x06b6d4, 16); kidTable.position.set(22.0, 0.26, -6.5);
-    const kc1 = maintBox(0.35, 0.32, 0.35, 0xf59e0b); kc1.position.set(22.0, 0.16, -7.3);
-    const kc2 = maintBox(0.35, 0.32, 0.35, 0x10b981); kc2.position.set(22.0, 0.16, -5.7);
-    const kc3 = maintBox(0.35, 0.32, 0.35, 0x8b5cf6); kc3.position.set(21.2, 0.16, -6.5);
-    const kc4 = maintBox(0.35, 0.32, 0.35, 0xf43f5e); kc4.position.set(22.8, 0.16, -6.5);
+    const kidTable = maintCyl(0.70, 0.70, 0.52, 0x06b6d4, 16); kidTable.position.set(22.0, 0.26, 12.0);
+    const kc1 = maintBox(0.35, 0.32, 0.35, 0xf59e0b); kc1.position.set(22.0, 0.16, 11.2);
+    const kc2 = maintBox(0.35, 0.32, 0.35, 0x10b981); kc2.position.set(22.0, 0.16, 12.8);
+    const kc3 = maintBox(0.35, 0.32, 0.35, 0x8b5cf6); kc3.position.set(21.2, 0.16, 12.0);
+    const kc4 = maintBox(0.35, 0.32, 0.35, 0xf43f5e); kc4.position.set(22.8, 0.16, 12.0);
     // ตู้เก็บชุดตรวจพัฒนาการ DSPM / DAIM และของเล่นฝึกทักษะ
-    const toyShelf = maintBox(0.65, 1.7, 3.2, 0x3b82f6); toyShelf.position.set(24.8, 0.85, -6.5);
+    const toyShelf = maintBox(0.65, 1.7, 3.2, 0x3b82f6); toyShelf.position.set(24.8, 0.85, 12.0);
     // เตียงตรวจร่างกายเด็กและที่วัดส่วนสูง/ชั่งน้ำหนัก
-    const examBed = maintBox(0.9, 0.70, 1.8, 0x0284c7); examBed.position.set(24.5, 0.35, -2.5);
-    const scale = maintBox(0.4, 0.12, 0.6, 0xffffff); scale.position.set(24.5, 0.76, -2.0);
+    const examBed = maintBox(0.9, 0.70, 1.8, 0x0284c7); examBed.position.set(24.5, 0.35, 16.0);
+    const scale = maintBox(0.4, 0.12, 0.6, 0xffffff); scale.position.set(24.5, 0.76, 16.5);
     // โซฟาผู้ปกครอง
-    const pSofa = maintBox(2.2, 0.65, 0.85, 0x475569); pSofa.position.set(16.5, 0.325, -2.2);
+    const pSofa = maintBox(2.2, 0.65, 0.85, 0x475569); pSofa.position.set(16.5, 0.325, 16.5);
     g.add(mat1, mat2, mat3, mat4, playPen, balls, kidTable, kc1, kc2, kc3, kc4, toyShelf, examBed, scale, pSofa);
     // โต๊ะคอมพิวเตอร์พัฒนาการเด็ก
-    createRomphoPcDesk(21.0, -2.2, Math.PI, CHILD_DEV_PC_SPECS, '🖥️ PC-DEV-01: โต๊ะคอมพัฒนาการเด็ก', { role: 'nurse', pose: 'sit', rotY: Math.PI });
+    createRomphoPcDesk(21.0, 16.3, Math.PI, CHILD_DEV_PC_SPECS, '🖥️ PC-DEV-01: โต๊ะคอมพัฒนาการเด็ก', { role: 'nurse', pose: 'sit', rotY: Math.PI });
 
-    // --- เฟอร์นิเจอร์และอุปกรณ์: งานระบาดวิทยา ---
+    // =========================================================================
+    // 10. ช่องหมายเลข 2: งานระบาดวิทยา (X: +13.5 .. +25.5, Z: +18.5 .. +27.75)
+    // =========================================================================
+    floor(g, 12.0, 9.25, '#f0fdf4', '#bbf7d0', 0.6, 19.5, 23.125);
+
+    // กำแพงรอบช่องหมายเลข 2
+    g.add(
+      // กำแพงล่างสุดของช่อง 2 (Z = +27.75)
+      maintAt(maintWall(12.0, WH, wThick, 0x1e293b), 19.5, WH / 2, 27.75 - wThick / 2),
+      // กำแพงฝั่งตะวันตก (X = +13.5)
+      maintAt(maintWall(wThick, WH, 9.25, 0x1e293b), 13.5 + wThick / 2, WH / 2, 23.125),
+      // กำแพงฝั่งตะวันออก (X = +25.5) พร้อมประตูด้านข้าง
+      maintAt(maintWall(wThick, WH, 4.0, 0x1e293b), 25.5 - wThick / 2, WH / 2, 20.5),
+      maintAt(maintWall(wThick, 0.35, 1.2, 0x1e293b), 25.5 - wThick / 2, WH - 0.175, 23.125),
+      maintAt(maintWall(wThick, WH, 4.0, 0x1e293b), 25.5 - wThick / 2, WH / 2, 25.75)
+    );
+    makeRomphoDoor(25.5 - wThick / 2, 23.125, 0.45, 1.2, 0.35);
+    L.push(maintTag('🚪 ประตู', V(25.5 - 0.35, 1.45, 23.125), 'room', null, 'ประตูด้านข้างงานระบาดวิทยา'));
+
+    // --- เฟอร์นิเจอร์และอุปกรณ์: ช่อง 2 งานระบาดวิทยา ---
     L.push({
-      text: `🔬 งานระบาดวิทยา (${romphoState.epiOccupied ? '🔴 มีประชุมสอบสวนโรค' : '🟢 พร้อมปฏิบัติการ'})`,
-      pos: V(19.5, 2.2, 4.625),
+      text: `🔬 ช่อง 2: งานระบาดวิทยา (${romphoState.epiOccupied ? '🔴 มีประชุมสอบสวนโรค' : '🟢 พร้อมปฏิบัติการ'})`,
+      pos: V(19.5, 2.2, 23.125),
       cls: `int-label ${romphoState.epiOccupied ? 'busy' : 'free'} toggleable`,
       toggleId: 'rompho-epi'
     });
     // โต๊ะประชุมทีมสอบสวนโรค (JIT / SRRT Outbreak War Room)
-    const epiTable = maintBox(3.4, 0.74, 1.4, 0x0f172a); epiTable.position.set(21.5, 0.37, 4.2);
-    const epiTableTop = maintBox(3.45, 0.04, 1.45, 0x0284c7); epiTableTop.position.set(21.5, 0.74, 4.2);
+    const epiTable = maintBox(3.4, 0.74, 1.4, 0x0f172a); epiTable.position.set(21.5, 0.37, 22.7);
+    const epiTableTop = maintBox(3.45, 0.04, 1.45, 0x0284c7); epiTableTop.position.set(21.5, 0.74, 22.7);
     g.add(epiTable, epiTableTop);
     [-1.1, 0, 1.1].forEach((ox) => {
-      const cU = maintBox(0.42, 0.45, 0.42, 0x334155); cU.position.set(21.5 + ox, 0.225, 3.2);
-      const cD = maintBox(0.42, 0.45, 0.42, 0x334155); cD.position.set(21.5 + ox, 0.225, 5.2);
+      const cU = maintBox(0.42, 0.45, 0.42, 0x334155); cU.position.set(21.5 + ox, 0.225, 21.7);
+      const cD = maintBox(0.42, 0.45, 0.42, 0x334155); cD.position.set(21.5 + ox, 0.225, 23.7);
       g.add(cU, cD);
     });
     // จอแสดงผลข้อมูลระบาดวิทยา GIS / Dashboard 506
-    const dashFrame = maintBox(0.06, 1.4, 2.8, 0x0f172a); dashFrame.position.set(25.35, 1.6, 4.2);
-    const dashScreen = maintBox(0.04, 1.3, 2.7, 0x0284c7); dashScreen.position.set(25.32, 1.6, 4.2);
+    const dashFrame = maintBox(0.06, 1.4, 2.8, 0x0f172a); dashFrame.position.set(25.35, 1.6, 22.7);
+    const dashScreen = maintBox(0.04, 1.3, 2.7, 0x0284c7); dashScreen.position.set(25.32, 1.6, 22.7);
     g.add(dashFrame, dashScreen);
-    L.push({ text: '🗺️ จอแดชบอร์ดระบาดวิทยา GIS 506', pos: V(25.1, 2.3, 4.2), cls: 'int-label pc-tag' });
+    L.push({ text: '🗺️ จอแดชบอร์ดระบาดวิทยา GIS 506', pos: V(25.1, 2.3, 22.7), cls: 'int-label pc-tag' });
     // ตู้เก็บชุด PPE และอุปกรณ์สอบสวนโรคภาคสนาม
-    const ppeCabinet = maintBox(0.65, 1.85, 2.4, 0x475569); ppeCabinet.position.set(24.8, 0.925, 7.5);
+    const ppeCabinet = maintBox(0.65, 1.85, 2.4, 0x475569); ppeCabinet.position.set(24.8, 0.925, 26.0);
     // กล่องเก็บตัวอย่างสิ่งส่งตรวจควบคุมอุณหภูมิ (VTM / Specimen Cooler Boxes)
-    const blueCooler = maintBox(0.55, 0.45, 0.75, 0x3b82f6); blueCooler.position.set(21.2, 0.225, 7.5);
-    const redCooler = maintBox(0.55, 0.45, 0.75, 0xef4444); redCooler.position.set(19.6, 0.225, 7.5);
-    const yellowKit = maintBox(0.45, 0.35, 0.55, 0xf59e0b); yellowKit.position.set(18.0, 0.175, 7.5);
+    const blueCooler = maintBox(0.55, 0.45, 0.75, 0x3b82f6); blueCooler.position.set(21.2, 0.225, 26.0);
+    const redCooler = maintBox(0.55, 0.45, 0.75, 0xef4444); redCooler.position.set(19.6, 0.225, 26.0);
+    const yellowKit = maintBox(0.45, 0.35, 0.55, 0xf59e0b); yellowKit.position.set(18.0, 0.175, 26.0);
     // ไวท์บอร์ดรายงานสถานการณ์ระบาดวิทยา
-    const whiteBoard = maintBox(2.2, 1.1, 0.04, 0xffffff); whiteBoard.position.set(17.5, 1.4, 0.15);
+    const whiteBoard = maintBox(2.2, 1.1, 0.04, 0xffffff); whiteBoard.position.set(17.5, 1.4, 18.65);
     g.add(ppeCabinet, blueCooler, redCooler, yellowKit, whiteBoard);
-    L.push({ text: 'กล่องเก็บสิ่งส่งตรวจ VTM / PPE', pos: V(20.4, 1.55, 7.5), cls: 'int-label sub-tag' });
+    L.push({ text: 'กล่องเก็บสิ่งส่งตรวจ VTM / PPE', pos: V(20.4, 1.55, 26.0), cls: 'int-label sub-tag' });
     // โต๊ะคอมพิวเตอร์ระบาดวิทยา
-    createRomphoPcDesk(16.5, 2.5, 0, EPI_PC_SPECS, '🖥️ PC-EPI-01: โต๊ะคอมระบาดวิทยา', { role: 'doctor', pose: 'sit', rotY: 0 });
+    createRomphoPcDesk(16.5, 21.0, 0, EPI_PC_SPECS, '🖥️ PC-EPI-01: โต๊ะคอมระบาดวิทยา', { role: 'doctor', pose: 'sit', rotY: 0 });
 
     const items = [
-      ['🏢', 'ตึกร่มโพธิ์ 3 - ชั้น 1', 'แผนกห้องคลอด, งานพัฒนาการเด็ก, งานระบาดวิทยา'],
+      ['🏢', 'ตึกร่มโพธิ์ 3 - ชั้น 1', 'แผนกห้องคลอด, ช่อง 1 พัฒนาการเด็ก, ช่อง 2 ระบาดวิทยา'],
       ['🏥', 'ห้องผ่าคลอด 1 (OR Delivery)', '1 ห้อง (เตียงผ่าคลอด, โคมไฟคู่, เครื่องดมยา, ตู้อุ่นทารก)', 'rompho-or-1', romphoState.or1Occupied ? 'busy' : 'free'],
       ['🛌', 'เตียงพักคลอด หอผู้ป่วยคลอด', '16 เตียง (คลิกเตียงเพื่อสลับ ว่าง/ไม่ว่าง)'],
       ['🛏️', 'เตียงเตรียมคลอด / สังเกตอาการ', '3 เตียง (คลิกเตียงเพื่อสลับ ว่าง/ไม่ว่าง)'],
       ['🖥️', 'PC-ROM-01: โต๊ะคอมห้องคลอด 1', 'ดูสเปก', null, 'free', ROMPHO_PC_SPECS],
-      ['🧸', 'งานพัฒนาการเด็ก (Child Development)', '1 ห้อง (DSPM, เบาะฝึกพัฒนาการ, โต๊ะตรวจประเมิน)', 'rompho-child-dev', romphoState.childDevOccupied ? 'busy' : 'free'],
+      ['📦', 'ห้องว่าง (รอจัดสรรแผนก)', '1 ห้อง (ปีกขวาเดิม กว้าง 12m x 18.5m)'],
+      ['🧸', 'ช่อง 1: งานพัฒนาการเด็ก (Child Development)', '1 ห้อง (DSPM, เบาะฝึกพัฒนาการ, โต๊ะตรวจประเมิน)', 'rompho-child-dev', romphoState.childDevOccupied ? 'busy' : 'free'],
       ['🖥️', 'PC-DEV-01: โต๊ะคอมพัฒนาการเด็ก', 'ดูสเปก', null, 'free', CHILD_DEV_PC_SPECS],
-      ['🔬', 'งานระบาดวิทยา (Epidemiology)', '1 ห้อง (ศูนย์สอบสวนโรค SRRT, จอ GIS Dashboard, ตู้ PPE, กล่อง VTM)', 'rompho-epi', romphoState.epiOccupied ? 'busy' : 'free'],
+      ['🔬', 'ช่อง 2: งานระบาดวิทยา (Epidemiology)', '1 ห้อง (ศูนย์สอบสวนโรค SRRT, จอ GIS Dashboard, ตู้ PPE, กล่อง VTM)', 'rompho-epi', romphoState.epiOccupied ? 'busy' : 'free'],
       ['🖥️', 'PC-EPI-01: โต๊ะคอมระบาดวิทยา', 'ดูสเปก', null, 'free', EPI_PC_SPECS],
+      ['🚶', 'ทางเดินด้านหน้าห้องคลอด', 'กว้าง 2.5m เชื่อมต่อไปยังช่อง 1 และช่อง 2'],
       ['👶', 'ห้องพักคลอด 1 & 2', '2 ห้อง'],
       ['👨‍⚕️', 'ห้องพักแพทย์ 1', '1 ห้อง', 'rompho-doc-1', romphoState.doctorRoom1Occupied ? 'busy' : 'free'],
       ['👩‍⚕️', 'ห้องพักแพทย์ 2', '1 ห้อง', 'rompho-doc-2', romphoState.doctorRoom2Occupied ? 'busy' : 'free'],
@@ -7373,16 +7423,16 @@
       ['🗄️', 'ชั้นเก็บอุปกรณ์ห้องคลอด', '2 จุด (ฝั่งขวาสุด และใต้ห้องผ่าคลอด)'],
       ['🪑', 'โต๊ะทำงานเคาน์เตอร์บริการ', '2 ตัว'],
       ['🚻', 'ห้องน้ำ', '1 ห้อง'],
-      ['🚪', 'ประตูทางเข้าและประตูห้องภายใน', '19 จุด ตามผัง']
+      ['🚪', 'ประตูทางเข้าและประตูห้องภายใน', '21 จุด ตามผัง']
     ];
 
     return {
       group: g,
       labels: L,
-      title: 'ตึกร่มโพธิ์ 3 - ชั้น 1 (ห้องคลอด • งานพัฒนาการเด็ก • งานระบาดวิทยา)',
-      sub: 'ผังชั้น 1: แผนกห้องคลอดและสูติกรรม • ส่วนต่อขยายปีกขวา: งานพัฒนาการเด็ก 1 ห้อง (ชุดตรวจ DSPM, เบาะฝึกทักษะ) และงานระบาดวิทยา 1 ห้อง (ทีมสอบสวนโรค SRRT, จอ GIS 506, กล่อง VTM)',
+      title: 'ตึกร่มโพธิ์ 3 - ชั้น 1 (ห้องคลอด • ช่อง 1 พัฒนาการเด็ก • ช่อง 2 ระบาดวิทยา)',
+      sub: 'ผังชั้น 1: แผนกห้องคลอดและสูติกรรม • ทางเดินด้านหน้า • ปีกขวาเดิม (ห้องว่างรอจัดสรร) • ช่อง 1: งานพัฒนาการเด็ก (ชุดตรวจ DSPM, เบาะฝึกทักษะ) • ช่อง 2: งานระบาดวิทยา (ทีมสอบสวนโรค SRRT, จอ GIS 506)',
       floors: [
-        { num: 1, label: 'ชั้น 1 (ห้องคลอด • พัฒนาการเด็ก • ระบาดวิทยา)' },
+        { num: 1, label: 'ชั้น 1 (ห้องคลอด • ช่อง 1 พัฒนาการเด็ก • ช่อง 2 ระบาดวิทยา)' },
         { num: 2, label: 'ชั้น 2 (ศูนย์ไตเทียม)' },
         { num: 3, label: 'ชั้น 3 (หอผู้ป่วยพิเศษ)' }
       ],
@@ -7391,7 +7441,7 @@
         romphoState.currentFloor = f;
       },
       items,
-      cam: { pos: V(6.0, 30.0, 26.0), target: V(6.0, 0, 0.5) }
+      cam: { pos: V(6.0, 38.0, 38.0), target: V(6.0, 0, 9.25) }
     };
   }
 
