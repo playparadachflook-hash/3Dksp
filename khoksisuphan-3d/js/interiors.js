@@ -5754,9 +5754,51 @@
     ]
   };
 
+  const CHILD_DEV_PC_SPECS = {
+    name: 'โต๊ะคอมพัฒนาการเด็ก (Child Development)',
+    code: 'PC-DEV-01',
+    role: 'บันทึกการตรวจประเมินพัฒนาการเด็กปฐมวัย DSPM / DAIM และเชื่อมโยงข้อมูลสุขภาพเด็กดี',
+    specs: [
+      ['CPU', 'Intel Core i5-12400 (6 Cores / 12 Threads, up to 4.40 GHz)'],
+      ['RAM', '16 GB DDR4 3200MHz'],
+      ['Storage', '512 GB M.2 NVMe PCIe SSD'],
+      ['Monitor', 'Dell 24" Full HD IPS (Anti-Glare, ComfortView Plus)'],
+      ['OS', 'Windows 11 Pro 64-bit'],
+      ['Network', 'LAN Gigabit + Hospital Healthcare VLAN']
+    ],
+    software: [
+      'HOSxP Child Health & DSPM Assessment Module',
+      'ระบบบันทึกพัฒนาการเด็กปฐมวัย (KidDiary)',
+      'HDC Health Data Center Link',
+      'Microsoft Edge / Hospital Intranet'
+    ]
+  };
+
+  const EPI_PC_SPECS = {
+    name: 'โต๊ะคอมระบาดวิทยา (Epidemiology & Surveillance)',
+    code: 'PC-EPI-01',
+    role: 'ระบบเฝ้าระวังและสอบสวนโรคทางระบาดวิทยา การรายงานโรค 506 และแผนที่ระบาดวิทยา GIS',
+    specs: [
+      ['CPU', 'Intel Core i7-12700 (12 Cores / 20 Threads, up to 4.90 GHz)'],
+      ['RAM', '32 GB DDR4 3200MHz (รองรับการวิเคราะห์ข้อมูลระบาดวิทยาและแผนที่ GIS)'],
+      ['Storage', '1 TB M.2 NVMe PCIe 4.0 SSD (High-Speed Analytics)'],
+      ['Monitor', 'Dell UltraSharp 27" 4K IPS (Dual-Display setup)'],
+      ['GPU', 'NVIDIA GeForce RTX 3050 8GB'],
+      ['OS', 'Windows 11 Pro 64-bit Workstation'],
+      ['Network', 'LAN Gigabit Dedicated Epi VLAN + Redundant Uplink']
+    ],
+    software: [
+      'CD-Online / Digital Disease Surveillance (ระบบรายงาน 506)',
+      'ArcGIS Pro / QGIS (แผนที่ระบาดวิทยาเชิงพื้นที่)',
+      'HOSxP Epidemiology & Outbreak Investigation Module',
+      'Epi Info / R-Studio Analytics',
+      'Microsoft Edge / Security Portal'
+    ]
+  };
+
   const romphoState = {
     currentFloor: 1,
-    // Floor 1 (ห้องคลอดและสูติกรรม)
+    // Floor 1 (ห้องคลอดและสูติกรรม + งานพัฒนาการเด็ก + งานระบาดวิทยา)
     beds: Array.from({ length: 19 }, (_, i) => ({
       id: `rompho-bed-${i + 1}`,
       name: i < 16 ? `เตียงพักคลอด ${i + 1}` : `เตียงเตรียมคลอด ${i - 15}`,
@@ -5766,6 +5808,8 @@
     staffRoomOccupied: false,
     doctorRoom1Occupied: false,
     doctorRoom2Occupied: false,
+    childDevOccupied: false,
+    epiOccupied: false,
 
     // Floor 2 (ศูนย์ไตเทียม 17 เตียง)
     hemoBeds: Array.from({ length: 17 }, (_, i) => ({
@@ -6226,7 +6270,7 @@
         title: 'ตึกร่มโพธิ์ 3 - ชั้น 3 (หอผู้ป่วยพิเศษ)',
         sub: 'ผังหอผู้ป่วยพิเศษ: ขยายขนาด 10-15% ห้องพิเศษ 13 ห้อง (พร้อมตู้สีเหลืองเป็นระเบียบ) • เค้าเตอร์พยาบาล • โต๊ะคอมห้องพิเศษ • โต๊ะประชุม • ลิฟต์ • ห้องพักเจ้าหน้าที่',
         floors: [
-          { num: 1, label: 'ชั้น 1 (ห้องคลอด)' },
+          { num: 1, label: 'ชั้น 1 (ห้องคลอด • พัฒนาการเด็ก • ระบาดวิทยา)' },
           { num: 2, label: 'ชั้น 2 (ศูนย์ไตเทียม)' },
           { num: 3, label: 'ชั้น 3 (หอผู้ป่วยพิเศษ)' }
         ],
@@ -6764,7 +6808,7 @@
         title: 'ตึกร่มโพธิ์ 3 - ชั้น 2 (ศูนย์ไตเทียม)',
         sub: 'ผังชั้น 2 ศูนย์ไตเทียม: ขยายขนาด 10-15% ห้องฟอกไต 17 เตียง • โต๊ะพยาบาล 1-2 • ห้องระบบน้ำ RO • ห้องล้าง/เก็บตัวกรอง • ห้องเก็บเวชภัณฑ์ • ห้องพักเจ้าหน้าที่ 1-3 • ห้องพักญาติ • ลิฟต์ • ห้องพระ',
         floors: [
-          { num: 1, label: 'ชั้น 1 (ห้องคลอด)' },
+          { num: 1, label: 'ชั้น 1 (ห้องคลอด • พัฒนาการเด็ก • ระบาดวิทยา)' },
           { num: 2, label: 'ชั้น 2 (ศูนย์ไตเทียม)' },
           { num: 3, label: 'ชั้น 3 (หอผู้ป่วยพิเศษ)' }
         ],
@@ -6961,7 +7005,7 @@
     // กำแพงซ้ายสุด (X = -13.5)
     g.add(maintAt(maintWall(wThick, WH, D, 0x1e293b), xMin + wThick / 2, WH / 2, 0));
 
-    // กำแพงขวาสุด (X = +13.5) มีประตูตรงช่องทางเดินขวา 3 บาน
+    // กำแพงขวาสุดของแผนกห้องคลอด (X = +13.5) มีประตูเชื่อมต่อสู่ส่วนต่อขยาย 3 บาน
     g.add(
       maintAt(maintWall(wThick, WH, 6.2, 0x1e293b), xMax - wThick / 2, WH / 2, -6.15),
       maintAt(maintWall(wThick, 0.35, 1.2, 0x1e293b), xMax - wThick / 2, WH - 0.175, -2.45),
@@ -6972,11 +7016,11 @@
       maintAt(maintWall(wThick, WH, 3.5, 0x1e293b), xMax - wThick / 2, WH / 2, 7.50)
     );
     makeRomphoDoor(xMax - wThick / 2, -2.45, 0.45, 1.2, 0.35);
-    L.push(maintTag('🚪 ประตู', V(xMax - 0.35, 1.45, -2.45), 'room', null, 'ประตูออกสู่อาคารข้างเคียง'));
+    L.push(maintTag('🚪 ประตู', V(xMax - 0.35, 1.45, -2.45), 'room', null, 'ประตูเชื่อมงานพัฒนาการเด็ก'));
     makeRomphoDoor(xMax - wThick / 2, 1.35, 0.45, 1.2, 0.35);
-    L.push(maintTag('🚪 ประตู', V(xMax - 0.35, 1.45, 1.35), 'room', null, 'ประตูออกระเบียงด้านขวา'));
+    L.push(maintTag('🚪 ประตู', V(xMax - 0.35, 1.45, 1.35), 'room', null, 'ประตูเชื่อมงานระบาดวิทยา (บน)'));
     makeRomphoDoor(xMax - wThick / 2, 5.15, 0.45, 1.2, 0.35);
-    L.push(maintTag('🚪 ประตู', V(xMax - 0.35, 1.45, 5.15), 'room', null, 'ประตูออกบันไดหนีไฟด้านขวา'));
+    L.push(maintTag('🚪 ประตู', V(xMax - 0.35, 1.45, 5.15), 'room', null, 'ประตูเชื่อมงานระบาดวิทยา (ล่าง)'));
 
     // 3. กำแพงกั้นโถงทางเดินกลาง (Corridor Walls)
     // ผนังฝั่งซ้ายของโถงทางเดิน (X = -4.2) พร้อมประตูเข้า 5 ห้องฝั่งซ้าย
@@ -7216,12 +7260,112 @@
     lockers.position.set(5.8, 0.85, 7.225);
     g.add(staffSofa, staffDine, fridge, lockers);
 
+    // =========================================================================
+    // 7. ส่วนต่อขยายปีกขวา: งานพัฒนาการเด็ก และ งานระบาดวิทยา (X: +13.5 .. +25.5)
+    // =========================================================================
+    // พื้นที่ทั้งสองห้อง (ความกว้าง 12.0m, ความลึกห้องละ 9.25m)
+    floor(g, 12.0, 9.25, '#fef9c3', '#fef08a', 0.6, 19.5, -4.625); // งานพัฒนาการเด็ก (บน)
+    floor(g, 12.0, 9.25, '#f0fdf4', '#bbf7d0', 0.6, 19.5, 4.625);  // งานระบาดวิทยา (ล่าง)
+
+    // กำแพงรอบนอกของส่วนต่อขยาย
+    g.add(
+      // กำแพงบนส่วนต่อขยาย (Z = -9.25)
+      maintAt(maintWall(12.0, WH, wThick, 0x1e293b), 19.5, WH / 2, zMin + wThick / 2),
+      // กำแพงล่างส่วนต่อขยาย (Z = +9.25)
+      maintAt(maintWall(12.0, WH, wThick, 0x1e293b), 19.5, WH / 2, zMax - wThick / 2),
+      // กำแพงขวาสุด (X = +25.5) พร้อมประตูทางออกด้านข้าง
+      maintAt(maintWall(wThick, WH, 8.5, 0x1e293b), 25.5 - wThick / 2, WH / 2, -5.0),
+      maintAt(maintWall(wThick, 0.35, 1.2, 0x1e293b), 25.5 - wThick / 2, WH - 0.175, 0.0),
+      maintAt(maintWall(wThick, WH, 8.5, 0x1e293b), 25.5 - wThick / 2, WH / 2, 5.0)
+    );
+    makeRomphoDoor(25.5 - wThick / 2, 0.0, 0.45, 1.2, 0.35);
+    L.push(maintTag('🚪 ประตู', V(25.5 - 0.35, 1.45, 0.0), 'room', null, 'ประตูด้านข้างอาคารปีกขวา'));
+
+    // กำแพงกั้นกลางระหว่างงานพัฒนาการเด็ก และ งานระบาดวิทยา (Z = 0.0, X: +13.5 .. +25.5)
+    g.add(
+      maintAt(maintWall(5.3, WH, wThick, 0x1e293b), 16.25, WH / 2, 0.0),
+      maintAt(maintWall(1.2, 0.35, wThick, 0x1e293b), 19.5, WH - 0.175, 0.0),
+      maintAt(maintWall(5.3, WH, wThick, 0x1e293b), 22.75, WH / 2, 0.0)
+    );
+    makeRomphoDoor(19.5, 0.0, 1.2, 0.45, 0.3);
+    L.push(maintTag('🚪 ประตู', V(19.5, 1.45, 0.0), 'room', null, 'ประตูเชื่อมพัฒนาการเด็ก-ระบาดวิทยา'));
+
+    // --- เฟอร์นิเจอร์และอุปกรณ์: งานพัฒนาการเด็ก ---
+    L.push({
+      text: `🧸 งานพัฒนาการเด็ก (${romphoState.childDevOccupied ? '🔴 มีเด็กรับบริการ' : '🟢 พร้อมให้บริการ'})`,
+      pos: V(19.5, 2.2, -4.625),
+      cls: `int-label ${romphoState.childDevOccupied ? 'busy' : 'free'} toggleable`,
+      toggleId: 'rompho-child-dev'
+    });
+    // แผ่นโฟมยางปูพื้นเสริมพัฒนาการ (Sensory play mats)
+    const mat1 = maintBox(1.6, 0.04, 1.6, 0x38bdf8); mat1.position.set(16.5, 0.02, -7.0);
+    const mat2 = maintBox(1.6, 0.04, 1.6, 0xf43f5e); mat2.position.set(18.2, 0.02, -7.0);
+    const mat3 = maintBox(1.6, 0.04, 1.6, 0xfacc15); mat3.position.set(16.5, 0.02, -5.3);
+    const mat4 = maintBox(1.6, 0.04, 1.6, 0x10b981); mat4.position.set(18.2, 0.02, -5.3);
+    // บ่อบอล / คอกกั้นฝึกการเคลื่อนไหว
+    const playPen = maintBox(2.2, 0.45, 2.2, 0xec4899); playPen.position.set(17.35, 0.225, -2.5);
+    const balls = maintBox(2.0, 0.25, 2.0, 0xfbcfe8); balls.position.set(17.35, 0.28, -2.5);
+    // โต๊ะประเมินพัฒนาการทรงกลมสำหรับเด็ก
+    const kidTable = maintCyl(0.70, 0.70, 0.52, 0x06b6d4, 16); kidTable.position.set(22.0, 0.26, -6.5);
+    const kc1 = maintBox(0.35, 0.32, 0.35, 0xf59e0b); kc1.position.set(22.0, 0.16, -7.3);
+    const kc2 = maintBox(0.35, 0.32, 0.35, 0x10b981); kc2.position.set(22.0, 0.16, -5.7);
+    const kc3 = maintBox(0.35, 0.32, 0.35, 0x8b5cf6); kc3.position.set(21.2, 0.16, -6.5);
+    const kc4 = maintBox(0.35, 0.32, 0.35, 0xf43f5e); kc4.position.set(22.8, 0.16, -6.5);
+    // ตู้เก็บชุดตรวจพัฒนาการ DSPM / DAIM และของเล่นฝึกทักษะ
+    const toyShelf = maintBox(0.65, 1.7, 3.2, 0x3b82f6); toyShelf.position.set(24.8, 0.85, -6.5);
+    // เตียงตรวจร่างกายเด็กและที่วัดส่วนสูง/ชั่งน้ำหนัก
+    const examBed = maintBox(0.9, 0.70, 1.8, 0x0284c7); examBed.position.set(24.5, 0.35, -2.5);
+    const scale = maintBox(0.4, 0.12, 0.6, 0xffffff); scale.position.set(24.5, 0.76, -2.0);
+    // โซฟาผู้ปกครอง
+    const pSofa = maintBox(2.2, 0.65, 0.85, 0x475569); pSofa.position.set(16.5, 0.325, -2.2);
+    g.add(mat1, mat2, mat3, mat4, playPen, balls, kidTable, kc1, kc2, kc3, kc4, toyShelf, examBed, scale, pSofa);
+    // โต๊ะคอมพิวเตอร์พัฒนาการเด็ก
+    createRomphoPcDesk(21.0, -2.2, Math.PI, CHILD_DEV_PC_SPECS, '🖥️ PC-DEV-01: โต๊ะคอมพัฒนาการเด็ก', { role: 'nurse', pose: 'sit', rotY: Math.PI });
+
+    // --- เฟอร์นิเจอร์และอุปกรณ์: งานระบาดวิทยา ---
+    L.push({
+      text: `🔬 งานระบาดวิทยา (${romphoState.epiOccupied ? '🔴 มีประชุมสอบสวนโรค' : '🟢 พร้อมปฏิบัติการ'})`,
+      pos: V(19.5, 2.2, 4.625),
+      cls: `int-label ${romphoState.epiOccupied ? 'busy' : 'free'} toggleable`,
+      toggleId: 'rompho-epi'
+    });
+    // โต๊ะประชุมทีมสอบสวนโรค (JIT / SRRT Outbreak War Room)
+    const epiTable = maintBox(3.4, 0.74, 1.4, 0x0f172a); epiTable.position.set(21.5, 0.37, 4.2);
+    const epiTableTop = maintBox(3.45, 0.04, 1.45, 0x0284c7); epiTableTop.position.set(21.5, 0.74, 4.2);
+    g.add(epiTable, epiTableTop);
+    [-1.1, 0, 1.1].forEach((ox) => {
+      const cU = maintBox(0.42, 0.45, 0.42, 0x334155); cU.position.set(21.5 + ox, 0.225, 3.2);
+      const cD = maintBox(0.42, 0.45, 0.42, 0x334155); cD.position.set(21.5 + ox, 0.225, 5.2);
+      g.add(cU, cD);
+    });
+    // จอแสดงผลข้อมูลระบาดวิทยา GIS / Dashboard 506
+    const dashFrame = maintBox(0.06, 1.4, 2.8, 0x0f172a); dashFrame.position.set(25.35, 1.6, 4.2);
+    const dashScreen = maintBox(0.04, 1.3, 2.7, 0x0284c7); dashScreen.position.set(25.32, 1.6, 4.2);
+    g.add(dashFrame, dashScreen);
+    L.push({ text: '🗺️ จอแดชบอร์ดระบาดวิทยา GIS 506', pos: V(25.1, 2.3, 4.2), cls: 'int-label pc-tag' });
+    // ตู้เก็บชุด PPE และอุปกรณ์สอบสวนโรคภาคสนาม
+    const ppeCabinet = maintBox(0.65, 1.85, 2.4, 0x475569); ppeCabinet.position.set(24.8, 0.925, 7.5);
+    // กล่องเก็บตัวอย่างสิ่งส่งตรวจควบคุมอุณหภูมิ (VTM / Specimen Cooler Boxes)
+    const blueCooler = maintBox(0.55, 0.45, 0.75, 0x3b82f6); blueCooler.position.set(21.2, 0.225, 7.5);
+    const redCooler = maintBox(0.55, 0.45, 0.75, 0xef4444); redCooler.position.set(19.6, 0.225, 7.5);
+    const yellowKit = maintBox(0.45, 0.35, 0.55, 0xf59e0b); yellowKit.position.set(18.0, 0.175, 7.5);
+    // ไวท์บอร์ดรายงานสถานการณ์ระบาดวิทยา
+    const whiteBoard = maintBox(2.2, 1.1, 0.04, 0xffffff); whiteBoard.position.set(17.5, 1.4, 0.15);
+    g.add(ppeCabinet, blueCooler, redCooler, yellowKit, whiteBoard);
+    L.push({ text: 'กล่องเก็บสิ่งส่งตรวจ VTM / PPE', pos: V(20.4, 1.55, 7.5), cls: 'int-label sub-tag' });
+    // โต๊ะคอมพิวเตอร์ระบาดวิทยา
+    createRomphoPcDesk(16.5, 2.5, 0, EPI_PC_SPECS, '🖥️ PC-EPI-01: โต๊ะคอมระบาดวิทยา', { role: 'doctor', pose: 'sit', rotY: 0 });
+
     const items = [
-      ['🏢', 'ตึกร่มโพธิ์ 3 - ชั้น 1', 'แผนกห้องคลอดและสูติกรรม (ขยาย 10-15%)'],
+      ['🏢', 'ตึกร่มโพธิ์ 3 - ชั้น 1', 'แผนกห้องคลอด, งานพัฒนาการเด็ก, งานระบาดวิทยา'],
       ['🏥', 'ห้องผ่าคลอด 1 (OR Delivery)', '1 ห้อง (เตียงผ่าคลอด, โคมไฟคู่, เครื่องดมยา, ตู้อุ่นทารก)', 'rompho-or-1', romphoState.or1Occupied ? 'busy' : 'free'],
       ['🛌', 'เตียงพักคลอด หอผู้ป่วยคลอด', '16 เตียง (คลิกเตียงเพื่อสลับ ว่าง/ไม่ว่าง)'],
       ['🛏️', 'เตียงเตรียมคลอด / สังเกตอาการ', '3 เตียง (คลิกเตียงเพื่อสลับ ว่าง/ไม่ว่าง)'],
       ['🖥️', 'PC-ROM-01: โต๊ะคอมห้องคลอด 1', 'ดูสเปก', null, 'free', ROMPHO_PC_SPECS],
+      ['🧸', 'งานพัฒนาการเด็ก (Child Development)', '1 ห้อง (DSPM, เบาะฝึกพัฒนาการ, โต๊ะตรวจประเมิน)', 'rompho-child-dev', romphoState.childDevOccupied ? 'busy' : 'free'],
+      ['🖥️', 'PC-DEV-01: โต๊ะคอมพัฒนาการเด็ก', 'ดูสเปก', null, 'free', CHILD_DEV_PC_SPECS],
+      ['🔬', 'งานระบาดวิทยา (Epidemiology)', '1 ห้อง (ศูนย์สอบสวนโรค SRRT, จอ GIS Dashboard, ตู้ PPE, กล่อง VTM)', 'rompho-epi', romphoState.epiOccupied ? 'busy' : 'free'],
+      ['🖥️', 'PC-EPI-01: โต๊ะคอมระบาดวิทยา', 'ดูสเปก', null, 'free', EPI_PC_SPECS],
       ['👶', 'ห้องพักคลอด 1 & 2', '2 ห้อง'],
       ['👨‍⚕️', 'ห้องพักแพทย์ 1', '1 ห้อง', 'rompho-doc-1', romphoState.doctorRoom1Occupied ? 'busy' : 'free'],
       ['👩‍⚕️', 'ห้องพักแพทย์ 2', '1 ห้อง', 'rompho-doc-2', romphoState.doctorRoom2Occupied ? 'busy' : 'free'],
@@ -7229,16 +7373,16 @@
       ['🗄️', 'ชั้นเก็บอุปกรณ์ห้องคลอด', '2 จุด (ฝั่งขวาสุด และใต้ห้องผ่าคลอด)'],
       ['🪑', 'โต๊ะทำงานเคาน์เตอร์บริการ', '2 ตัว'],
       ['🚻', 'ห้องน้ำ', '1 ห้อง'],
-      ['🚪', 'ประตูทางเข้าและประตูห้องภายใน', '15 จุด ตามผัง']
+      ['🚪', 'ประตูทางเข้าและประตูห้องภายใน', '19 จุด ตามผัง']
     ];
 
     return {
       group: g,
       labels: L,
-      title: 'ตึกร่มโพธิ์ 3 - ชั้น 1 (แผนกห้องคลอดและสูติกรรม)',
-      sub: 'ผังห้องคลอด: ขยายขนาด 10-15% ห้องผ่าคลอด 1 • หอผู้ป่วยคลอด 16 เตียง • ห้องเตรียมคลอด 3 เตียง • ห้องพักแพทย์ 2 ห้อง • ห้องพักเจ้าหน้าที่ • โต๊ะคอมห้องคลอด 1',
+      title: 'ตึกร่มโพธิ์ 3 - ชั้น 1 (ห้องคลอด • งานพัฒนาการเด็ก • งานระบาดวิทยา)',
+      sub: 'ผังชั้น 1: แผนกห้องคลอดและสูติกรรม • ส่วนต่อขยายปีกขวา: งานพัฒนาการเด็ก 1 ห้อง (ชุดตรวจ DSPM, เบาะฝึกทักษะ) และงานระบาดวิทยา 1 ห้อง (ทีมสอบสวนโรค SRRT, จอ GIS 506, กล่อง VTM)',
       floors: [
-        { num: 1, label: 'ชั้น 1 (ห้องคลอด)' },
+        { num: 1, label: 'ชั้น 1 (ห้องคลอด • พัฒนาการเด็ก • ระบาดวิทยา)' },
         { num: 2, label: 'ชั้น 2 (ศูนย์ไตเทียม)' },
         { num: 3, label: 'ชั้น 3 (หอผู้ป่วยพิเศษ)' }
       ],
@@ -7247,7 +7391,7 @@
         romphoState.currentFloor = f;
       },
       items,
-      cam: { pos: V(0, 24.0, 20.0), target: V(0, 0, 0.5) }
+      cam: { pos: V(6.0, 30.0, 26.0), target: V(6.0, 0, 0.5) }
     };
   }
 
@@ -7310,6 +7454,14 @@
       }
       if (id === 'rompho-doc-2') {
         romphoState.doctorRoom2Occupied = !romphoState.doctorRoom2Occupied;
+        return true;
+      }
+      if (id === 'rompho-child-dev') {
+        romphoState.childDevOccupied = !romphoState.childDevOccupied;
+        return true;
+      }
+      if (id === 'rompho-epi') {
+        romphoState.epiOccupied = !romphoState.epiOccupied;
         return true;
       }
       if (id === 'rompho-switch-floor-1') {
