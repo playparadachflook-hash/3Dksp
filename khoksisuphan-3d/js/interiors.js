@@ -8075,9 +8075,9 @@
     g.add(shelfVert);
     L.push({ text: '🗄️ ชั้นเก็บของ', pos: V(7.4, 1.8, 1.8), cls: 'int-label sub-tag' });
 
-    // (e) โต๊ะประชุมเปลี่ยนเป็น "โต๊ะกลมนั่งรอพัสดุ"
+    // (e) โต๊ะประชุมเปลี่ยนเป็น "โต๊ะกลมนั่งรอพัสดุ" ขยับขึ้นไปอยู่หน้าโต๊ะคอม 5
     const roundWaitingGroup = new THREE.Group();
-    roundWaitingGroup.position.set(5.2, 0, 0.5);
+    roundWaitingGroup.position.set(5.2, 0, -3.8);
     const roundPedestal = maintCyl(0.2, 0.25, 0.7, 0x64748b, 16);
     roundPedestal.position.set(0, 0.35, 0);
     const roundTop = maintCyl(1.0, 1.0, 0.05, 0xd97706, 24);
@@ -8101,7 +8101,7 @@
     g.add(roundWaitingGroup);
     L.push({
       text: `🪑 โต๊ะกลมนั่งรอพัสดุ (${storeState.waitingOccupied ? '🔴 มีผู้มารอรับ' : '🟢 ว่าง มีที่นั่ง'})`,
-      pos: V(5.2, 1.8, 0.5),
+      pos: V(5.2, 1.8, -3.8),
       cls: `int-label ${storeState.waitingOccupied ? 'busy' : 'free'} toggleable`,
       toggleId: 'store-waiting'
     });
