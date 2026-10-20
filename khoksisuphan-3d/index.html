@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>แผนผัง 3D Isometric - โรงพยาบาลโคกศรีสุพรรณ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="scene"></div>
+  <div id="loading"><div class="spinner"></div>กำลังสร้างแผนผัง 3D...</div>
+
+  <!-- ===== Exterior UI ===== -->
+  <header class="panel topbar">
+    <div class="logo">🏥</div>
+    <div>
+      <h1>โรงพยาบาลโคกศรีสุพรรณ</h1>
+      <p>ลากเมาส์ซ้าย = หมุน 360° • ลากเมาส์ขวา = เลื่อน • ล้อเมาส์ = ซูม • คลิกหมุด/อาคารเพื่อดูข้อมูล</p>
+    </div>
+  </header>
+
+  <div class="panel toolbar" id="toolbar">
+    <button id="btn-iso" class="active">มุม Isometric</button>
+    <button id="btn-top">มุมบน 2D</button>
+    <button id="btn-rot-left" title="หมุนซ้าย 45°">⟲ 45°</button>
+    <button id="btn-rot-right" title="หมุนขวา 45°">45° ⟳</button>
+    <button id="btn-auto">หมุนอัตโนมัติ</button>
+    <button id="btn-pins" class="active">แสดงหมุด</button>
+  </div>
+
+  <aside class="panel sidebar" id="sidebar">
+    <input id="search" type="text" placeholder="ค้นหาอาคาร เช่น ห้องยา, โรงรถ...">
+    <div id="legend" class="legend"></div>
+    <div id="list" class="list"></div>
+    <div class="hint">🔍 = คลิกเข้าไปดูภายในอาคารได้</div>
+  </aside>
+
+  <div class="panel info hidden" id="info">
+    <div class="info-head">
+      <span id="info-icon" class="info-icon"></span>
+      <div class="info-title">
+        <h3 id="info-name"></h3>
+        <span id="info-cat" class="chip"></span>
+      </div>
+      <button id="info-close" class="icon-btn">✕</button>
+    </div>
+    <p id="info-desc"></p>
+    <div id="info-meta" class="meta"></div>
+    <div class="info-actions">
+      <button id="btn-enter" class="primary">🔍 ดูภายในอาคาร</button>
+      <button id="btn-zoom">📍 ซูมไปที่อาคาร</button>
+    </div>
+  </div>
+
+  <!-- ===== Interior UI ===== -->
+  <div class="panel interior-bar hidden" id="interior-bar">
+    <button id="btn-back" class="primary">← กลับสู่แผนผัง</button>
+    <div>
+      <h2 id="int-title"></h2>
+      <p id="int-sub"></p>
+    </div>
+  </div>
+  <div class="panel interior-items hidden" id="interior-items">
+    <h3>สิ่งที่อยู่ภายใน</h3>
+    <ul id="int-list"></ul>
+    <p class="hint">ลากเมาส์เพื่อหมุนดูรอบห้อง 360° • คลิกที่ "🖥️ โต๊ะคอม" เพื่อดูสเปกคอมพิวเตอร์</p>
+  </div>
+
+  <!-- ===== Computer Details Modal (สำหรับคลิกดูรายละเอียดโต๊ะคอม) ===== -->
+  <div class="panel pc-modal hidden" id="pc-modal">
+    <div class="info-head">
+      <span class="info-icon" style="background:#dbeafe;color:#1d4ed8">🖥️</span>
+      <div class="info-title">
+        <h3 id="pc-name">โต๊ะคอมพิวเตอร์</h3>
+        <span id="pc-code" class="chip" style="background:#2563eb">PC-ER-01</span>
+      </div>
+      <button id="pc-close" class="icon-btn">✕</button>
+    </div>
+    <p id="pc-role" style="font-size:12.5px;color:#334155;margin:10px 0 8px;"></p>
+    <div id="pc-specs" class="meta"></div>
+    <div class="pc-soft-box">
+      <small>ซอฟต์แวร์และระบบที่เปิดใช้งาน</small>
+      <div id="pc-software"></div>
+    </div>
+  </div>
+
+  <!-- Libraries (Three.js r128, classic scripts -> works when opening the file directly) -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS2DRenderer.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <!-- App -->
+  <script src="js/data.js?v=20261019k"></script>
+  <script src="js/models.js?v=20261019k"></script>
+  <script src="js/interiors.js?v=20261019k"></script>
+  <script src="js/app.js?v=20261019k"></script>
+</body>
+</html>
