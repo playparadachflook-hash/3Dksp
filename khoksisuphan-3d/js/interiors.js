@@ -8450,14 +8450,14 @@
     floor(g, 5.0, D, '#f8fafc', '#e2e8f0', 0.8, -11.5, 0);
     // ห้องจ่ายกลาง / งานปลอดเชื้อ (X = -9.0 .. -3.2)
     floor(g, 5.8, D, '#ecfdf5', '#a7f3d0', 0.8, -6.1, 0);
-    // ห้องทำงานธุรการซัพพลาย (X = -3.2 .. +3.5)
-    floor(g, 6.7, D, '#f8fafc', '#cbd5e1', 0.8, 0.15, 0);
-    // ห้องน้ำ (ในห้องทำงาน มุมขวาล่าง: X = -1.2 .. +3.5, Z = 1.2 .. 4.3)
-    floor(g, 4.7, 3.1, '#f1f5f9', '#cbd5e1', 0.5, 1.15, 2.75);
-    // โซนเครื่องซักผ้าใหญ่ (X = 3.5 .. 7.8)
-    floor(g, 4.3, D, '#e0f2fe', '#93c5fd', 0.8, 5.65, 0);
-    // ห้องเก็บผ้าและอุปกรณ์ทางการแพทย์ (ขวาสุด: X = 7.8 .. 14.0)
-    floor(g, 6.2, D, '#fffbeb', '#fde68a', 0.8, 10.9, 0);
+    // ห้องทำงานธุรการซัพพลาย (X = -3.2 .. +3.2)
+    floor(g, 6.4, D, '#f8fafc', '#cbd5e1', 0.8, 0.0, 0);
+    // ห้องน้ำ (ย้ายไปชิดกำแพงซ้ายและผนังล่างตามสั่ง: X = -3.2 .. +0.6, Z = 1.2 .. 4.3)
+    floor(g, 3.8, 3.1, '#f1f5f9', '#cbd5e1', 0.5, -1.3, 2.75);
+    // โซนเครื่องซักผ้าใหญ่ (เว้นระยะห่างฝั่งซ้ายกว้าง 5.0m: X = 3.2 .. 8.2)
+    floor(g, 5.0, D, '#e0f2fe', '#93c5fd', 0.8, 5.7, 0);
+    // ห้องเก็บผ้าและอุปกรณ์ทางการแพทย์ (ขวาสุด: X = 8.2 .. 14.0)
+    floor(g, 5.8, D, '#fffbeb', '#fde68a', 0.8, 11.1, 0);
 
     // =========================================================================
     // 2. กำแพงรอบนอก (Exterior Walls)
@@ -8468,13 +8468,13 @@
     g.add(supplyAt(supplyWall(wThick, WH, D, 0x1e293b), xMin + wThick / 2, WH / 2, 0));
     // กำแพงขวาสุด (X = +14.0)
     g.add(supplyAt(supplyWall(wThick, WH, D, 0x1e293b), xMax - wThick / 2, WH / 2, 0));
-    // กำแพงล่าง (Z = +4.3) พร้อมช่องเปิดสำหรับช่องจ่ายของ 2 จุด (ที่ห้องจ่ายกลาง X = -6.0 และ ห้องเก็บผ้า X = 10.9)
+    // กำแพงล่าง (Z = +4.3) พร้อมช่องเปิดสำหรับช่องจ่ายของ 2 จุด (ที่ห้องจ่ายกลาง X = -6.0 และ ห้องเก็บผ้า X = 11.1)
     g.add(
       supplyAt(supplyWall(6.5, WH, wThick, 0x1e293b), -10.75, WH / 2, zMax - wThick / 2),
       supplyAt(supplyWall(1.5, 0.5, wThick, 0x1e293b), -6.0, WH - 0.25, zMax - wThick / 2),
-      supplyAt(supplyWall(14.0, WH, wThick, 0x1e293b), 2.1, WH / 2, zMax - wThick / 2),
-      supplyAt(supplyWall(1.8, 0.5, wThick, 0x1e293b), 10.9, WH - 0.25, zMax - wThick / 2),
-      supplyAt(supplyWall(2.1, WH, wThick, 0x1e293b), 12.95, WH / 2, zMax - wThick / 2)
+      supplyAt(supplyWall(14.4, WH, wThick, 0x1e293b), 2.1, WH / 2, zMax - wThick / 2),
+      supplyAt(supplyWall(1.8, 0.5, wThick, 0x1e293b), 11.1, WH - 0.25, zMax - wThick / 2),
+      supplyAt(supplyWall(1.8, WH, wThick, 0x1e293b), 13.0, WH / 2, zMax - wThick / 2)
     );
 
     // =========================================================================
@@ -8490,40 +8490,42 @@
 
     // (B) กำแพงกั้นระหว่าง "ห้องจ่ายกลาง" กับ "ห้องทำงานธุรการ" (X = -3.2) พร้อมประตูเชื่อมต่อ
     g.add(
-      supplyAt(supplyWall(wThick, WH, 2.0, 0x1e293b), -3.2 + wThick / 2, WH / 2, -3.3),
-      supplyAt(supplyWall(wThick, 0.4, 1.2, 0x1e293b), -3.2 + wThick / 2, WH - 0.2, -1.7),
-      supplyAt(supplyWall(wThick, WH, 5.4, 0x1e293b), -3.2 + wThick / 2, WH / 2, 1.6)
+      supplyAt(supplyWall(wThick, WH, 2.2, 0x1e293b), -3.2 + wThick / 2, WH / 2, -3.2),
+      supplyAt(supplyWall(wThick, 0.4, 1.2, 0x1e293b), -3.2 + wThick / 2, WH - 0.2, -1.5),
+      supplyAt(supplyWall(wThick, WH, 5.2, 0x1e293b), -3.2 + wThick / 2, WH / 2, 1.7)
     );
-    supplyDoor(-3.2 + wThick / 2, -1.7, 0.45, 1.2, 0.35);
+    supplyDoor(-3.2 + wThick / 2, -1.5, 0.45, 1.2, 0.35);
 
-    // (C) ผนังกั้นห้องน้ำภายในห้องทำงาน (มุมล่าง: X: -1.2 .. +3.5, Z = 1.2)
+    // (C) ผนังกั้นห้องน้ำภายในห้องทำงาน (ย้ายไปชิดกำแพงซ้าย X = -3.2 .. +0.6, Z = 1.2 .. 4.3)
     g.add(
-      supplyAt(supplyWall(4.7, WH, wThick, 0x1e293b), 1.15, WH / 2, 1.2),
-      supplyAt(supplyWall(wThick, WH, 3.1, 0x1e293b), -1.2 - wThick / 2, WH / 2, 2.75)
+      supplyAt(supplyWall(2.3, WH, wThick, 0x1e293b), -2.05, WH / 2, 1.2),
+      supplyAt(supplyWall(1.0, 0.4, wThick, 0x1e293b), -0.4, WH - 0.2, 1.2),
+      supplyAt(supplyWall(0.5, WH, wThick, 0x1e293b), 0.35, WH / 2, 1.2),
+      supplyAt(supplyWall(wThick, WH, 3.1, 0x1e293b), 0.6 + wThick / 2, WH / 2, 2.75)
     );
-    supplyDoor(-0.3, 1.2, 1.1, 0.45, 0.35);
+    supplyDoor(-0.4, 1.2, 1.0, 0.45, 0.35);
 
-    // (D) กำแพงกั้นห้องทำงานกับโซนเครื่องซักผ้า (X = 3.5) พร้อมช่องจ่ายของ และประตูออกสู่ซักฟอก
+    // (D) กำแพงกั้นห้องทำงานกับโซนเครื่องซักผ้า (X = 3.2) พร้อมช่องจ่ายของ และประตูออกสู่ซักฟอก
     g.add(
-      supplyAt(supplyWall(wThick, WH, 1.3, 0x1e293b), 3.5 - wThick / 2, WH / 2, -3.65),
-      supplyAt(supplyWall(wThick, 0.4, 1.8, 0x1e293b), 3.5 - wThick / 2, WH - 0.2, -1.0),
-      supplyAt(supplyWall(wThick, WH, 2.4, 0x1e293b), 3.5 - wThick / 2, WH / 2, 1.1),
-      supplyAt(supplyWall(wThick, 0.4, 1.2, 0x1e293b), 3.5 - wThick / 2, WH - 0.2, 2.8),
-      supplyAt(supplyWall(wThick, WH, 0.9, 0x1e293b), 3.5 - wThick / 2, WH / 2, 3.85)
+      supplyAt(supplyWall(wThick, WH, 2.4, 0x1e293b), 3.2 - wThick / 2, WH / 2, -3.1),
+      supplyAt(supplyWall(wThick, 0.4, 1.8, 0x1e293b), 3.2 - wThick / 2, WH - 0.2, -1.0),
+      supplyAt(supplyWall(wThick, WH, 1.9, 0x1e293b), 3.2 - wThick / 2, WH / 2, 0.85),
+      supplyAt(supplyWall(wThick, 0.4, 1.2, 0x1e293b), 3.2 - wThick / 2, WH - 0.2, 2.4),
+      supplyAt(supplyWall(wThick, WH, 1.3, 0x1e293b), 3.2 - wThick / 2, WH / 2, 3.65)
     );
-    supplyDoor(3.5 - wThick / 2, 2.8, 0.45, 1.2, 0.35);
+    supplyDoor(3.2 - wThick / 2, 2.4, 0.45, 1.2, 0.35);
 
-    // (E) กำแพงกั้นระหว่างโซนเครื่องซักผ้า กับ "ห้องเก็บผ้าและอุปกรณ์ทางการแพทย์" (X = 7.8) พร้อมประตูเข้าห้อง
+    // (E) กำแพงกั้นระหว่างโซนเครื่องซักผ้า กับ "ห้องเก็บผ้าและอุปกรณ์ทางการแพทย์" (X = 8.2) พร้อมประตูเข้าห้อง
     g.add(
-      supplyAt(supplyWall(wThick, WH, 5.8, 0x1e293b), 7.8 + wThick / 2, WH / 2, -1.4),
-      supplyAt(supplyWall(wThick, 0.4, 1.2, 0x1e293b), 7.8 + wThick / 2, WH - 0.2, 2.8),
-      supplyAt(supplyWall(wThick, WH, 1.6, 0x1e293b), 7.8 + wThick / 2, WH / 2, 3.5)
+      supplyAt(supplyWall(wThick, WH, 6.1, 0x1e293b), 8.2 + wThick / 2, WH / 2, -1.25),
+      supplyAt(supplyWall(wThick, 0.4, 1.2, 0x1e293b), 8.2 + wThick / 2, WH - 0.2, 2.4),
+      supplyAt(supplyWall(wThick, WH, 1.3, 0x1e293b), 8.2 + wThick / 2, WH / 2, 3.65)
     );
-    supplyDoor(7.8 + wThick / 2, 2.8, 0.45, 1.2, 0.35);
+    supplyDoor(8.2 + wThick / 2, 2.4, 0.45, 1.2, 0.35);
 
-    // หลังคากันสาดเชื่อมต่อด้านบนโซนซักผ้า (เส้นสีฟ้าตามผัง)
-    const canopyRoof = supplyBox(4.3, 0.08, D, 0x0284c7, 0.6);
-    canopyRoof.position.set(5.65, WH + 0.1, 0);
+    // หลังคากันสาดเชื่อมต่อด้านบนโซนซักผ้า (เส้นสีฟ้าตามผัง กว้าง 5.0m)
+    const canopyRoof = supplyBox(5.0, 0.08, D, 0x0284c7, 0.6);
+    canopyRoof.position.set(5.7, WH + 0.1, 0);
     g.add(canopyRoof);
 
     // =========================================================================
@@ -8531,10 +8533,10 @@
     // =========================================================================
     // 1. ช่องจ่ายของห้องจ่ายกลาง (ผนังล่าง: X = -6.0, Z = 4.3)
     supplyHatch(-6.0, 4.3, 1.5, true, 'ช่องจ่ายของ 1: เครื่องมือแพทย์ปลอดเชื้อ/เวชภัณฑ์');
-    // 2. ช่องจ่ายของห้องทำงาน (ผนังขวา: X = 3.5, Z = -1.0)
-    supplyHatch(3.5, -1.0, 1.8, false, 'ช่องจ่ายของ 2: งานบริการซัพพลายและจ่ายผ้าส่งซัก');
-    // 3. ช่องจ่ายของห้องเก็บผ้าและอุปกรณ์ (ผนังล่าง: X = 10.9, Z = 4.3)
-    supplyHatch(10.9, 4.3, 1.8, true, 'ช่องจ่ายของ 3: จ่ายผ้าสะอาดและอุปกรณ์การแพทย์');
+    // 2. ช่องจ่ายของห้องทำงาน (ผนังขวา: X = 3.2, Z = -1.0)
+    supplyHatch(3.2, -1.0, 1.8, false, 'ช่องจ่ายของ 2: งานบริการซัพพลายและจ่ายผ้าส่งซัก');
+    // 3. ช่องจ่ายของห้องเก็บผ้าและอุปกรณ์ (ผนังล่าง: X = 11.1, Z = 4.3)
+    supplyHatch(11.1, 4.3, 1.8, true, 'ช่องจ่ายของ 3: จ่ายผ้าสะอาดและอุปกรณ์การแพทย์');
 
     // =========================================================================
     // 5. เฟอร์นิเจอร์ อุปกรณ์ และป้ายกำกับแต่ละห้อง
@@ -8564,60 +8566,60 @@
     L.push({ text: '♨️ ตู้อบฆ่าเชื้อ Autoclave (134°C)', pos: V(-6.8, 2.0, -3.4), cls: 'int-label sub-tag' });
 
     // --- โซนที่ 3: ห้องทำงานธุรการและห้องน้ำ ---
-    L.push({ text: '💼 สำนักงานซัพพลาย', pos: V(0.15, 2.2, -2.5), cls: 'int-label room-title' });
-    // โต๊ะคอม 3 (ในผังเขียน โต๊ะคอม 2 เหนือห้องน้ำ): หันหน้าเข้าผนังล่าง/ห้องน้ำ
-    createSupplyPcDesk(1.0, 0.2, 0, SUPPLY_PC_SPECS[2], '🖥️ PC-SUPPLY-03: โต๊ะคอม 2 (ธุรการซัพพลาย)', { role: 'nurse', shirtColor: 0x0284c7 });
+    L.push({ text: '💼 สำนักงานซัพพลาย', pos: V(1.0, 2.2, -2.5), cls: 'int-label room-title' });
+    // โต๊ะคอม 3 (ในผังเขียน โต๊ะคอม 2 เหนือห้องน้ำ): จัดวางเหนือห้องน้ำที่ชิดกำแพงซ้าย
+    createSupplyPcDesk(-1.3, 0.1, 0, SUPPLY_PC_SPECS[2], '🖥️ PC-SUPPLY-03: โต๊ะคอม 2 (ธุรการซัพพลาย)', { role: 'nurse', shirtColor: 0x0284c7 });
     // โต๊ะคอม 1: ชิดผนังขวาเหนือช่องจ่ายของ
-    createSupplyPcDesk(2.6, -2.6, -Math.PI / 2, SUPPLY_PC_SPECS[0], '🖥️ PC-SUPPLY-01: โต๊ะคอม 1 (จ่ายพัสดุ)', { role: 'nurse', shirtColor: 0x0284c7 });
+    createSupplyPcDesk(2.4, -2.6, -Math.PI / 2, SUPPLY_PC_SPECS[0], '🖥️ PC-SUPPLY-01: โต๊ะคอม 1 (จ่ายพัสดุ)', { role: 'nurse', shirtColor: 0x0284c7 });
     // ตู้เก็บเอกสารธุรการ
     const adminCab = supplyBox(2.2, 1.8, 0.5, 0x64748b);
-    adminCab.position.set(-1.8, 0.9, -3.9);
+    adminCab.position.set(1.0, 0.9, -3.9);
     g.add(adminCab);
 
-    // ห้องน้ำ
-    L.push({ text: '🚻 ห้องน้ำ', pos: V(1.15, 2.0, 2.75), cls: 'int-label room-title' });
+    // ห้องน้ำ (ชิดกำแพงซ้าย)
+    L.push({ text: '🚻 ห้องน้ำ', pos: V(-1.3, 2.0, 2.75), cls: 'int-label room-title' });
     const toilet1 = supplyBox(0.45, 0.45, 0.6, 0xffffff);
-    toilet1.position.set(0.2, 0.225, 3.8);
+    toilet1.position.set(-2.4, 0.225, 3.8);
     const toilet2 = supplyBox(0.45, 0.45, 0.6, 0xffffff);
-    toilet2.position.set(2.2, 0.225, 3.8);
+    toilet2.position.set(-1.2, 0.225, 3.8);
     const sink1 = supplyBox(0.55, 0.8, 0.45, 0xffffff);
-    sink1.position.set(0.2, 0.4, 1.6);
+    sink1.position.set(-2.4, 0.4, 1.8);
     const sink2 = supplyBox(0.55, 0.8, 0.45, 0xffffff);
-    sink2.position.set(2.2, 0.4, 1.6);
+    sink2.position.set(0.0, 0.4, 1.8);
     g.add(toilet1, toilet2, sink1, sink2);
 
-    // --- โซนที่ 4: เครื่องซักผ้าอุตสาหกรรมขนาดใหญ่ 3 เครื่อง ---
-    L.push({ text: '🌀 โซนเครื่องซักผ้าอุตสาหกรรม', pos: V(5.65, 2.3, 0), cls: 'int-label zone-er' });
-    makeWasher(5.65, -2.5, 1, 'supply-wash-1', supplyState.wash1Running);
-    makeWasher(5.65, 0.0, 2, 'supply-wash-2', supplyState.wash2Running);
-    makeWasher(5.65, 2.5, 3, 'supply-wash-3', supplyState.wash3Running);
+    // --- โซนที่ 4: เครื่องซักผ้าอุตสาหกรรมขนาดใหญ่ 3 เครื่อง (เว้นระยะห่างฝั่งซ้ายกว้าง 2.35m) ---
+    L.push({ text: '🌀 โซนเครื่องซักผ้าอุตสาหกรรม', pos: V(5.7, 2.3, 0), cls: 'int-label zone-er' });
+    makeWasher(6.2, -2.5, 1, 'supply-wash-1', supplyState.wash1Running);
+    makeWasher(6.2, 0.0, 2, 'supply-wash-2', supplyState.wash2Running);
+    makeWasher(6.2, 2.5, 3, 'supply-wash-3', supplyState.wash3Running);
 
     // --- โซนที่ 5: ห้องเก็บผ้าและอุปกรณ์ทางการแพทย์ ---
     L.push({
       text: `🧺 ห้องเก็บผ้าและอุปกรณ์ทางการแพทย์ (${supplyState.equipBusy ? '🔴 กำลังจัดเตรียมผ้า' : '🟢 สต็อกพร้อมจ่าย'})`,
-      pos: V(10.9, 2.2, -1.0),
+      pos: V(11.1, 2.2, -1.0),
       cls: `int-label ${supplyState.equipBusy ? 'busy' : 'free'} toggleable`,
       toggleId: 'supply-store'
     });
     // ชั้นวางผ้าสะอาด (Linen Storage Shelves) เรียงตามแนวผนังบน
-    for (let lx = 8.5; lx <= 13.0; lx += 2.2) {
-      const lShelf = supplyBox(1.9, 2.2, 0.8, 0x0284c7);
+    for (let lx = 9.2; lx <= 13.0; lx += 1.9) {
+      const lShelf = supplyBox(1.7, 2.2, 0.8, 0x0284c7);
       lShelf.position.set(lx, 1.1, -3.6);
       g.add(lShelf);
       // พับผ้าสะอาดวางบนชั้น
       for (let ly = 0.5; ly <= 1.8; ly += 0.55) {
-        const linenStack = supplyBox(1.7, 0.35, 0.7, 0xffffff);
+        const linenStack = supplyBox(1.5, 0.35, 0.7, 0xffffff);
         linenStack.position.set(lx, ly, -3.6);
         g.add(linenStack);
       }
     }
     // รถเข็นผ้าสะอาด 2 คัน
     const cart1 = supplyBox(1.4, 0.9, 0.8, 0x94a3b8);
-    cart1.position.set(9.5, 0.45, 0.5);
+    cart1.position.set(9.8, 0.45, 0.5);
     const cart2 = supplyBox(1.4, 0.9, 0.8, 0x94a3b8);
-    cart2.position.set(12.2, 0.45, 0.5);
+    cart2.position.set(12.4, 0.45, 0.5);
     g.add(cart1, cart2);
-    L.push({ text: '🛒 รถเข็นผ้าสะอาดและเซ็ตผ่าตัด', pos: V(10.9, 1.5, 0.5), cls: 'int-label sub-tag' });
+    L.push({ text: '🛒 รถเข็นผ้าสะอาดและเซ็ตผ่าตัด', pos: V(11.1, 1.5, 0.5), cls: 'int-label sub-tag' });
 
     const items = [
       ['🏢', 'อาคารซัพพลาย (Supply & CSSD)', 'งานจ่ายกลาง, ซักฟอก, ห้องเก็บผ้าและอุปกรณ์ทางการแพทย์, และห้องว่าง'],
