@@ -1,4 +1,4 @@
-/* มุมมองภายในอาคาร: ป้อมยาม, ร้านค้าสวัสดิการ, โรงจอดรถ, และ ตึกอุบัติเหตุฉุกเฉิน (PCU & ER) */
+﻿/* มุมมองภายในอาคาร: ป้อมยาม, ร้านค้าสวัสดิการ, โรงจอดรถ, และ ตึกอุบัติเหตุฉุกเฉิน (PCU & ER) */
 (function () {
   const K = window.KSS, M = K.M;
   const V = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -8649,6 +8649,1033 @@
     };
   }
 
+  // --- STATE FOR OPD INTERIOR ---
+  const opdState = {
+    examRooms: [
+      { id: 'opd-exam-1', name: 'ห้องตรวจ 1', occupied: false, doc: 'นพ.ธนกฤต' },
+      { id: 'opd-exam-2', name: 'ห้องตรวจ 2', occupied: true,  doc: 'พญ.ศิรินทิพย์' },
+      { id: 'opd-exam-3', name: 'ห้องตรวจ 3', occupied: false, doc: 'นพ.วรวิทย์' },
+      { id: 'opd-exam-4', name: 'ห้องตรวจ 4', occupied: true,  doc: 'พญ.กานดา' },
+      { id: 'opd-exam-5', name: 'ห้องตรวจ 5', occupied: false, doc: 'นพ.ชยพล' },
+      { id: 'opd-exam-6', name: 'ห้องตรวจ 6', occupied: false, doc: 'พญ.ณัฐธิดา' }
+    ],
+    ekgOccupied: false,
+    screeningActive: true,
+    serverOnline: true,
+    confMedOccupied: false,
+    confGovOccupied: false,
+    directorOccupied: true
+  };
+
+  function buildOpdInterior(b) {
+    const g = new THREE.Group();
+    const L = [];
+
+    const W = 38.0;
+    const D = 20.0;
+    const WH = 3.0;
+    const wThick = 0.18;
+    const xMin = -W / 2; // -19.0
+    const xMax = W / 2;  // 19.0
+    const zMin = -D / 2; // -10.0
+    const zMax = D / 2;  // 10.0
+
+    // Floors with distinct zones
+    // 1. General polished clinical floor
+    floor(g, W, D, '#f8fafc', '#e2e8f0', 0.6, 0, 0);
+
+    // 2. Exam rooms sage green floor
+    const examFloorTex = M.tileTexture('#ecfdf5', '#a7f3d0', 19.5 / 0.5, 3.7 / 0.5);
+    const mExamFloor = M.box(g, 19.3, 0.105, 3.7, M.mat(0xffffff, { map: examFloorTex, roughness: 0.6 }), -9.15, -0.047, -5.35);
+    addEdges(mExamFloor, 0x059669);
+
+    // 3. Buddha room teak wood floor
+    const woodTex = M.tileTexture('#78350f', '#451a03', 5.0 / 0.4, 5.6 / 0.4);
+    const mWoodFloor = M.box(g, 5.0, 0.11, 5.6, M.mat(0xffffff, { map: woodTex, roughness: 0.4 }), -2.0, -0.045, 7.0);
+    addEdges(mWoodFloor, 0x92400e);
+
+    // 4. Server room anti-static ESD dark tiles
+    const serverTex = M.tileTexture('#0f172a', '#0284c7', 3.0 / 0.4, 4.0 / 0.4);
+    const mServerFloor = M.box(g, 3.0, 0.11, 4.0, M.mat(0xffffff, { map: serverTex, roughness: 0.5 }), 10.0, -0.045, 3.5);
+    addEdges(mServerFloor, 0x0284c7);
+
+    // 5. Restrooms moisture-resistant ceramic floor
+    const wcTex = M.tileTexture('#e2e8f0', '#94a3b8', 9.3 / 0.4, 3.2 / 0.4);
+    const mWcFloor = M.box(g, 9.3, 0.11, 3.2, M.mat(0xffffff, { map: wcTex, roughness: 0.7 }), 14.15, -0.045, -1.4);
+    addEdges(mWcFloor, 0x64748b);
+
+    // 6. Director & Conference rooms warm carpeting
+    const carpetTex = M.tileTexture('#fef3c7', '#d97706', 4.8 / 0.5, 3.3 / 0.5);
+    const mDirFloor = M.box(g, 4.8, 0.11, 3.3, M.mat(0xffffff, { map: carpetTex, roughness: 0.8 }), 16.4, -0.045, 8.15);
+    addEdges(mDirFloor, 0xb45309);
+
+    // Walkways: Main OPD corridor & connecting routes (ตึก ER style blue walkway)
+    walkwayStrip(g, -9.15, -2.5, 19.0, 1.2, 0); // Hallway in front of exam rooms
+    walkwayStrip(g, -9.15, 0.8, 19.0, 1.4, 0);  // Main waiting lobby aisle
+    walkwayStrip(g, -9.15, 3.9, 19.0, 1.3, 0);  // Walkway between screening & lower waiting
+    walkwayStrip(g, 2.5, 0.8, 5.0, 1.8, 0);    // Central connecting plaza
+    walkwayStrip(g, 11.65, -3.75, 14.3, 1.1, 0); // Corridor 1 (Top right)
+    walkwayStrip(g, 11.65, 0.85, 14.3, 1.1, 0);  // Corridor 2 (Mid right)
+    walkwayStrip(g, 11.65, 6.0, 14.3, 1.1, 0);   // Corridor 3 (Bottom right)
+
+    // Materials
+    const mWall = M.mat(0xffffff, { roughness: 0.85 });
+    const mWallPart = M.mat(0xf1f5f9, { roughness: 0.85 });
+    const mDark = M.mat(0x0f172a);
+    const mSteel = M.mat(0x94a3b8, { metalness: 0.6, roughness: 0.3 });
+    const mGold = M.mat(0xf59e0b, { metalness: 0.75, roughness: 0.25 });
+    const mWood = M.mat(0xb45309, { roughness: 0.5 });
+    const mTeak = M.mat(0x78350f, { roughness: 0.6 });
+    const mGlass = M.mat(0x38bdf8, { transparent: true, opacity: 0.45, roughness: 0.1 });
+    const mBlueSeat = M.mat(0x0284c7, { roughness: 0.6 });
+    const mLeather = M.mat(0x1e293b, { roughness: 0.4 });
+
+    function wall(x1, z1, x2, z2, thick = 0.16, h = WH, isOuter = false) {
+      const dx = x2 - x1, dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const angle = Math.atan2(dx, dz);
+      const cx = (x1 + x2) / 2, cz = (z1 + z2) / 2;
+      const mat = isOuter ? mWall : mWallPart;
+      const m = M.box(g, thick, h, len, mat, cx, h / 2, cz);
+      m.rotation.y = angle;
+      addEdges(m, isOuter ? 0x94a3b8 : 0xcbd5e1);
+      return m;
+    }
+
+    function doorWay(x, z, rotY = 0, w = 1.1) {
+      const dg = new THREE.Group();
+      dg.position.set(x, 0, z);
+      dg.rotation.y = rotY;
+      const frameM = M.mat(0x475569);
+      M.box(dg, 0.08, WH, 0.08, frameM, -w / 2, WH / 2, 0);
+      M.box(dg, 0.08, WH, 0.08, frameM, w / 2, WH / 2, 0);
+      M.box(dg, w, 0.08, 0.08, frameM, 0, 2.2, 0);
+      M.box(dg, w, WH - 2.2, 0.14, mWallPart, 0, 2.2 + (WH - 2.2) / 2, 0);
+      const leaf = M.box(dg, w - 0.08, 2.14, 0.04, M.mat(0x38bdf8, { transparent: true, opacity: 0.4 }), 0.15, 1.07, 0.2);
+      leaf.rotation.y = -0.45;
+      g.add(dg);
+    }
+
+    function doubleDoorWay(x, z, rotY = 0, w = 1.8) {
+      const dg = new THREE.Group();
+      dg.position.set(x, 0, z);
+      dg.rotation.y = rotY;
+      const frameM = M.mat(0x1e293b);
+      M.box(dg, 0.09, WH, 0.09, frameM, -w / 2, WH / 2, 0);
+      M.box(dg, 0.09, WH, 0.09, frameM, w / 2, WH / 2, 0);
+      M.box(dg, w, 0.09, 0.09, frameM, 0, 2.2, 0);
+      M.box(dg, w, WH - 2.2, 0.14, mWallPart, 0, 2.2 + (WH - 2.2) / 2, 0);
+      const leafL = M.box(dg, w / 2 - 0.05, 2.14, 0.05, M.mat(0x334155, { metalness: 0.6 }), -w / 4, 1.07, 0.15);
+      leafL.rotation.y = -0.35;
+      const leafR = M.box(dg, w / 2 - 0.05, 2.14, 0.05, M.mat(0x334155, { metalness: 0.6 }), w / 4, 1.07, 0.15);
+      leafR.rotation.y = 0.35;
+      g.add(dg);
+    }
+
+    function makeChair(parent, x, z, rotY = 0, color = 0x0284c7) {
+      const cg = new THREE.Group();
+      cg.position.set(x, 0, z);
+      cg.rotation.y = rotY;
+      const cmat = M.mat(color, { roughness: 0.6 });
+      M.box(cg, 0.44, 0.05, 0.44, cmat, 0, 0.45, 0);
+      M.box(cg, 0.44, 0.45, 0.05, cmat, 0, 0.7, -0.2);
+      [[-0.18, -0.18], [0.18, -0.18], [-0.18, 0.18], [0.18, 0.18]].forEach(([lx, lz]) => {
+        M.box(cg, 0.03, 0.45, 0.03, mSteel, lx, 0.225, lz);
+      });
+      parent.add(cg);
+      return cg;
+    }
+
+    function makeExecutiveChair(parent, x, z, rotY = 0) {
+      const cg = new THREE.Group();
+      cg.position.set(x, 0, z);
+      cg.rotation.y = rotY;
+      M.box(cg, 0.56, 0.08, 0.54, mLeather, 0, 0.48, 0);
+      M.box(cg, 0.54, 0.72, 0.08, mLeather, 0, 0.88, -0.24);
+      M.box(cg, 0.08, 0.24, 0.42, mLeather, -0.26, 0.68, 0);
+      M.box(cg, 0.08, 0.24, 0.42, mLeather, 0.26, 0.68, 0);
+      M.box(cg, 0.08, 0.46, 0.08, mSteel, 0, 0.23, 0);
+      M.box(cg, 0.52, 0.03, 0.52, mSteel, 0, 0.06, 0);
+      parent.add(cg);
+      return cg;
+    }
+
+    function workDesk(opts) {
+      const {
+        x, z, w = 1.25, d = 0.65, rotY = 0,
+        hasPC = true, label = null, pcInfo = null, hasChair = true, hasVisitor = false
+      } = opts;
+      const dg = new THREE.Group();
+      dg.position.set(x, 0, z);
+      dg.rotation.y = rotY;
+
+      const topM = M.mat(0xe2e8f0, { roughness: 0.5 });
+      const deskTop = M.box(dg, w, 0.05, d, topM, 0, 0.72, 0);
+      addEdges(deskTop, 0x475569);
+      M.box(dg, w - 0.06, 0.7, d - 0.06, M.mat(0x94a3b8), 0, 0.35, 0);
+
+      if (hasPC) {
+        const mon = M.box(dg, 0.44, 0.3, 0.03, mDark, 0, 0.94, -d / 2 + 0.12);
+        addEdges(mon, 0x38bdf8);
+        M.box(dg, 0.4, 0.25, 0.01, M.mat(0x0284c7, { emissive: 0x0284c7, emissiveIntensity: 0.45 }), 0, 0.94, -d / 2 + 0.14);
+        M.box(dg, 0.05, 0.12, 0.05, mDark, 0, 0.78, -d / 2 + 0.12);
+        M.box(dg, 0.32, 0.02, 0.12, mDark, 0, 0.75, 0.06);
+        M.box(dg, 0.18, 0.38, 0.38, M.mat(0x1e293b), w / 2 - 0.16, 0.2, 0);
+      }
+
+      if (hasChair) {
+        makeChair(dg, 0, 0.52, Math.PI, 0x334155);
+      }
+      if (hasVisitor) {
+        makeChair(dg, 0, -0.52, 0, 0x0284c7);
+      }
+
+      if (pcInfo) {
+        dg.traverse((ch) => { if (ch.isMesh) ch.userData.pcInfo = pcInfo; });
+        if (label) {
+          L.push({
+            text: label,
+            pos: V(x, 1.45, z),
+            cls: 'int-label pc-tag',
+            pcInfo
+          });
+        }
+      }
+
+      g.add(dg);
+      return dg;
+    }
+
+    // DOCTOR DESK: Specifically designed for ห้องตรวจ 1-6 flush against the right wall (+X inside room)
+    function doctorDesk(opts) {
+      const {
+        x, z, rotY = 0, w = 1.3, d = 0.7,
+        label = null, pcInfo = null
+      } = opts;
+      const dg = new THREE.Group();
+      dg.position.set(x, 0, z);
+      dg.rotation.y = rotY;
+
+      // Desk body
+      const topM = M.mat(0xf8fafc, { roughness: 0.4 });
+      const deskTop = M.box(dg, w, 0.06, d, topM, 0, 0.74, 0);
+      addEdges(deskTop, 0x0284c7);
+      M.box(dg, w - 0.06, 0.71, d - 0.06, M.mat(0xcbd5e1), 0, 0.355, 0);
+
+      // Computer monitor against wall (+X) facing doctor (-X)
+      const mon = M.box(dg, 0.03, 0.34, 0.48, mDark, w / 2 - 0.1, 0.98, 0);
+      addEdges(mon, 0x0ea5e9);
+      M.box(dg, 0.01, 0.28, 0.42, M.mat(0x0284c7, { emissive: 0x0284c7, emissiveIntensity: 0.5 }), w / 2 - 0.12, 0.98, 0);
+      M.box(dg, 0.06, 0.14, 0.06, mDark, w / 2 - 0.1, 0.81, 0);
+      // Keyboard & mouse
+      M.box(dg, 0.14, 0.02, 0.34, mDark, w / 2 - 0.28, 0.77, 0);
+      M.box(dg, 0.08, 0.02, 0.05, mDark, w / 2 - 0.28, 0.77, 0.24);
+      // CPU tower underneath
+      M.box(dg, 0.4, 0.4, 0.2, M.mat(0x0f172a), 0, 0.22, d / 2 - 0.15);
+
+      // Doctor chair (facing right towards desk/PC)
+      makeChair(dg, -0.65, 0, Math.PI / 2, 0x1e293b);
+      // Patient consultation chair (facing desk)
+      makeChair(dg, 0, -0.68, 0, 0x0284c7);
+
+      // Medical items on desk (prescription pad, stethoscope)
+      M.box(dg, 0.2, 0.02, 0.15, M.mat(0xffffff), 0, 0.78, 0.15);
+      M.cyl(dg, 0.04, 0.04, 0.02, 12, mSteel, 0.15, 0.78, -0.15);
+
+      if (pcInfo) {
+        dg.traverse((ch) => { if (ch.isMesh) ch.userData.pcInfo = pcInfo; });
+        if (label) {
+          L.push({
+            text: label,
+            pos: V(x, 1.5, z),
+            cls: 'int-label pc-tag',
+            pcInfo
+          });
+        }
+      }
+
+      g.add(dg);
+      return dg;
+    }
+
+    function examBed(x, z, rotY = 0, label = null) {
+      const bg = new THREE.Group();
+      bg.position.set(x, 0, z);
+      bg.rotation.y = rotY;
+
+      // Bed frame
+      M.box(bg, 0.9, 0.45, 2.0, mSteel, 0, 0.225, 0);
+      // Mattress & sheet
+      const mat = M.box(bg, 0.86, 0.14, 1.96, M.mat(0xecfdf5, { roughness: 0.6 }), 0, 0.52, 0);
+      addEdges(mat, 0x10b981);
+      // Pillow
+      M.box(bg, 0.6, 0.08, 0.35, M.mat(0xffffff), 0, 0.61, -0.72);
+      // Stainless steel side safety rails
+      M.box(bg, 0.04, 0.26, 1.2, mSteel, -0.44, 0.65, 0);
+      M.box(bg, 0.04, 0.26, 1.2, mSteel, 0.44, 0.65, 0);
+      // IV Drip stand
+      const iv = new THREE.Group();
+      iv.position.set(-0.55, 0, -0.85);
+      M.cyl(iv, 0.015, 0.015, 1.8, 8, mSteel, 0, 0.9, 0);
+      M.box(iv, 0.35, 0.04, 0.35, mSteel, 0, 0.02, 0);
+      M.cyl(iv, 0.08, 0.08, 0.25, 10, M.mat(0x38bdf8, { transparent: true, opacity: 0.6 }), 0, 1.7, 0);
+      bg.add(iv);
+
+      g.add(bg);
+      return bg;
+    }
+
+    function waitingBenches(x, z, count, rotY = 0) {
+      const wg = new THREE.Group();
+      wg.position.set(x, 0, z);
+      wg.rotation.y = rotY;
+      const spacing = 0.55;
+      const totalW = count * spacing;
+      // Steel gang beam
+      M.box(wg, totalW, 0.05, 0.08, mSteel, 0, 0.38, 0);
+      [-totalW / 2 + 0.2, 0, totalW / 2 - 0.2].forEach((lx) => {
+        M.box(wg, 0.04, 0.38, 0.45, mSteel, lx, 0.19, 0);
+      });
+      // Individual seats
+      for (let i = 0; i < count; i++) {
+        const sx = -totalW / 2 + spacing * (i + 0.5);
+        const seat = M.box(wg, 0.46, 0.05, 0.42, mBlueSeat, sx, 0.44, 0);
+        addEdges(seat, 0x0369a1);
+        M.box(wg, 0.46, 0.42, 0.05, mBlueSeat, sx, 0.68, -0.19);
+      }
+      g.add(wg);
+      return wg;
+    }
+
+    function bpStation(x, z, num, rotY = 0) {
+      const bpg = new THREE.Group();
+      bpg.position.set(x, 0, z);
+      bpg.rotation.y = rotY;
+      // Compact table
+      const tb = M.box(bpg, 0.8, 0.04, 0.6, M.mat(0xf1f5f9), 0, 0.72, 0);
+      addEdges(tb, 0x64748b);
+      M.box(bpg, 0.76, 0.7, 0.56, M.mat(0xcbd5e1), 0, 0.35, 0);
+      // Automatic Blood Pressure Monitor
+      const mon = M.box(bpg, 0.32, 0.24, 0.28, M.mat(0xffffff), 0, 0.86, 0);
+      addEdges(mon, 0x0284c7);
+      // Arm tunnel cylinder
+      M.cyl(bpg, 0.09, 0.09, 0.29, 16, M.mat(0x334155), 0, 0.86, 0, Math.PI / 2);
+      // Digital readout
+      M.box(bpg, 0.18, 0.12, 0.01, M.mat(0x22c55e, { emissive: 0x22c55e, emissiveIntensity: 0.6 }), 0, 0.94, -0.145);
+      // Patient stool
+      makeChair(bpg, 0, 0.55, Math.PI, 0x0284c7);
+
+      L.push({
+        text: `💓 BP ${num} (จุดวัดความดัน)`,
+        pos: V(x, 1.45, z),
+        cls: 'int-label sub-tag'
+      });
+
+      g.add(bpg);
+      return bpg;
+    }
+
+    function serverRack(x, z, rotY = 0) {
+      const rg = new THREE.Group();
+      rg.position.set(x, 0, z);
+      rg.rotation.y = rotY;
+      // 42U Rack cabinet
+      const cab = M.box(rg, 0.8, 2.2, 0.9, M.mat(0x0f172a, { metalness: 0.8, roughness: 0.2 }), 0, 1.1, 0);
+      addEdges(cab, 0x0284c7);
+      // Front glass door
+      M.box(rg, 0.72, 2.1, 0.02, M.mat(0x38bdf8, { transparent: true, opacity: 0.35 }), 0, 1.1, 0.46);
+      // Blinking status LEDs & patch units
+      for (let y = 0.4; y < 2.0; y += 0.28) {
+        M.box(rg, 0.7, 0.12, 0.8, M.mat(0x1e293b), 0, y, 0);
+        M.box(rg, 0.08, 0.03, 0.01, M.mat(0x22c55e, { emissive: 0x22c55e, emissiveIntensity: 0.9 }), -0.22, y, 0.45);
+        M.box(rg, 0.08, 0.03, 0.01, M.mat(0x38bdf8, { emissive: 0x38bdf8, emissiveIntensity: 0.9 }), 0.22, y, 0.45);
+      }
+      g.add(rg);
+      return rg;
+    }
+
+    function confTable(opts) {
+      const { x, z, w = 4.0, d = 1.4, seats = 8, label = null } = opts;
+      const tg = new THREE.Group();
+      tg.position.set(x, 0, z);
+      const top = M.box(tg, w, 0.06, d, mWood, 0, 0.74, 0);
+      addEdges(top, 0x78350f);
+      M.box(tg, w - 0.4, 0.71, d - 0.4, mLeather, 0, 0.355, 0);
+      // Chairs along top & bottom
+      const perSide = Math.floor(seats / 2);
+      const step = (w - 0.6) / (perSide > 1 ? perSide - 1 : 1);
+      for (let i = 0; i < perSide; i++) {
+        const cx = -(w - 0.6) / 2 + i * step;
+        makeExecutiveChair(tg, cx, -d / 2 - 0.35, 0);
+        makeExecutiveChair(tg, cx, d / 2 + 0.35, Math.PI);
+      }
+      g.add(tg);
+      return tg;
+    }
+
+    function buddhaAltar(x, z) {
+      const ag = new THREE.Group();
+      ag.position.set(x, 0, z);
+      // Tiered Altar tables (โต๊ะหมู่บูชา)
+      M.box(ag, 1.8, 0.4, 0.9, mTeak, 0, 0.2, 0);
+      M.box(ag, 1.4, 0.3, 0.6, mTeak, 0, 0.55, -0.15);
+      M.box(ag, 0.8, 0.3, 0.4, mTeak, 0, 0.85, -0.25);
+      // Golden Buddha statue
+      const bg = new THREE.Group();
+      bg.position.set(0, 1.0, -0.25);
+      // Base
+      M.cyl(bg, 0.22, 0.26, 0.08, 16, mGold, 0, 0.04, 0);
+      // Torso & head
+      M.cyl(bg, 0.12, 0.16, 0.3, 12, mGold, 0, 0.23, 0);
+      M.cyl(bg, 0.07, 0.07, 0.14, 12, mGold, 0, 0.45, 0);
+      // Ushnisha & aura flame
+      M.cyl(bg, 0.02, 0.04, 0.1, 8, mGold, 0, 0.57, 0);
+      ag.add(bg);
+
+      // Lotus vases, candles & incense burner
+      M.cyl(ag, 0.05, 0.04, 0.22, 10, mGold, -0.5, 0.8, -0.2);
+      M.cyl(ag, 0.05, 0.04, 0.22, 10, mGold, 0.5, 0.8, -0.2);
+      M.cyl(ag, 0.06, 0.05, 0.12, 12, mGold, 0, 0.76, 0.1);
+
+      // Offering flowers (pink lotus)
+      M.cyl(ag, 0.08, 0.02, 0.12, 8, M.mat(0xf472b6), -0.5, 0.95, -0.2);
+      M.cyl(ag, 0.08, 0.02, 0.12, 8, M.mat(0xf472b6), 0.5, 0.95, -0.2);
+
+      // Prayer kneeling mats (เบาะกราบ)
+      [-0.45, 0, 0.45].forEach((mx) => {
+        M.box(ag, 0.38, 0.04, 0.38, M.mat(0xd97706), mx, 0.02, 0.7);
+      });
+
+      g.add(ag);
+      return ag;
+    }
+
+    function restroomFixtures(gender, x, z, w, d) {
+      const rg = new THREE.Group();
+      rg.position.set(x, 0, z);
+      // Washbasin counter
+      const basinCounter = M.box(rg, w - 0.4, 0.78, 0.55, M.mat(0xf8fafc), 0, 0.39, -d / 2 + 0.35);
+      addEdges(basinCounter, 0x64748b);
+      // Mirror
+      M.box(rg, w - 0.5, 0.8, 0.02, mGlass, 0, 1.25, -d / 2 + 0.08);
+      // Cubicles at the rear (+Z)
+      const cubW = 1.0;
+      const numCub = Math.min(3, Math.floor((w - 0.4) / cubW));
+      for (let i = 0; i < numCub; i++) {
+        const cx = -(numCub - 1) * cubW / 2 + i * cubW;
+        // Cubicle partition
+        M.box(rg, 0.04, 1.9, 1.2, M.mat(0xcbd5e1), cx - cubW / 2, 0.95, d / 2 - 0.6);
+        // Toilet bowl
+        M.box(rg, 0.38, 0.42, 0.52, M.mat(0xffffff), cx, 0.21, d / 2 - 0.4);
+      }
+      if (gender === 'male') {
+        // Urinals
+        [-0.6, 0.6].forEach((ux) => {
+          M.box(rg, 0.32, 0.6, 0.25, M.mat(0xffffff), ux, 0.75, 0);
+          M.box(rg, 0.03, 0.8, 0.35, M.mat(0x94a3b8), ux - 0.22, 0.8, 0);
+          M.box(rg, 0.03, 0.8, 0.35, M.mat(0x94a3b8), ux + 0.22, 0.8, 0);
+        });
+      }
+      g.add(rg);
+      return rg;
+    }
+
+    // ==========================================
+    // SPECIFICATIONS FOR COMPUTERS (OPD_PC_SPECS)
+    // ==========================================
+    const pcSpec = (code, name, role, user, ipSuffix, sw = 'HOSxP v3.6 / Windows 11') => ({
+      code,
+      name,
+      role,
+      user,
+      os: 'Windows 11 Pro 64-bit',
+      cpu: 'Intel Core i5-12400 (6C/12T, 4.4GHz)',
+      ram: '16 GB DDR4-3200',
+      storage: '512 GB M.2 NVMe SSD',
+      monitor: '23.8" IPS Full HD (1920x1080)',
+      ip: `192.168.10.${ipSuffix}`,
+      software: sw,
+      peripherals: 'เครื่องอ่านบัตรสมาร์ทการ์ด, Barcode Scanner, UPS 850VA',
+      status: '🟢 ออนไลน์ปกติ'
+    });
+
+    // --- OUTER WALLS ---
+    wall(xMin, zMin, xMax, zMin, wThick, WH, true); // North wall
+    wall(xMin, zMax, xMax, zMax, wThick, WH, true); // South wall
+    wall(xMin, zMin, xMin, zMax, wThick, WH, true); // West wall
+    wall(xMax, zMin, xMax, zMax, wThick, WH, true); // East wall
+
+    // ==========================================
+    // 1. LEFT WING: OPD CLINIC & EXAM ROOMS 1-6
+    // ==========================================
+    // Rear Nurse Rest Room corridor at top: z = -10.0 to -7.2, x = -18.8 to 0.5
+    wall(-18.8, -7.2, 0.5, -7.2, wThick, WH); // Wall separating rest room & exam rooms
+    // Doors into rest room from Room 6 and Room 1
+    doorWay(-17.0, -7.2, 0, 1.0);
+    doorWay(-1.2, -7.2, 0, 1.0);
+
+    // Front wall of exam rooms: z = -3.5, x = -18.8 to 0.5
+    // Openings for doors in front of Rooms 6, 5, 4, 3, 2, 1
+    const examDoorsX = [-17.0, -13.8, -10.6, -7.4, -4.2, -1.2];
+    let lastWx = -18.8;
+    examDoorsX.forEach((dx) => {
+      wall(lastWx, -3.5, dx - 0.55, -3.5, wThick, WH);
+      doorWay(dx, -3.5, 0, 1.1);
+      lastWx = dx + 0.55;
+    });
+    wall(lastWx, -3.5, 0.5, -3.5, wThick, WH);
+
+    // Vertical dividing walls between Exam rooms:
+    // Room 6: [-18.8, -15.6]
+    // Room 5: [-15.6, -12.4]
+    // Room 4: [-12.4, -9.2]
+    // Room 3: [-9.2, -6.0]
+    // Room 2: [-6.0, -2.8]
+    // Room 1: [-2.8, 0.5]
+    const examDividers = [-15.6, -12.4, -9.2, -6.0, -2.8];
+    examDividers.forEach((vx) => {
+      // Interconnecting doors between exam rooms (as shown in blueprint)
+      wall(vx, -7.2, vx, -5.85, wThick, WH);
+      doorWay(vx, -5.35, Math.PI / 2, 1.0);
+      wall(vx, -4.85, vx, -3.5, wThick, WH);
+    });
+    // Wall between Room 1 and EKG room
+    wall(0.5, -10.0, 0.5, -3.5, wThick, WH);
+
+    // Populate Exam Rooms 1 to 6
+    // USER MANDATE: "ห้องตรวจ 1-6 มีคอมพิวเตอร์ 1 เครื่องชิดกำแพงขวา"
+    const examRoomDefs = [
+      { num: 6, xL: -18.8, xR: -15.6, doc: 'พญ.ณัฐธิดา', specCode: 'PC-EXAM-06', ip: '66' },
+      { num: 5, xL: -15.6, xR: -12.4, doc: 'นพ.ชยพล',   specCode: 'PC-EXAM-05', ip: '65' },
+      { num: 4, xL: -12.4, xR: -9.2,  doc: 'พญ.กานดา',   specCode: 'PC-EXAM-04', ip: '64' },
+      { num: 3, xL: -9.2,  xR: -6.0,  doc: 'นพ.วรวิทย์', specCode: 'PC-EXAM-03', ip: '63' },
+      { num: 2, xL: -6.0,  xR: -2.8,  doc: 'พญ.ศิรินทิพย์', specCode: 'PC-EXAM-02', ip: '62' },
+      { num: 1, xL: -2.8,  xR: 0.5,   doc: 'นพ.ธนกฤต',  specCode: 'PC-EXAM-01', ip: '61' }
+    ];
+
+    examRoomDefs.forEach((r) => {
+      const roomMidX = (r.xL + r.xR) / 2;
+      // 1. Doctor desk FLUSH AGAINST RIGHT WALL (x = r.xR - 0.42)
+      doctorDesk({
+        x: r.xR - 0.42,
+        z: -4.5,
+        rotY: 0,
+        label: `🖳 คอมห้องตรวจ ${r.num}`,
+        pcInfo: pcSpec(r.specCode, `คอมห้องตรวจ ${r.num}`, `ระบบเวชระเบียนและสั่งการรักษาแพทย์ ห้องตรวจ ${r.num}`, `แพทย์ตรวจโรค (${r.doc})`, r.ip, 'HOSxP Doctor Station / Electronic Medical Record (EMR)')
+      });
+
+      // 2. Exam bed on the left side of room
+      examBed(r.xL + 0.85, -5.35, 0);
+
+      // 3. Washbasin / hand sanitation cabinet
+      M.box(g, 0.45, 0.78, 0.45, M.mat(0xf8fafc), r.xL + 0.35, 0.39, -6.7);
+      M.cyl(g, 0.02, 0.02, 0.12, 8, mSteel, r.xL + 0.35, 0.84, -6.7);
+
+      // 4. Interactive Room Status Badge
+      const isOcc = opdState.examRooms.find((er) => er.id === `opd-exam-${r.num}`).occupied;
+      L.push({
+        text: `🚪 ห้องตรวจ ${r.num} (${r.doc}) ${isOcc ? '🔴 กำลังตรวจ' : '🟢 ว่าง'}`,
+        pos: V(roomMidX, 2.3, -5.35),
+        cls: `int-label toggleable ${isOcc ? 'busy' : 'free'}`,
+        toggleId: `opd-exam-${r.num}`
+      });
+    });
+
+    // Nurses' Rest Room (ห้องพักพยาบาล) along top
+    L.push({
+      text: '🛋️ ห้องพักพยาบาล (Staff Lounge)',
+      pos: V(-9.15, 2.2, -8.6),
+      cls: 'int-label room-title'
+    });
+    // Rest room furniture
+    M.box(g, 3.2, 0.42, 0.8, mLeather, -12.0, 0.21, -8.8); // Sofa
+    M.box(g, 1.2, 0.35, 0.6, mWood, -12.0, 0.175, -7.8);   // Coffee table
+    M.box(g, 0.5, 1.4, 0.5, M.mat(0x38bdf8), -6.0, 0.7, -8.8); // Water dispenser
+    M.box(g, 2.4, 1.9, 0.5, mSteel, -3.0, 0.95, -8.8);      // Staff lockers
+
+    // Desks in Hallway outside exam rooms:
+    // คอม OPD 6, 5, 4, 3, 2, 1
+    const hallDesks = [
+      { x: -17.0, z: -2.5, num: 6, code: 'PC-OPD-06', ip: '46' },
+      { x: -14.2, z: -2.5, num: 5, code: 'PC-OPD-05', ip: '45' },
+      { x: -12.2, z: -2.5, num: 4, code: 'PC-OPD-04', ip: '44' },
+      { x: -8.2,  z: -2.5, num: 3, code: 'PC-OPD-03', ip: '43' },
+      { x: -6.2,  z: -2.5, num: 2, code: 'PC-OPD-02', ip: '42' },
+      { x: -1.2,  z: -2.5, num: 1, code: 'PC-OPD-01', ip: '41' }
+    ];
+    hallDesks.forEach((hd) => {
+      workDesk({
+        x: hd.x,
+        z: hd.z,
+        w: 1.15,
+        d: 0.6,
+        rotY: 0,
+        label: `🖳 คอม OPD ${hd.num}`,
+        pcInfo: pcSpec(hd.code, `คอม OPD ${hd.num}`, `จุดบริการซักประวัติและเรียกคิวหน้าห้องตรวจ ${hd.num}`, `พยาบาลวิชาชีพ/ผู้ช่วยพยาบาล`, hd.ip, 'HOSxP Queue & OPD Station')
+      });
+    });
+
+    // Far Left Desk: คอม OPD 7 (oriented vertically)
+    workDesk({
+      x: -18.2,
+      z: 0.5,
+      w: 1.2,
+      d: 0.6,
+      rotY: Math.PI / 2,
+      label: '🖳 คอม OPD 7',
+      pcInfo: pcSpec('PC-OPD-07', 'คอม OPD 7', 'จุดคัดกรองเบื้องต้น/ประสานงานผู้ป่วยนอก', 'เจ้าหน้าที่เวชสถิติ/พยาบาล', '47')
+    });
+
+    // ==========================================
+    // 2. WAITING LOBBY, SCREENING & BUDDHA ROOM
+    // ==========================================
+    // Upper Waiting Seats (20 seats back-to-back facing -Z and +Z)
+    waitingBenches(-10.0, -1.0, 10, 0);       // 10 seats facing +Z
+    waitingBenches(-10.0, -0.2, 10, Math.PI); // 10 seats facing -Z
+    // 4 Side waiting seats
+    waitingBenches(-2.5, -1.0, 2, Math.PI / 2);
+    waitingBenches(-2.5, -0.2, 2, -Math.PI / 2);
+
+    L.push({
+      text: '🪑 จุดพักคอยผู้รับบริการ (20 ที่นั่ง)',
+      pos: V(-10.0, 1.8, -0.6),
+      cls: 'int-label sub-tag'
+    });
+
+    // Screening Counters & BP Kiosks: z = 2.4
+    // จุดคัดกรอง 1
+    const scr1 = M.box(g, 1.6, 0.85, 0.8, M.mat(0x0284c7), -15.5, 0.425, 2.4);
+    addEdges(scr1, 0x0369a1);
+    makePerson({ role: 'nurse', shirtColor: 0xffffff, pantsColor: 0xffffff, pose: 'stand', rotY: 0 }).position.set(-15.5, 0, 2.8);
+    L.push({ text: '📋 จุดคัดกรอง 1', pos: V(-15.5, 1.7, 2.4), cls: 'int-label room-title' });
+
+    // จุดคัดกรอง 2 + คอม OPD 8
+    const scr2 = workDesk({
+      x: -13.0,
+      z: 2.4,
+      w: 1.4,
+      d: 0.7,
+      rotY: 0,
+      label: '🖳 คอม OPD 8 (คัดกรอง 2)',
+      pcInfo: pcSpec('PC-OPD-08', 'คอม OPD 8', 'ระบบคัดกรอง ประเมินสัญญาณชีพ และบันทึกประวัติแรกรับ', 'พยาบาลคัดกรอง', '48', 'HOSxP Triage & Vital Signs')
+    });
+    L.push({ text: '🩺 จุดคัดกรอง 2 (คอม OPD 8)', pos: V(-13.0, 1.8, 2.4), cls: 'int-label room-title' });
+
+    // 6 Blood Pressure Kiosks (BP 1 to BP 6)
+    const bpPositions = [-10.5, -8.8, -7.1, -5.4, -3.7, -2.0];
+    bpPositions.forEach((bpx, idx) => {
+      bpStation(bpx, 2.4, idx + 1);
+    });
+
+    // Lower Waiting Seats (16 seats back-to-back: 8 facing -Z, 8 facing +Z)
+    waitingBenches(-10.5, 5.2, 8, 0);
+    waitingBenches(-10.5, 6.0, 8, Math.PI);
+    L.push({
+      text: '🪑 จุดพักคอยวัดความดัน/รอพบแพทย์ (16 ที่นั่ง)',
+      pos: V(-10.5, 1.8, 5.6),
+      cls: 'int-label sub-tag'
+    });
+
+    // Buddha Room (ห้องพระ)
+    // Walls: x = -4.5 to 0.5, z = 4.2 to 9.8
+    wall(-4.5, 4.2, 0.5, 4.2, wThick, WH); // North wall of Buddha room
+    wall(-4.5, 4.2, -4.5, 9.8, wThick, WH); // West wall of Buddha room with door
+    doorWay(-4.5, 5.5, Math.PI / 2, 1.1);
+    buddhaAltar(-2.0, 8.5);
+    L.push({
+      text: '🙏 ห้องพระ (จุดสักการะประจำโรงพยาบาล)',
+      pos: V(-2.0, 2.2, 6.5),
+      cls: 'int-label room-title'
+    });
+
+    // ==========================================
+    // 3. RIGHT WING: ROW 1 (TOP / NORTH)
+    // ==========================================
+    // EKG Room: x = 0.5 to 4.5, z = -10.0 to -4.5
+    wall(4.5, -10.0, 4.5, -4.5, wThick, WH); // East wall of EKG
+    wall(0.5, -4.5, 4.5, -4.5, wThick, WH);  // South wall of EKG
+    doorWay(0.5, -6.5, Math.PI / 2, 1.1);   // Door from corridor into EKG
+
+    // คอม EKG & 2 Exam beds
+    workDesk({
+      x: 1.2,
+      z: -7.0,
+      w: 1.1,
+      d: 0.6,
+      rotY: Math.PI / 2,
+      label: '🖳 คอม EKG',
+      pcInfo: pcSpec('PC-EKG-01', 'คอมห้อง EKG', 'ระบบตรวจบันทึกคลื่นไฟฟ้าหัวใจและส่งต่อแพทย์เฉพาะทาง', 'เจ้าหน้าที่ตรวจ EKG', '71', 'ECG Analysis Software / PACS Link')
+    });
+    examBed(3.6, -8.2, 0);
+    examBed(3.6, -5.8, 0);
+
+    L.push({
+      text: `🫀 ห้อง EKG ${opdState.ekgOccupied ? '🔴 กำลังบันทึก' : '🟢 ว่าง'}`,
+      pos: V(2.5, 2.2, -7.0),
+      cls: `int-label toggleable ${opdState.ekgOccupied ? 'busy' : 'free'}`,
+      toggleId: 'opd-ekg'
+    });
+
+    // Nursing Administration: x = 4.5 to 9.5, z = -10.0 to -4.5
+    wall(9.5, -10.0, 9.5, -4.5, wThick, WH);
+    wall(4.5, -4.5, 9.5, -4.5, wThick, WH);
+    doorWay(7.0, -4.5, 0, 1.1);
+
+    // 4 Nurse PCs: คอม 1, 2, 3, 4
+    const nurseDesks = [
+      { x: 5.6, z: -8.5, num: 1, ip: '81' },
+      { x: 5.6, z: -6.5, num: 2, ip: '82' },
+      { x: 8.4, z: -8.5, num: 3, ip: '83' },
+      { x: 8.4, z: -6.5, num: 4, ip: '84' }
+    ];
+    nurseDesks.forEach((nd) => {
+      workDesk({
+        x: nd.x,
+        z: nd.z,
+        w: 1.15,
+        d: 0.6,
+        rotY: 0,
+        label: `🖳 คอมพยาบาล ${nd.num}`,
+        pcInfo: pcSpec(`PC-NURSE-0${nd.num}`, `คอมพยาบาล ${nd.num}`, `งานบริหารการพยาบาลและตารางปฏิบัติงาน`, `กลุ่มงานการพยาบาล`, nd.ip)
+      });
+    });
+    L.push({
+      text: '👩‍⚕️ ห้องกลุ่มงานการพยาบาล',
+      pos: V(7.0, 2.2, -7.5),
+      cls: 'int-label room-title'
+    });
+
+    // Nurse Head Office (ห้องคอม 5): x = 9.5 to 12.5, z = -10.0 to -4.5
+    wall(12.5, -10.0, 12.5, -4.5, wThick, WH);
+    wall(9.5, -4.5, 12.5, -4.5, wThick, WH);
+    doorWay(11.0, -4.5, 0, 1.1);
+    workDesk({
+      x: 11.0,
+      z: -7.2,
+      w: 1.3,
+      d: 0.7,
+      rotY: 0,
+      hasVisitor: true,
+      label: '🖳 คอมพยาบาล 5 (หัวหน้า)',
+      pcInfo: pcSpec('PC-NURSE-05', 'คอมพยาบาล 5', 'ห้องหัวหน้ากลุ่มงานการพยาบาล', 'หัวหน้าพยาบาล', '85')
+    });
+    L.push({
+      text: '💼 ห้องหัวหน้ากลุ่มการพยาบาล',
+      pos: V(11.0, 2.2, -8.6),
+      cls: 'int-label sub-tag'
+    });
+
+    // Large Nursing Meeting Room: x = 12.5 to 18.8, z = -10.0 to -4.5
+    wall(12.5, -4.5, 18.8, -4.5, wThick, WH);
+    doorWay(17.5, -4.5, 0, 1.1);
+    confTable({ x: 15.65, z: -7.25, w: 4.8, d: 1.4, seats: 8 });
+
+    // Top PCs: คอม 7, 6, 5 (z = -8.8)
+    const nTopPCs = [
+      { x: 14.0, num: 7, ip: '97' },
+      { x: 15.65, num: 6, ip: '96' },
+      { x: 17.3, num: 5, ip: '95' }
+    ];
+    nTopPCs.forEach((p) => {
+      workDesk({
+        x: p.x,
+        z: -8.8,
+        w: 1.0,
+        d: 0.5,
+        rotY: 0,
+        hasChair: false,
+        label: `🖳 คอมประชุม ${p.num}`,
+        pcInfo: pcSpec(`PC-NCONF-0${p.num}`, `คอมห้องประชุม ${p.num}`, `ระบบสนับสนุนการประชุมกลุ่มงานการพยาบาล`, `คณะทำงาน`, p.ip)
+      });
+    });
+
+    // Bottom PCs: คอม 1, 2, 3, 4 (z = -5.7)
+    const nBotPCs = [
+      { x: 13.5, num: 1, ip: '91' },
+      { x: 14.9, num: 2, ip: '92' },
+      { x: 16.3, num: 3, ip: '93' },
+      { x: 17.7, num: 4, ip: '94' }
+    ];
+    nBotPCs.forEach((p) => {
+      workDesk({
+        x: p.x,
+        z: -5.7,
+        w: 0.95,
+        d: 0.5,
+        rotY: Math.PI,
+        hasChair: false,
+        label: `🖳 คอมประชุม ${p.num}`,
+        pcInfo: pcSpec(`PC-NCONF-0${p.num}`, `คอมห้องประชุม ${p.num}`, `ระบบสนับสนุนการประชุมกลุ่มงานการพยาบาล`, `คณะทำงาน`, p.ip)
+      });
+    });
+    L.push({
+      text: '🏢 ห้องประชุมกลุ่มงานการพยาบาล (7 โต๊ะคอม)',
+      pos: V(15.65, 2.2, -7.25),
+      cls: 'int-label room-title'
+    });
+
+    // ==========================================
+    // 4. RIGHT WING: ROW 2 (HA & RESTROOMS)
+    // ==========================================
+    // North wall of Row 2: z = -3.0, x = 4.5 to 18.8
+    // South wall of Row 2: z = 0.2, x = 4.5 to 18.8
+    wall(4.5, -3.0, 18.8, -3.0, wThick, WH);
+    wall(4.5, 0.2, 18.8, 0.2, wThick, WH);
+    wall(4.5, -3.0, 4.5, 0.2, wThick, WH); // West wall
+
+    // Dividers:
+    // Room HA: x = 4.5 to 9.5
+    // Female WC: x = 9.5 to 14.0
+    // Male WC: x = 14.0 to 18.8
+    wall(9.5, -3.0, 9.5, 0.2, wThick, WH);
+    wall(14.0, -3.0, 14.0, 0.2, wThick, WH);
+
+    // Doors for Row 2
+    doorWay(7.0, 0.2, 0, 1.1);   // HA
+    doorWay(11.75, 0.2, 0, 1.1); // Female WC
+    doorWay(16.4, 0.2, 0, 1.1);  // Male WC
+
+    // HA Room Furniture
+    workDesk({
+      x: 6.5,
+      z: -1.4,
+      w: 1.3,
+      d: 0.65,
+      rotY: 0,
+      hasVisitor: true,
+      label: '🖳 คอม HA 1',
+      pcInfo: pcSpec('PC-HA-01', 'คอมงานพัฒนาคุณภาพ (HA)', 'บริหารจัดการข้อมูลมาตรฐานคุณภาพโรงพยาบาลและการรับรอง HA', 'ทีมนำพัฒนาคุณภาพ (HA)', '75')
+    });
+    M.box(g, 3.2, 2.0, 0.5, mSteel, 7.0, 1.0, -2.7); // Archive file cabinets
+    L.push({ text: '📋 ห้อง HA (พัฒนาคุณภาพโรงพยาบาล)', pos: V(7.0, 2.2, -1.4), cls: 'int-label room-title' });
+
+    // Restrooms
+    restroomFixtures('female', 11.75, -1.4, 4.3, 3.0);
+    L.push({ text: '🚺 ห้องน้ำหญิง', pos: V(11.75, 2.2, -1.4), cls: 'int-label sub-tag' });
+
+    restroomFixtures('male', 16.4, -1.4, 4.6, 3.0);
+    L.push({ text: '🚹 ห้องน้ำชาย', pos: V(16.4, 2.2, -1.4), cls: 'int-label sub-tag' });
+
+    // ==========================================
+    // 5. RIGHT WING: ROW 3 (SERVER & CONFERENCES)
+    // ==========================================
+    // North wall of Row 3: z = 1.5, x = 4.5 to 18.8
+    // South wall of Row 3: z = 5.5, x = 4.5 to 18.8
+    wall(4.5, 1.5, 18.8, 1.5, wThick, WH);
+    wall(4.5, 5.5, 18.8, 5.5, wThick, WH);
+    wall(4.5, 1.5, 4.5, 5.5, wThick, WH);
+
+    // Dividers:
+    // IT Admin Room (คอม 1-4): x = 4.5 to 8.5
+    // Server Room (ประตู 2 บาน): x = 8.5 to 11.5
+    // Meeting Room องค์กรแพทย์: x = 11.5 to 15.2
+    // Meeting Room ธรรมาภิบาล: x = 15.2 to 18.8
+    wall(8.5, 1.5, 8.5, 5.5, wThick, WH);
+    wall(11.5, 1.5, 11.5, 5.5, wThick, WH);
+    wall(15.2, 1.5, 15.2, 5.5, wThick, WH);
+
+    // Doors for Row 3
+    doorWay(6.5, 5.5, 0, 1.1);           // IT Admin
+    doubleDoorWay(10.0, 5.5, 0, 1.8);    // Server Room: ประตู 2 บาน!
+    doorWay(13.35, 5.5, 0, 1.1);         // Meeting 1
+    doorWay(17.0, 5.5, 0, 1.1);          // Meeting 2
+
+    // IT Admin Room Desks (คอม 1, 2, 3 along left wall, คอม 4 in center)
+    const itAdminPCs = [
+      { x: 5.2, z: 2.3, num: 1, ip: '11' },
+      { x: 5.2, z: 3.5, num: 2, ip: '12' },
+      { x: 5.2, z: 4.7, num: 3, ip: '13' },
+      { x: 7.2, z: 3.5, num: 4, ip: '14' }
+    ];
+    itAdminPCs.forEach((p) => {
+      workDesk({
+        x: p.x,
+        z: p.z,
+        w: 1.05,
+        d: 0.55,
+        rotY: p.num === 4 ? 0 : Math.PI / 2,
+        label: `🖳 คอมธุรการ ${p.num}`,
+        pcInfo: pcSpec(`PC-ADM-0${p.num}`, `คอมธุรการแพทย์ ${p.num}`, `งานบริหารและสนับสนุนข้อมูลองค์กรแพทย์`, `ธุรการ`, p.ip)
+      });
+    });
+    L.push({ text: '💻 ห้องปฏิบัติการ/ธุรการแพทย์', pos: V(6.5, 2.2, 3.5), cls: 'int-label sub-tag' });
+
+    // Server Room (ห้อง Server)
+    serverRack(9.5, 2.6, 0);
+    serverRack(10.5, 2.6, 0);
+    // UPS Battery bank & Wall Cooling Unit
+    M.box(g, 1.2, 1.4, 0.6, M.mat(0x1e293b), 10.0, 0.7, 4.8);
+    M.box(g, 0.8, 0.4, 0.25, M.mat(0xffffff), 10.0, 2.4, 1.65);
+    L.push({
+      text: `🖥️ ห้อง Server ${opdState.serverOnline ? '🟢 ระบบออนไลน์ 100%' : '🟡 ซ่อมบำรุง'}`,
+      pos: V(10.0, 2.2, 3.5),
+      cls: `int-label toggleable ${opdState.serverOnline ? 'free' : 'busy'}`,
+      toggleId: 'opd-server'
+    });
+
+    // Medical Org Meeting Room (ห้องประชุมองค์กรแพทย์)
+    confTable({ x: 13.35, z: 3.3, w: 2.6, d: 1.2, seats: 6 });
+    workDesk({
+      x: 14.5,
+      z: 4.8,
+      w: 1.0,
+      d: 0.5,
+      rotY: Math.PI,
+      label: '🖳 คอมห้องประชุม 1',
+      pcInfo: pcSpec('PC-CONF-01', 'คอมห้องประชุม 1', 'ระบบนำเสนอและฉายภาพการประชุมองค์กรแพทย์', 'องค์กรแพทย์', '101', 'Zoom / Microsoft Teams / PACS Viewer')
+    });
+    L.push({
+      text: `🩺 ห้องประชุมองค์กรแพทย์ ${opdState.confMedOccupied ? '🔴 มีการประชุม' : '🟢 ว่าง'}`,
+      pos: V(13.35, 2.2, 3.5),
+      cls: `int-label toggleable ${opdState.confMedOccupied ? 'busy' : 'free'}`,
+      toggleId: 'opd-conf-med'
+    });
+
+    // Good Governance Meeting Room (ห้องประชุมธรรมาภิบาล)
+    confTable({ x: 17.0, z: 3.3, w: 2.6, d: 1.2, seats: 6 });
+    workDesk({
+      x: 18.0,
+      z: 4.8,
+      w: 1.0,
+      d: 0.5,
+      rotY: Math.PI,
+      label: '🖳 คอมห้องประชุม 2',
+      pcInfo: pcSpec('PC-CONF-02', 'คอมห้องประชุม 2', 'ระบบบันทึกและถ่ายทอดการประชุมธรรมาภิบาลและจริยธรรม', 'คณะกรรมการธรรมาภิบาล', '102')
+    });
+    L.push({
+      text: `⚖️ ห้องประชุมธรรมาภิบาล ${opdState.confGovOccupied ? '🔴 มีการประชุม' : '🟢 ว่าง'}`,
+      pos: V(17.0, 2.2, 3.5),
+      cls: `int-label toggleable ${opdState.confGovOccupied ? 'busy' : 'free'}`,
+      toggleId: 'opd-conf-gov'
+    });
+
+    // ==========================================
+    // 6. RIGHT WING: ROW 4 (IT, DOCTORS, DIRECTOR)
+    // ==========================================
+    // North wall of Row 4: z = 6.5, x = 4.5 to 18.8
+    wall(4.5, 6.5, 18.8, 6.5, wThick, WH);
+    wall(4.5, 6.5, 4.5, 9.8, wThick, WH);
+
+    // Dividers:
+    // IT Room: x = 4.5 to 9.5
+    // Doctors' Lounge: x = 9.5 to 14.0
+    // Director's Office: x = 14.0 to 18.8
+    wall(9.5, 6.5, 9.5, 9.8, wThick, WH);
+    wall(14.0, 6.5, 14.0, 9.8, wThick, WH);
+
+    // Doors for Row 4 (on north wall)
+    doorWay(7.0, 6.5, 0, 1.1);
+    doorWay(11.75, 6.5, 0, 1.1);
+    doorWay(15.5, 6.5, 0, 1.1);
+
+    // IT Room (คอม IT 2, คอม IT 3 on left wall; คอม IT 1 on right wall)
+    workDesk({
+      x: 5.2,
+      z: 7.5,
+      w: 1.15,
+      d: 0.6,
+      rotY: Math.PI / 2,
+      label: '🖳 คอม IT 2 (Network)',
+      pcInfo: pcSpec('PC-IT-02', 'คอม IT 2', 'บริหารระบบเครือข่าย Firewall และความมั่นคงปลอดภัยไซเบอร์', 'นักวิชาการคอมพิวเตอร์', '22', 'Cisco / Mikrotik / PRTG Monitor')
+    });
+    workDesk({
+      x: 5.2,
+      z: 8.8,
+      w: 1.15,
+      d: 0.6,
+      rotY: Math.PI / 2,
+      label: '🖳 คอม IT 3 (Database)',
+      pcInfo: pcSpec('PC-IT-03', 'คอม IT 3', 'ผู้ดูแลระบบฐานข้อมูลโรงพยาบาล HOSxP และคลังข้อมูล HDC', 'ผู้ดูแลระบบสารสนเทศ', '23', 'MySQL Workbench / Navicat / Linux Shell')
+    });
+    workDesk({
+      x: 8.8,
+      z: 8.0,
+      w: 1.15,
+      d: 0.6,
+      rotY: -Math.PI / 2,
+      label: '🖳 คอม IT 1 (Helpdesk)',
+      pcInfo: pcSpec('PC-IT-01', 'คอม IT 1', 'รับแจ้งซ่อมคอมพิวเตอร์ จัดการสิทธิ์ผู้ใช้งาน และสนับสนุนเทคนิค', 'เจ้าหน้าที่คอมพิวเตอร์', '21', 'Helpdesk Ticketing / Remote Support')
+    });
+    // Hardware diagnostic bench
+    M.box(g, 1.8, 0.75, 0.7, mSteel, 7.0, 0.375, 9.2);
+    L.push({ text: '🛠️ ห้องปฏิบัติการคอมพิวเตอร์ (IT)', pos: V(7.0, 2.2, 8.0), cls: 'int-label room-title' });
+
+    // Doctors' Lounge (ห้องพักแพทย์)
+    M.box(g, 2.8, 0.45, 0.85, mLeather, 11.75, 0.225, 9.0); // Large lounge sofa
+    M.box(g, 1.4, 0.35, 0.6, mWood, 11.75, 0.175, 8.0);     // Coffee table
+    M.box(g, 0.5, 1.4, 0.5, M.mat(0x38bdf8), 13.2, 0.7, 7.2); // Water dispenser
+    L.push({ text: '🛋️ ห้องพักแพทย์ (Doctors\' Lounge)', pos: V(11.75, 2.2, 8.0), cls: 'int-label room-title' });
+
+    // Hospital Director's Office (ห้องผู้อำนวยการโรงพยาบาล)
+    // Enclosed private restroom in top-right corner: x = 16.8 to 18.8, z = 6.5 to 7.8
+    wall(16.8, 6.5, 16.8, 7.8, wThick, WH);
+    wall(16.8, 7.8, 18.8, 7.8, wThick, WH);
+    doorWay(16.8, 7.15, Math.PI / 2, 0.85); // Door into private WC
+    M.box(g, 0.36, 0.42, 0.48, M.mat(0xffffff), 18.1, 0.21, 7.15); // Toilet
+    M.box(g, 0.4, 0.75, 0.35, M.mat(0xf8fafc), 17.5, 0.375, 6.8);   // Sink
+
+    // Director's executive desk
+    const dirDesk = M.box(g, 1.8, 0.08, 0.9, mWood, 15.6, 0.74, 8.5);
+    addEdges(dirDesk, 0x78350f);
+    M.box(g, 1.7, 0.7, 0.8, mLeather, 15.6, 0.35, 8.5);
+    makeExecutiveChair(g, 15.6, 9.2, Math.PI);
+    makeChair(g, 15.0, 7.8, 0, 0x334155);
+    makeChair(g, 16.2, 7.8, 0, 0x334155);
+
+    // Director's PC
+    const dirPC = pcSpec('PC-DIR-01', 'คอมผู้อำนวยการ', 'ระบบบริหารจัดการโรงพยาบาลและสารสนเทศผู้บริหาร (EIS)', 'ผู้อำนวยการโรงพยาบาล', '01', 'Hospital Executive Information System (EIS) / Digital Signature');
+    const dMon = M.box(g, 0.52, 0.34, 0.03, mDark, 15.6, 0.98, 8.35);
+    addEdges(dMon, 0xf59e0b);
+    M.box(g, 0.48, 0.28, 0.01, M.mat(0x0284c7, { emissive: 0x0284c7, emissiveIntensity: 0.5 }), 15.6, 0.98, 8.37);
+    dirDesk.userData.pcInfo = dirPC;
+    dMon.userData.pcInfo = dirPC;
+
+    L.push({
+      text: '🖳 คอมผู้อำนวยการ',
+      pos: V(15.6, 1.5, 8.4),
+      cls: 'int-label pc-tag',
+      pcInfo: dirPC
+    });
+
+    // Executive credenza behind director
+    M.box(g, 2.2, 1.8, 0.45, mTeak, 15.6, 0.9, 9.6);
+    // National flag & Royal portrait
+    M.box(g, 0.6, 0.8, 0.02, M.mat(0xfef08a), 17.5, 1.6, 9.7);
+
+    L.push({
+      text: `👑 ห้องผู้อำนวยการโรงพยาบาล ${opdState.directorOccupied ? '🔴 ปฏิบัติราชการ' : '🟢 พร้อมต้อนรับ'}`,
+      pos: V(15.6, 2.3, 8.0),
+      cls: `int-label toggleable ${opdState.directorOccupied ? 'busy' : 'free'}`,
+      toggleId: 'opd-director'
+    });
+
+    // Build items list for interior panel
+    const itemsList = [
+      { id: 'opd-exam-1', name: 'ห้องตรวจ 1 (นพ.ธนกฤต)', status: opdState.examRooms[0].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง' },
+      { id: 'opd-exam-2', name: 'ห้องตรวจ 2 (พญ.ศิรินทิพย์)', status: opdState.examRooms[1].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง' },
+      { id: 'opd-exam-3', name: 'ห้องตรวจ 3 (นพ.วรวิทย์)', status: opdState.examRooms[2].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง' },
+      { id: 'opd-exam-4', name: 'ห้องตรวจ 4 (พญ.กานดา)', status: opdState.examRooms[3].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง' },
+      { id: 'opd-exam-5', name: 'ห้องตรวจ 5 (นพ.ชยพล)', status: opdState.examRooms[4].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง' },
+      { id: 'opd-exam-6', name: 'ห้องตรวจ 6 (พญ.ณัฐธิดา)', status: opdState.examRooms[5].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง' },
+      { id: 'opd-ekg', name: 'ห้องตรวจคลื่นไฟฟ้าหัวใจ (EKG)', status: opdState.ekgOccupied ? '🔴 กำลังบันทึก' : '🟢 ว่าง' },
+      { id: 'opd-server', name: 'ห้องแม่ข่ายคอมพิวเตอร์ (Server)', status: opdState.serverOnline ? '🟢 ระบบออนไลน์ 100%' : '🟡 ซ่อมบำรุง' },
+      { id: 'opd-conf-med', name: 'ห้องประชุมองค์กรแพทย์', status: opdState.confMedOccupied ? '🔴 มีการประชุม' : '🟢 ว่าง' },
+      { id: 'opd-conf-gov', name: 'ห้องประชุมธรรมาภิบาล', status: opdState.confGovOccupied ? '🔴 มีการประชุม' : '🟢 ว่าง' },
+      { id: 'opd-director', name: 'ห้องผู้อำนวยการโรงพยาบาล', status: opdState.directorOccupied ? '🔴 ปฏิบัติราชการ' : '🟢 พร้อมต้อนรับ' }
+    ];
+
+    return {
+      group: g,
+      labels: L,
+      size: { w: W, d: D, h: WH },
+      title: '🩺 ผังภายใน ตึกผู้ป่วยนอก (OPD & บริหาร)',
+      sub: 'ห้องตรวจ 1–6 (คอมชิดกำแพงขวา), จุดคัดกรอง, ความดัน BP, ห้องพระ, ห้อง EKG, กลุ่มการพยาบาล, ห้อง Server, ห้องประชุมองค์กรแพทย์/ธรรมาภิบาล, ห้อง IT, พักแพทย์, และห้อง ผอ.',
+      items: itemsList,
+      cam: { pos: V(0, 26, 26), target: V(0, 1.0, 0) }
+    };
+  }
+
+
   K.Interiors = {
     build(b) {
       if (b.interior === 'guard') return guard(b);
@@ -8668,6 +9695,7 @@
       if (b.interior === 'rompho') return buildRomphoInterior(b);
       if (b.interior === 'store') return buildStoreInterior(b);
       if (b.interior === 'supply') return buildSupplyInterior(b);
+      if (b.interior === 'opd') return buildOpdInterior(b);
       return null;
     },
     toggleStatus(id) {
@@ -8701,6 +9729,33 @@
       }
       if (id === 'store-copier') {
         storeState.copierBusy = !storeState.copierBusy;
+        return true;
+      }
+      if (id.startsWith('opd-exam-')) {
+        const r = opdState.examRooms.find((x) => x.id === id);
+        if (r) {
+          r.occupied = !r.occupied;
+          return true;
+        }
+      }
+      if (id === 'opd-ekg') {
+        opdState.ekgOccupied = !opdState.ekgOccupied;
+        return true;
+      }
+      if (id === 'opd-server') {
+        opdState.serverOnline = !opdState.serverOnline;
+        return true;
+      }
+      if (id === 'opd-conf-med') {
+        opdState.confMedOccupied = !opdState.confMedOccupied;
+        return true;
+      }
+      if (id === 'opd-conf-gov') {
+        opdState.confGovOccupied = !opdState.confGovOccupied;
+        return true;
+      }
+      if (id === 'opd-director') {
+        opdState.directorOccupied = !opdState.directorOccupied;
         return true;
       }
       if (id.startsWith('vip-')) {
