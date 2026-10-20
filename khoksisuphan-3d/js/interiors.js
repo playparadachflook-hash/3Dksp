@@ -7590,7 +7590,7 @@
     currentFloor: 1,
     liftRunning: false,
     headOccupied: false,
-    meetingOccupied: false,
+    waitingOccupied: false,
     copierBusy: false
   };
 
@@ -7712,14 +7712,43 @@
       });
     }
 
+    function makePalletRack(x, z, d, color) {
+      const rack = new THREE.Group();
+      rack.position.set(x, 0, z);
+      [-0.55, 0.55].forEach((ox) => {
+        [-d / 2, d / 2].forEach((oz) => {
+          const col = storeBox(0.08, 2.5, 0.08, color);
+          col.position.set(ox, 1.25, oz);
+          rack.add(col);
+        });
+      });
+      [0.6, 1.4, 2.2].forEach((h) => {
+        const shelfBeam = storeBox(1.2, 0.08, d, color);
+        shelfBeam.position.set(0, h, 0);
+        rack.add(shelfBeam);
+        for (let sz = -d / 2 + 0.6; sz < d / 2; sz += 1.2) {
+          const boxMat = Math.abs(Math.sin(sz + h)) > 0.5 ? 0xd97706 : 0x0284c7;
+          const medBox = storeBox(0.95, 0.45, 0.85, boxMat);
+          medBox.position.set(0, h + 0.265, sz);
+          rack.add(medBox);
+        }
+      });
+      g.add(rack);
+    }
+
     // =========================================================================
     // ตรวจสอบชั้น (Floor 1 vs Floor 2)
     // =========================================================================
     if (storeState.currentFloor === 2) {
-      // --- FLOOR 2: รอดำเนินการหลังจากชั้น 1 เสร็จสิ้น ---
-      floor(g, W, D, '#f8fafc', '#cbd5e1', 0.8, 0, 0);
+      // =========================================================================
+      // FLOOR 2: ตามแผนผังรูปที่ 1 อย่างแม่นยำ
+      // =========================================================================
+      // 1. พื้นโซนชั้น 2
+      floor(g, 8.0, 18.0, '#e2e8f0', '#94a3b8', 1.0, -12.0, 0.0);    // คลังเก็บยาขนาดใหญ่
+      floor(g, 24.0, 12.0, '#f8fafc', '#cbd5e1', 0.8, 4.0, -3.0);   // คลังเก็บพัสดุอุปกรณ์ของคลังพัสดุโรงพยาบาล
+      floor(g, 24.0, 6.0, '#f1f5f9', '#cbd5e1', 0.8, 4.0, 6.0);     // โถงทางเดินด้านล่างและบันได
 
-      // กำแพงรอบนอกชั้น 2
+      // 2. กำแพงรอบนอกชั้น 2
       g.add(
         storeAt(storeWall(W, WH, wThick, 0x1e293b), 0, WH / 2, zMin + wThick / 2),
         storeAt(storeWall(W, WH, wThick, 0x1e293b), 0, WH / 2, zMax - wThick / 2),
@@ -7727,43 +7756,107 @@
         storeAt(storeWall(wThick, WH, D, 0x1e293b), xMax - wThick / 2, WH / 2, 0)
       );
 
-      // โถงเปิดช่องลิฟต์ส่งของชั้น 2
-      const liftShaft = storeBox(5.2, WH, 7.5, 0x334155, 0.25);
-      liftShaft.position.set(-5.4, WH / 2, -5.25);
-      g.add(liftShaft);
-      const liftDoorF2 = storeBox(2.4, 2.2, 0.1, 0x94a3b8);
-      liftDoorF2.position.set(-5.4, 1.1, -1.5);
-      g.add(liftDoorF2);
-      L.push({ text: '🛗 ลิฟต์ส่งของ (ชั้น 2)', pos: V(-5.4, 2.2, -1.5), cls: 'int-label sub-tag' });
+      // 3. กำแพงกั้นห้องภายในชั้น 2
+      // (A) กำแพงแบ่ง คลังเก็บยาขนาดใหญ่ (X = -8.0) ตลอดแนว พร้อมประตูที่ Z = 5.5
+      g.add(
+        storeAt(storeWall(wThick, WH, 13.8, 0x1e293b), -8.0 + wThick / 2, WH / 2, -2.1),
+        storeAt(storeWall(wThick, 0.4, 1.4, 0x1e293b), -8.0 + wThick / 2, WH - 0.2, 5.5),
+        storeAt(storeWall(wThick, WH, 2.8, 0x1e293b), -8.0 + wThick / 2, WH / 2, 7.6)
+      );
+      storeDoor(-8.0 + wThick / 2, 5.5, 0.45, 1.4, 0.35);
+      L.push(maintTag('🚪 ประตู', V(-8.0 + 0.35, 1.45, 5.5), 'room', null, 'ประตูเข้าคลังเก็บยาขนาดใหญ่ (ชั้น 2)'));
 
-      // ช่องเปิดบันไดขึ้นมาจากชั้น 1
-      const stairOpening = storeBox(6.5, 0.1, 3.5, 0x0f172a);
-      stairOpening.position.set(12.75, 0.05, 7.25);
-      const stairRail = storeBox(6.5, 0.9, 0.08, 0x94a3b8);
-      stairRail.position.set(12.75, 0.45, 5.5);
-      g.add(stairOpening, stairRail);
-      L.push({ text: '🪜 ทางลงบันไดไปชั้น 1', pos: V(12.75, 1.6, 7.25), cls: 'int-label sub-tag' });
+      // (B) กำแพงแนวนอนแบ่ง คลังเก็บพัสดุอุปกรณ์ (Z = +3.0) พร้อมประตูกลาง
+      g.add(
+        storeAt(storeWall(10.5, WH, wThick, 0x1e293b), -2.75, WH / 2, 3.0),
+        storeAt(storeWall(2.0, 0.4, wThick, 0x1e293b), 3.5, WH - 0.2, 3.0),
+        storeAt(storeWall(11.5, WH, wThick, 0x1e293b), 10.25, WH / 2, 3.0)
+      );
+      storeDoor(3.5, 3.0, 1.8, 0.45, 0.3);
+      L.push(maintTag('🚪 ประตู', V(3.5, 1.45, 3.0), 'room', null, 'ประตูเข้าคลังเก็บพัสดุอุปกรณ์โรงพยาบาล'));
 
+      // 4. เฟอร์นิเจอร์และอุปกรณ์ใน คลังเก็บยาขนาดใหญ่ (ชั้น 2)
+      L.push({ text: '💊 คลังเก็บยาขนาดใหญ่ (ชั้น 2)', pos: V(-12.0, 2.2, 0.0), cls: 'int-label zone-pcu' });
+      L.push({ text: '🌡️ คลังยา: 22.0°C / 52% RH', pos: V(-12.0, 2.3, -8.8), cls: 'int-label sub-tag' });
+      makePalletRack(-14.2, -4.5, 6.5, 0x0284c7);
+      makePalletRack(-14.2, 3.5, 6.5, 0x0284c7);
+      makePalletRack(-9.8, -4.5, 6.5, 0xd97706);
+      makePalletRack(-9.8, 1.5, 4.0, 0xd97706);
+      const palletF2 = storeBox(1.2, 0.12, 1.2, 0x92400e);
+      palletF2.position.set(-12.0, 0.06, -5.0);
+      const boxOnPalletF2 = storeBox(1.1, 0.8, 1.1, 0xd97706);
+      boxOnPalletF2.position.set(-12.0, 0.52, -5.0);
+      g.add(palletF2, boxOnPalletF2);
+
+      // 5. เฟอร์นิเจอร์และอุปกรณ์ใน คลังเก็บพัสดุอุปกรณ์ของคลังพัสดุโรงพยาบาล
       L.push({
-        text: '🏗️ พื้นที่ชั้น 2 (รอดำเนินการหลังจากชั้น 1 เสร็จสิ้นตามคำขอ)',
-        pos: V(0, 2.2, 0),
+        text: '📦 คลังเก็บพัสดุอุปกรณ์ของคลังพัสดุโรงพยาบาล',
+        pos: V(4.0, 2.2, -3.0),
         cls: 'int-label zone-pcu'
       });
+      // แถวชั้นวางพัสดุและครุภัณฑ์โรงพยาบาล
+      makePalletRack(-1.0, -5.5, 5.5, 0x475569);
+      makePalletRack(3.5, -5.5, 5.5, 0x475569);
+      makePalletRack(8.0, -5.5, 5.5, 0x475569);
+      makePalletRack(12.5, -5.5, 5.5, 0x475569);
+      makePalletRack(-1.0, 0.5, 3.5, 0x0284c7);
+      makePalletRack(12.5, 0.5, 3.5, 0x0284c7);
+
+      // กองพาเลทและกล่องครุภัณฑ์ขนาดใหญ่
+      [6.0, 8.5].forEach((px, idx) => {
+        const pal = storeBox(1.3, 0.12, 1.3, 0x92400e);
+        pal.position.set(px, 0.06, 0.5);
+        const pBox = storeBox(1.2, 0.9, 1.2, idx === 0 ? 0xd97706 : 0x0284c7);
+        pBox.position.set(px, 0.57, 0.5);
+        g.add(pal, pBox);
+      });
+
+      // ลิฟต์ส่งของ (เชื่อมต่อเปิดเข้าสู่คลังพัสดุชั้น 2)
+      const liftShaftF2 = storeBox(5.2, WH, 0.1, 0x1e293b);
+      liftShaftF2.position.set(-5.4, WH / 2, -1.5);
+      const liftDoorSteelF2 = storeBox(2.4, 2.2, 0.08, 0x334155);
+      liftDoorSteelF2.position.set(-5.4, 1.1, -1.45);
+      const liftHazardF2 = storeBox(2.6, 0.04, 0.35, 0xfacc15);
+      liftHazardF2.position.set(-5.4, 0.02, -1.25);
+      g.add(liftShaftF2, liftDoorSteelF2, liftHazardF2);
+      L.push({ text: '🛗 ลิฟต์ส่งของ (ชั้น 2)', pos: V(-5.4, 2.2, -1.45), cls: 'int-label sub-tag' });
+
+      // 6. โถงทางเดินด้านล่าง และ บันไดลงชั้น 1
+      L.push({ text: '🚶 โถงทางเดินขนส่งพัสดุชั้น 2', pos: V(0.0, 1.5, 6.0), cls: 'int-label sub-tag' });
+      // บันไดลงชั้น 1 (ขวาล่าง)
+      const stairOpening = storeBox(6.5, 0.08, 3.5, 0x0f172a);
+      stairOpening.position.set(12.75, 0.04, 7.25);
+      const stairRailTop = storeBox(6.5, 0.9, 0.08, 0x94a3b8);
+      stairRailTop.position.set(12.75, 0.45, 5.5);
+      const stairRailLeft = storeBox(0.08, 0.9, 3.5, 0x94a3b8);
+      stairRailLeft.position.set(9.5, 0.45, 7.25);
+      g.add(stairOpening, stairRailTop, stairRailLeft);
+
+      // ขั้นบันไดลง
+      for (let st = 0; st < 10; st++) {
+        const step = storeBox(0.55, 0.18, 2.6, 0x475569);
+        step.position.set(10.2 + st * 0.52, (9 - st) * 0.18 + 0.09, 7.25);
+        g.add(step);
+      }
+      L.push({ text: '🪜 บันไดลงชั้น 1 ➔', pos: V(12.75, 1.6, 7.25), cls: 'int-label sub-tag' });
 
       const itemsF2 = [
-        ['🏢', 'อาคารพัสดุ - ชั้น 2', 'พื้นที่โล่งโครงสร้างอาคาร (รอแผนผังรายละเอียดจากผู้ใช้งาน)'],
-        ['🛗', 'ลิฟต์ส่งของ (Freight Lift)', 'เชื่อมต่อชั้น 1-2 รองรับน้ำหนัก 1,500 กิโลกรัม'],
-        ['🪜', 'ช่องบันไดขึ้น-ลง', 'เชื่อมต่อลงไปยังชั้น 1']
+        ['🏢', 'อาคารพัสดุ - ชั้น 2', 'คลังเก็บพัสดุอุปกรณ์ของคลังพัสดุโรงพยาบาล, คลังเก็บยาขนาดใหญ่, โถงทางเดินและบันได'],
+        ['📦', 'คลังเก็บพัสดุอุปกรณ์ของคลังพัสดุโรงพยาบาล', 'ชั้นวางพัสดุและครุภัณฑ์ 6 แถวใหญ่, พาเลท, ลังอุปกรณ์, ลิฟต์ส่งของ'],
+        ['💊', 'คลังเก็บยาขนาดใหญ่ (ชั้น 2)', 'ชั้นวางพาเลทเหล็กยาและเวชภัณฑ์, เซ็นเซอร์ตรวจวัดอุณหภูมิ'],
+        ['🛗', 'ลิฟต์ส่งของ (Freight Lift 1,500 kg)', 'เปิดเข้าสู่คลังเก็บพัสดุอุปกรณ์ เชื่อมต่อระหว่างชั้น 1-2', 'store-lift', storeState.liftRunning ? 'busy' : 'free'],
+        ['🪜', 'บันไดลงชั้น 1', 'บันไดเชื่อมต่อไปยังชั้น 1'],
+        ['🚪', 'ประตูห้องและทางเข้าภายในชั้น 2', '2 บาน ตามผัง']
       ];
 
       return {
         group: g,
         labels: L,
-        title: 'อาคารพัสดุ - ชั้น 2 (รอดำเนินการ)',
-        sub: 'พื้นที่ชั้น 2: โครงสร้างอาคารพร้อมช่องลิฟต์ส่งของและบันได (รอดำเนินการจัดสรรห้องหลังจากชั้น 1 เสร็จสิ้น)',
+        title: 'อาคารพัสดุ - ชั้น 2 (คลังเก็บพัสดุอุปกรณ์ • คลังยา)',
+        sub: 'ผังชั้น 2: คลังเก็บพัสดุอุปกรณ์ของคลังพัสดุโรงพยาบาล • คลังเก็บยาขนาดใหญ่ • โถงทางเดินขนส่ง • ลิฟต์ส่งของ • บันไดลงชั้น 1',
         floors: [
-          { num: 1, label: 'ชั้น 1 (คลังยา • สนง.พัสดุ • ลิฟต์ส่งของ)' },
-          { num: 2, label: 'ชั้น 2 (รอดำเนินการ)' }
+          { num: 1, label: 'ชั้น 1 (คลังยา • สนง.พัสดุ • โต๊ะกลมนั่งรอ)' },
+          { num: 2, label: 'ชั้น 2 (คลังเก็บพัสดุอุปกรณ์ • คลังยา)' }
         ],
         currentFloor: 2,
         onSelectFloor: (f) => {
@@ -7775,22 +7868,23 @@
     }
 
     // =========================================================================
-    // FLOOR 1 (ตามแผนผังที่ผู้ใช้มอบหมายอย่างแม่นยำ)
+    // FLOOR 1: ปรับตามคำสั่งผู้ใช้งาน
+    // 1. เอาทางเดินออกเเล้วเอากำแพงมาเเทน
+    // 2. เครื่องถ่ายเอกสาร อยู่ด้านนอกติดประตูทางเข้า
+    // 3. โต๊ะคอมพัสดุ 3 ขยับขึ้นไปชิดกำแพง
+    // 4. โต๊ะคอม 1 ชิดกำแพงซ้าย
+    // 5. โต๊ะคอม 2 เลื่อนไปบนจัดให้อยู่ตรงกลาง
+    // 6. โต๊ะคอม 5 กับ 6 ขยับขึ้นไปอีก
+    // 7. โต๊ะประชุมเปลี่ยนเป็นโต๊ะกลมนั่งรอพัสดุ
     // =========================================================================
 
     // --- 1. พื้นแยกโซน ---
-    // คลังเก็บยาขนาดใหญ่ (ซ้ายสุด)
-    floor(g, 8.0, 18.0, '#e2e8f0', '#94a3b8', 1.0, -12.0, 0.0);
-    // ลิฟต์ส่งของ
-    floor(g, 5.2, 7.5, '#475569', '#334155', 0.8, -5.4, -5.25);
-    // ห้องหัวหน้าพัสดุ (ขวาบน)
-    floor(g, 8.0, 7.5, '#fef3c7', '#fde68a', 0.6, 12.0, -5.25);
-    // ห้องน้ำ (ขวากลาง)
-    floor(g, 6.5, 6.0, '#ecfdf5', '#a7f3d0', 0.5, 12.75, 2.5);
-    // โซนบันได (ขวาล่าง)
-    floor(g, 6.5, 3.5, '#f1f5f9', '#cbd5e1', 0.5, 12.75, 7.25);
-    // สำนักงานพัสดุกลาง
-    floor(g, 17.5, 18.0, '#f8fafc', '#cbd5e1', 0.8, 0.75, 0.0);
+    floor(g, 8.0, 18.0, '#e2e8f0', '#94a3b8', 1.0, -12.0, 0.0);    // คลังเก็บยาขนาดใหญ่ (ซ้ายสุด)
+    floor(g, 5.2, 7.5, '#475569', '#334155', 0.8, -5.4, -5.25);    // ลิฟต์ส่งของ
+    floor(g, 8.0, 7.5, '#fef3c7', '#fde68a', 0.6, 12.0, -5.25);    // ห้องหัวหน้าพัสดุ (ขวาบน)
+    floor(g, 6.5, 6.0, '#ecfdf5', '#a7f3d0', 0.5, 12.75, 2.5);     // ห้องน้ำ (ขวากลาง)
+    floor(g, 6.5, 3.5, '#f1f5f9', '#cbd5e1', 0.5, 12.75, 7.25);    // โซนบันได (ขวาล่าง)
+    floor(g, 17.5, 18.0, '#f8fafc', '#cbd5e1', 0.8, 0.75, 0.0);   // สำนักงานพัสดุและโถงทางเข้า
 
     // --- 2. กำแพงรอบนอก (Exterior Walls) ---
     g.add(
@@ -7817,7 +7911,7 @@
     g.add(cargoDoorL, cargoDoorR, cargoWinL, cargoWinR);
     L.push(maintTag('🚪 ประตูยาว', V(5.5, 1.6, zMax), 'room', null, 'ประตูรับ-ส่งของขนาดใหญ่ (ประตูยาว)'));
 
-    // --- 3. กำแพงกั้นห้องภายใน ---
+    // --- 3. กำแพงกั้นห้องภายในชั้น 1 (เอากำแพงมากั้นแทนทางเดินเดิม) ---
     // (A) กำแพงแบ่ง คลังเก็บยาขนาดใหญ่ (X = -8.0) พร้อมประตูที่ Z = 6.0
     g.add(
       storeAt(storeWall(wThick, WH, 14.0, 0x1e293b), -8.0 + wThick / 2, WH / 2, -2.0),
@@ -7829,14 +7923,11 @@
 
     // (B) กำแพงห้องลิฟต์ส่งของ (X: -8.0 .. -2.8, Z: -9.0 .. -1.5)
     g.add(
-      // กำแพงฝั่งตะวันออกของลิฟต์ (X = -2.8)
       storeAt(storeWall(wThick, WH, 7.5, 0x1e293b), -2.8 - wThick / 2, WH / 2, -5.25),
-      // กำแพงล่างของลิฟต์ (Z = -1.5) พร้อมช่องประตูลิฟต์ขนาดใหญ่
       storeAt(storeWall(1.3, WH, wThick, 0x1e293b), -7.35, WH / 2, -1.5),
       storeAt(storeWall(2.6, 0.4, wThick, 0x1e293b), -5.4, WH - 0.2, -1.5),
       storeAt(storeWall(1.3, WH, wThick, 0x1e293b), -3.45, WH / 2, -1.5)
     );
-    // ประตูลิฟต์ส่งของเหล็กหนาพร้อมแถบสีเหลือง-ดำ
     const liftDoorSteel = storeBox(2.5, 2.3, 0.08, 0x334155);
     liftDoorSteel.position.set(-5.4, 1.15, -1.5);
     const liftHazardPad = storeBox(2.6, 0.04, 0.4, 0xfacc15);
@@ -7851,9 +7942,7 @@
 
     // (C) กำแพงห้องหัวหน้าพัสดุ (X: 8.0 .. 16.0, Z: -9.0 .. -1.5)
     g.add(
-      // กำแพงล่าง (Z = -1.5)
       storeAt(storeWall(8.0, WH, wThick, 0x1e293b), 12.0, WH / 2, -1.5),
-      // กำแพงซ้าย (X = 8.0) พร้อมประตูที่ Z = -3.8
       storeAt(storeWall(wThick, WH, 4.4, 0x1e293b), 8.0 - wThick / 2, WH / 2, -6.8),
       storeAt(storeWall(wThick, 0.4, 1.2, 0x1e293b), 8.0 - wThick / 2, WH - 0.2, -3.8),
       storeAt(storeWall(wThick, WH, 1.9, 0x1e293b), 8.0 - wThick / 2, WH / 2, -2.45)
@@ -7863,11 +7952,8 @@
 
     // (D) กำแพงห้องน้ำ (X: 9.5 .. 16.0, Z: -0.5 .. +5.5)
     g.add(
-      // กำแพงบนห้องน้ำ (Z = -0.5)
       storeAt(storeWall(6.5, WH, wThick, 0x1e293b), 12.75, WH / 2, -0.5),
-      // กำแพงล่างห้องน้ำ (Z = +5.5)
       storeAt(storeWall(6.5, WH, wThick, 0x1e293b), 12.75, WH / 2, 5.5),
-      // กำแพงซ้ายห้องน้ำ (X = 9.5) พร้อมประตูที่ Z = 2.5
       storeAt(storeWall(wThick, WH, 2.4, 0x1e293b), 9.5 - wThick / 2, WH / 2, 0.7),
       storeAt(storeWall(wThick, 0.4, 1.2, 0x1e293b), 9.5 - wThick / 2, WH - 0.2, 2.5),
       storeAt(storeWall(wThick, WH, 2.4, 0x1e293b), 9.5 - wThick / 2, WH / 2, 4.3)
@@ -7875,67 +7961,38 @@
     storeDoor(9.5 - wThick / 2, 2.5, 0.45, 1.2, 0.35);
     L.push(maintTag('🚪 ประตู', V(9.5 - 0.35, 1.45, 2.5), 'room', null, 'ประตูห้องน้ำ'));
 
-    // (E) กำแพงและประตูกั้นโถงพัสดุ (Z = 5.2)
+    // (E) กำแพงกั้นสำนักงานพัสดุ (สร้างกำแพงกั้นห้องแทนทางเดินเดิม)
+    // 1. กำแพงแนวนอนใต้สำนักงานพัสดุ (Z = 4.2) กั้นระหว่าง สนง.พัสดุ กับ โถงรับส่งของด้านนอก
     g.add(
-      storeAt(storeWall(0.7, WH, wThick, 0x1e293b), 5.35, WH / 2, 5.2),
-      storeAt(storeWall(1.2, 0.4, wThick, 0x1e293b), 6.3, WH - 0.2, 5.2),
-      storeAt(storeWall(2.3, WH, wThick, 0x1e293b), 8.05, WH / 2, 5.2)
+      storeAt(storeWall(5.0, WH, wThick, 0x1e293b), -0.3, WH / 2, 4.2),
+      storeAt(storeWall(1.4, 0.4, wThick, 0x1e293b), 2.9, WH - 0.2, 4.2),
+      storeAt(storeWall(4.4, WH, wThick, 0x1e293b), 5.8, WH / 2, 4.2)
     );
-    storeDoor(6.3, 5.2, 1.2, 0.45, 0.3);
-    L.push(maintTag('🚪 ประตู', V(6.3, 1.45, 5.2), 'room', null, 'ประตูกั้นโถงพัสดุ'));
+    storeDoor(2.9, 4.2, 1.3, 0.45, 0.3);
+    L.push(maintTag('🚪 ประตู', V(2.9, 1.45, 4.2), 'room', null, 'ประตูกั้นสำนักงานพัสดุ'));
 
-    // --- 4. ทางเดินสีฟ้าแบบตึก ER (ตามเส้นสีฟ้าในแผนผัง) ---
-    // เส้นทางเดินสีฟ้า 5 ช่วง เชื่อมต่อต่อเนื่อง
-    walkwayStrip(g, -2.5, 2.0, 7.2, 1.35, Math.PI / 2);     // ดิ่งลงมาจากข้างลิฟต์
-    walkwayStrip(g, 3.2, 5.2, 12.0, 1.35, 0);              // แนวนอนผ่านหน้าเครื่องถ่ายเอกสารและลอดประตู
-    walkwayStrip(g, 9.2, 2.35, 6.0, 1.35, Math.PI / 2);     // ดิ่งขึ้นเลียบชั้นเก็บของแนวตั้ง
-    walkwayStrip(g, 11.2, -0.6, 4.5, 1.35, 0);             // แนวนอนเข้าหน้าห้องน้ำ
-    walkwayStrip(g, 9.2, 7.25, 4.0, 1.35, Math.PI / 2);     // สาขาลงสู่บันไดขึ้นชั้น 2
+    // 2. กำแพงแนวตั้งกั้นโถงบันไดและห้องน้ำ (X = 8.0) จาก Z = -1.5 ถึง Z = 4.2
+    g.add(
+      storeAt(storeWall(wThick, WH, 2.2, 0x1e293b), 8.0 - wThick / 2, WH / 2, -0.4),
+      storeAt(storeWall(wThick, 0.4, 1.2, 0x1e293b), 8.0 - wThick / 2, WH - 0.2, 1.3),
+      storeAt(storeWall(wThick, WH, 2.3, 0x1e293b), 8.0 - wThick / 2, WH / 2, 3.05)
+    );
+    storeDoor(8.0 - wThick / 2, 1.3, 0.45, 1.2, 0.35);
+    L.push(maintTag('🚪 ประตู', V(8.0 - 0.35, 1.45, 1.3), 'room', null, 'ประตูออกสู่โถงบันไดและห้องน้ำ'));
 
-    // --- 5. คลังเก็บยาขนาดใหญ่ (เฟอร์นิเจอร์และอุปกรณ์) ---
+    // --- 4. คลังเก็บยาขนาดใหญ่ (เฟอร์นิเจอร์) ---
     L.push({ text: '💊 คลังเก็บยาขนาดใหญ่', pos: V(-12.0, 2.2, 0.0), cls: 'int-label zone-pcu' });
     L.push({ text: '🌡️ คลังยา: 22.5°C / 55% RH', pos: V(-12.0, 2.3, -8.8), cls: 'int-label sub-tag' });
-
-    // ชั้นวางพาเลทเหล็กขนาดใหญ่ (Heavy-Duty Pallet Racks)
-    function makePalletRack(x, z, d, color) {
-      const rack = new THREE.Group();
-      rack.position.set(x, 0, z);
-      // เสาเหล็ก 4 มุม
-      [-0.55, 0.55].forEach((ox) => {
-        [-d / 2, d / 2].forEach((oz) => {
-          const col = storeBox(0.08, 2.5, 0.08, color);
-          col.position.set(ox, 1.25, oz);
-          rack.add(col);
-        });
-      });
-      // คานชั้นวาง 3 ชั้น
-      [0.6, 1.4, 2.2].forEach((h) => {
-        const shelfBeam = storeBox(1.2, 0.08, d, color);
-        shelfBeam.position.set(0, h, 0);
-        rack.add(shelfBeam);
-        // ลังยาและเวชภัณฑ์บนชั้น
-        for (let sz = -d / 2 + 0.6; sz < d / 2; sz += 1.2) {
-          const boxMat = Math.abs(Math.sin(sz + h)) > 0.5 ? 0xd97706 : 0x0284c7;
-          const medBox = storeBox(0.95, 0.45, 0.85, boxMat);
-          medBox.position.set(0, h + 0.265, sz);
-          rack.add(medBox);
-        }
-      });
-      g.add(rack);
-    }
     makePalletRack(-14.2, -4.5, 6.5, 0x0284c7);
     makePalletRack(-14.2, 3.5, 6.5, 0x0284c7);
     makePalletRack(-9.8, -4.5, 6.5, 0xd97706);
     makePalletRack(-9.8, 1.5, 4.0, 0xd97706);
-
-    // พาเลทไม้และกองลังยาบนพื้น
     const pallet1 = storeBox(1.2, 0.12, 1.2, 0x92400e);
     pallet1.position.set(-12.0, 0.06, -5.0);
     const boxOnPallet1 = storeBox(1.1, 0.8, 1.1, 0xd97706);
     boxOnPallet1.position.set(-12.0, 0.52, -5.0);
     g.add(pallet1, boxOnPallet1);
 
-    // รถลากพาเลท (Hand Pallet Jack) สีเหลือง
     const jackGroup = new THREE.Group();
     jackGroup.position.set(-12.0, 0, 5.5);
     const jackForkL = storeBox(0.16, 0.08, 1.1, 0xfacc15);
@@ -7949,28 +8006,25 @@
     jackGroup.add(jackForkL, jackForkR, jackHead, jackHandle);
     g.add(jackGroup);
 
-    // --- 6. ห้องหัวหน้าพัสดุ (เฟอร์นิเจอร์) ---
+    // --- 5. ห้องหัวหน้าพัสดุ (เฟอร์นิเจอร์) ---
     L.push({
       text: `👔 ห้องหัวหน้าพัสดุ (${storeState.headOccupied ? '🔴 ติดภารกิจ' : '🟢 ว่าง พร้อมติดต่อ'})`,
       pos: V(12.0, 2.2, -5.25),
       cls: `int-label ${storeState.headOccupied ? 'busy' : 'free'} toggleable`,
       toggleId: 'store-head'
     });
-    // โต๊ะทำงานหัวหน้า (PC-STORE-04)
     createStorePcDesk(12.5, -6.5, Math.PI, STORE_PC_SPECS[3], '🖥️ PC-STORE-04: โต๊ะคอมหัวหน้าพัสดุ', { role: 'doctor', shirtColor: 0x1e293b });
-    // เก้าอี้รับรองแขก 2 ตัว
     const vChair1 = storeBox(0.44, 0.45, 0.44, 0x334155);
     vChair1.position.set(11.8, 0.225, -5.3);
     const vChair2 = storeBox(0.44, 0.45, 0.44, 0x334155);
     vChair2.position.set(13.2, 0.225, -5.3);
-    // ตู้เอกสารผู้บริหารชิดผนัง
     const headCab = storeBox(2.4, 1.8, 0.55, 0x92400e);
     headCab.position.set(12.0, 0.9, -8.65);
     const headSofa = storeBox(2.0, 0.65, 0.85, 0x334155);
     headSofa.position.set(9.5, 0.325, -3.5);
     g.add(vChair1, vChair2, headCab, headSofa);
 
-    // --- 7. ห้องน้ำ (สุขภัณฑ์) ---
+    // --- 6. ห้องน้ำ ---
     L.push({ text: '🚻 ห้องน้ำ', pos: V(12.75, 2.2, 2.5), cls: 'int-label room-title' });
     const toilet1 = storeBox(0.45, 0.45, 0.65, 0xffffff);
     toilet1.position.set(14.8, 0.225, 0.8);
@@ -7984,10 +8038,9 @@
     wash2.position.set(11.0, 0.4, 4.75);
     g.add(toilet1, toilet2, tPartition, wash1, wash2);
 
-    // --- 8. บันไดขึ้นชั้น 2 ---
+    // --- 7. บันไดขึ้นชั้น 2 ---
     L.push({ text: '🪜 บันไดขึ้นชั้น 2 ➔', pos: V(12.75, 1.6, 7.25), cls: 'int-label sub-tag' });
-    const stairSteps = 10;
-    for (let st = 0; st < stairSteps; st++) {
+    for (let st = 0; st < 10; st++) {
       const step = storeBox(0.55, 0.18, 2.6, 0x475569);
       step.position.set(10.2 + st * 0.52, st * 0.18 + 0.09, 7.25);
       g.add(step);
@@ -7996,27 +8049,66 @@
     sRail.position.set(12.75, 1.25, 5.8);
     g.add(sRail);
 
-    // --- 9. สำนักงานพัสดุกลาง (โต๊ะคอม, โต๊ะประชุม, เครื่องถ่ายเอกสาร, ชั้นเก็บของ) ---
-    // โต๊ะคอม 1 & โต๊ะคอม 2 (แถวบน)
-    createStorePcDesk(-0.5, -7.5, Math.PI, STORE_PC_SPECS[0], '🖥️ PC-STORE-01: โต๊ะคอมพัสดุ 1', { role: 'nurse', shirtColor: 0x0284c7 });
-    createStorePcDesk(4.0, -7.5, Math.PI, STORE_PC_SPECS[1], '🖥️ PC-STORE-02: โต๊ะคอมพัสดุ 2', { role: 'nurse', shirtColor: 0x0284c7 });
+    // --- 8. สำนักงานพัสดุกลาง (จัดวางตำแหน่งใหม่ตามคำสั่ง) ---
+    // (a) โต๊ะคอม 1: ชิดกำแพงซ้าย (-1.8, -7.5)
+    createStorePcDesk(-1.8, -7.5, Math.PI, STORE_PC_SPECS[0], '🖥️ PC-STORE-01: โต๊ะคอมพัสดุ 1', { role: 'nurse', shirtColor: 0x0284c7 });
 
-    // โต๊ะคอม 3 (ชิดผนังห้องหัวหน้า หันหน้าไปทางซ้าย)
-    createStorePcDesk(6.8, -4.5, -Math.PI / 2, STORE_PC_SPECS[2], '🖥️ PC-STORE-03: โต๊ะคอมพัสดุ 3', { role: 'nurse', shirtColor: 0x0284c7 });
+    // (b) โต๊ะคอม 2: เลื่อนไปบนจัดให้อยู่ตรงกลาง (2.5, -7.5)
+    createStorePcDesk(2.5, -7.5, Math.PI, STORE_PC_SPECS[1], '🖥️ PC-STORE-02: โต๊ะคอมพัสดุ 2', { role: 'nurse', shirtColor: 0x0284c7 });
 
-    // โต๊ะคอม 6 & โต๊ะคอม 5 (แนวตั้งกลางห้อง)
-    createStorePcDesk(-1.2, 0.5, Math.PI / 2, STORE_PC_SPECS[5], '🖥️ PC-STORE-06: โต๊ะคอมพัสดุ 6', { role: 'nurse', shirtColor: 0x0284c7 });
-    createStorePcDesk(2.2, 0.5, -Math.PI / 2, STORE_PC_SPECS[4], '🖥️ PC-STORE-05: โต๊ะคอมพัสดุ 5', { role: 'nurse', shirtColor: 0x0284c7 });
+    // (c) โต๊ะคอมพัสดุ 3: ขยับขึ้นไปชิดกำแพง (6.8, -7.5)
+    createStorePcDesk(6.8, -7.5, Math.PI, STORE_PC_SPECS[2], '🖥️ PC-STORE-03: โต๊ะคอมพัสดุ 3', { role: 'nurse', shirtColor: 0x0284c7 });
 
-    // ชั้นเก็บของ (แนวนอน: ใต้โต๊ะคอม 5-6)
+    // (d) โต๊ะคอม 5 กับ 6 ขยับขึ้นไปอีก
+    createStorePcDesk(-1.2, -3.8, Math.PI / 2, STORE_PC_SPECS[5], '🖥️ PC-STORE-06: โต๊ะคอมพัสดุ 6', { role: 'nurse', shirtColor: 0x0284c7 });
+    createStorePcDesk(2.2, -3.8, -Math.PI / 2, STORE_PC_SPECS[4], '🖥️ PC-STORE-05: โต๊ะคอมพัสดุ 5', { role: 'nurse', shirtColor: 0x0284c7 });
+
+    // ชั้นเก็บของ แนวนอน (ใต้โต๊ะคอม 5-6)
     const shelfHoriz = storeBox(5.4, 1.8, 0.8, 0x475569);
-    shelfHoriz.position.set(0.5, 0.9, 2.8);
+    shelfHoriz.position.set(0.5, 0.9, -1.2);
     g.add(shelfHoriz);
-    L.push({ text: '🗄️ ชั้นเก็บของ', pos: V(0.5, 1.8, 2.8), cls: 'int-label sub-tag' });
+    L.push({ text: '🗄️ ชั้นเก็บของ', pos: V(0.5, 1.8, -1.2), cls: 'int-label sub-tag' });
 
-    // เครื่องถ่ายเอกสาร (ใต้ชั้นเก็บของ)
+    // ชั้นเก็บของ แนวตั้ง (ทางขวาของโถงสำนักงาน)
+    const shelfVert = storeBox(0.8, 1.8, 3.2, 0x475569);
+    shelfVert.position.set(7.4, 0.9, 1.8);
+    g.add(shelfVert);
+    L.push({ text: '🗄️ ชั้นเก็บของ', pos: V(7.4, 1.8, 1.8), cls: 'int-label sub-tag' });
+
+    // (e) โต๊ะประชุมเปลี่ยนเป็น "โต๊ะกลมนั่งรอพัสดุ"
+    const roundWaitingGroup = new THREE.Group();
+    roundWaitingGroup.position.set(5.2, 0, 0.5);
+    const roundPedestal = maintCyl(0.2, 0.25, 0.7, 0x64748b, 16);
+    roundPedestal.position.set(0, 0.35, 0);
+    const roundTop = maintCyl(1.0, 1.0, 0.05, 0xd97706, 24);
+    roundTop.position.set(0, 0.725, 0);
+    roundWaitingGroup.add(roundPedestal, roundTop);
+    const chairAngles = [0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2];
+    chairAngles.forEach((ang) => {
+      const cx = Math.cos(ang) * 1.5;
+      const cz = Math.sin(ang) * 1.5;
+      const chSeat = storeBox(0.5, 0.08, 0.5, 0x0284c7);
+      chSeat.position.set(cx, 0.44, cz);
+      const chBack = storeBox(0.48, 0.45, 0.08, 0x0284c7);
+      chBack.position.set(cx * 1.18, 0.68, cz * 1.18);
+      const chLeg = storeBox(0.06, 0.4, 0.06, 0x334155);
+      chLeg.position.set(cx, 0.2, cz);
+      roundWaitingGroup.add(chSeat, chBack, chLeg);
+    });
+    const waitingParcel = storeBox(0.35, 0.2, 0.25, 0xd97706);
+    waitingParcel.position.set(0, 0.85, 0);
+    roundWaitingGroup.add(waitingParcel);
+    g.add(roundWaitingGroup);
+    L.push({
+      text: `🪑 โต๊ะกลมนั่งรอพัสดุ (${storeState.waitingOccupied ? '🔴 มีผู้มารอรับ' : '🟢 ว่าง มีที่นั่ง'})`,
+      pos: V(5.2, 1.8, 0.5),
+      cls: `int-label ${storeState.waitingOccupied ? 'busy' : 'free'} toggleable`,
+      toggleId: 'store-waiting'
+    });
+
+    // (f) เครื่องถ่ายเอกสาร ย้ายไปอยู่ด้านนอกติดประตูทางเข้า
     const copierGroup = new THREE.Group();
-    copierGroup.position.set(1.5, 0, 4.3);
+    copierGroup.position.set(1.5, 0, 7.4);
     const copBody = storeBox(0.9, 0.85, 0.75, 0xe2e8f0);
     copBody.position.set(0, 0.425, 0);
     const copScreen = storeBox(0.2, 0.12, 0.04, 0x38bdf8);
@@ -8029,34 +8121,10 @@
     g.add(copierGroup);
     L.push({
       text: `🖨️ เครื่องถ่ายเอกสาร (${storeState.copierBusy ? '🔴 กำลังพิมพ์' : '🟢 พร้อมใช้งาน'})`,
-      pos: V(1.5, 1.6, 4.3),
+      pos: V(1.5, 1.6, 7.4),
       cls: `int-label ${storeState.copierBusy ? 'busy' : 'free'} toggleable`,
       toggleId: 'store-copier'
     });
-
-    // โต๊ะประชุม (Center-Right)
-    const meetTable = storeBox(2.6, 0.74, 3.8, 0xd97706);
-    meetTable.position.set(5.8, 0.37, 0.5);
-    g.add(meetTable);
-    [-1.2, 0, 1.2].forEach((oz) => {
-      const cL = storeBox(0.44, 0.45, 0.44, 0x334155);
-      cL.position.set(4.0, 0.225, 0.5 + oz);
-      const cR = storeBox(0.44, 0.45, 0.44, 0x334155);
-      cR.position.set(7.6, 0.225, 0.5 + oz);
-      g.add(cL, cR);
-    });
-    L.push({
-      text: `🤝 โต๊ะประชุม (${storeState.meetingOccupied ? '🔴 มีประชุม' : '🟢 ว่าง'})`,
-      pos: V(5.8, 1.9, 0.5),
-      cls: `int-label ${storeState.meetingOccupied ? 'busy' : 'free'} toggleable`,
-      toggleId: 'store-meeting'
-    });
-
-    // ชั้นเก็บของ (แนวตั้ง: ทางขวาของโต๊ะประชุม)
-    const shelfVert = storeBox(0.8, 1.8, 3.6, 0x475569);
-    shelfVert.position.set(8.8, 0.9, 2.8);
-    g.add(shelfVert);
-    L.push({ text: '🗄️ ชั้นเก็บของ', pos: V(8.8, 1.8, 2.8), cls: 'int-label sub-tag' });
 
     const items = [
       ['🏢', 'อาคารพัสดุ - ชั้น 1', 'คลังเก็บยาขนาดใหญ่, สำนักงานพัสดุ, ห้องหัวหน้าพัสดุ, ลิฟต์ส่งของ'],
@@ -8064,29 +8132,28 @@
       ['🛗', 'ลิฟต์ส่งของ (Freight Lift 1,500 kg)', 'ลิฟต์ขนส่งพัสดุ/ยา เชื่อมต่อไปยังชั้น 2', 'store-lift', storeState.liftRunning ? 'busy' : 'free'],
       ['👔', 'ห้องหัวหน้าพัสดุ', '1 ห้อง (โต๊ะทำงานหัวหน้า, ตู้เอกสาร, โซฟารับรอง)', 'store-head', storeState.headOccupied ? 'busy' : 'free'],
       ['🖥️', 'PC-STORE-04: โต๊ะคอมหัวหน้าพัสดุ', 'ดูสเปก', null, 'free', STORE_PC_SPECS[3]],
-      ['🤝', 'โต๊ะประชุมพัสดุ', 'โต๊ะประชุมใหญ่ 6 ที่นั่ง สำหรับประชุมและประสานงานจัดซื้อ', 'store-meeting', storeState.meetingOccupied ? 'busy' : 'free'],
-      ['🖥️', 'PC-STORE-01: โต๊ะคอมพัสดุ 1 (ตรวจรับ)', 'ดูสเปก', null, 'free', STORE_PC_SPECS[0]],
-      ['🖥️', 'PC-STORE-02: โต๊ะคอมพัสดุ 2 (เบิกจ่าย)', 'ดูสเปก', null, 'free', STORE_PC_SPECS[1]],
-      ['🖥️', 'PC-STORE-03: โต๊ะคอมพัสดุ 3 (จัดซื้อ e-GP)', 'ดูสเปก', null, 'free', STORE_PC_SPECS[2]],
-      ['🖥️', 'PC-STORE-05: โต๊ะคอมพัสดุ 5 (ทะเบียนครุภัณฑ์)', 'ดูสเปก', null, 'free', STORE_PC_SPECS[4]],
-      ['🖥️', 'PC-STORE-06: โต๊ะคอมพัสดุ 6 (คลังยา/โลจิสติกส์)', 'ดูสเปก', null, 'free', STORE_PC_SPECS[5]],
-      ['🖨️', 'เครื่องถ่ายเอกสาร & พิมพ์เอกสาร', 'เครื่องถ่ายเอกสารมัลติฟังก์ชันระบบเครือข่าย', 'store-copier', storeState.copierBusy ? 'busy' : 'free'],
-      ['🗄️', 'ชั้นเก็บของ / ตู้เอกสารพัสดุ', '2 จุด (ชั้นแนวนอน และชั้นแนวตั้ง)'],
-      ['🚶', 'ทางเดินสีฟ้าแบบตึก ER', 'เส้นทางเดินเชื่อมต่อคลังยา ลิฟต์ส่งของ โต๊ะประชุม และบันได'],
+      ['🪑', 'โต๊ะกลมนั่งรอพัสดุ', 'โต๊ะกลมพร้อมเก้าอี้พักคอย สำหรับผู้มารอรับพัสดุ/เวชภัณฑ์', 'store-waiting', storeState.waitingOccupied ? 'busy' : 'free'],
+      ['🖥️', 'PC-STORE-01: โต๊ะคอมพัสดุ 1 (ชิดกำแพงซ้าย)', 'ดูสเปก', null, 'free', STORE_PC_SPECS[0]],
+      ['🖥️', 'PC-STORE-02: โต๊ะคอมพัสดุ 2 (ตรงกลางบน)', 'ดูสเปก', null, 'free', STORE_PC_SPECS[1]],
+      ['🖥️', 'PC-STORE-03: โต๊ะคอมพัสดุ 3 (ชิดกำแพงบน)', 'ดูสเปก', null, 'free', STORE_PC_SPECS[2]],
+      ['🖥️', 'PC-STORE-05: โต๊ะคอมพัสดุ 5 (ขยับขึ้น)', 'ดูสเปก', null, 'free', STORE_PC_SPECS[4]],
+      ['🖥️', 'PC-STORE-06: โต๊ะคอมพัสดุ 6 (ขยับขึ้น)', 'ดูสเปก', null, 'free', STORE_PC_SPECS[5]],
+      ['🖨️', 'เครื่องถ่ายเอกสาร', 'ตั้งอยู่ด้านนอก ติดกับประตูทางเข้ารับ-ส่งของ', 'store-copier', storeState.copierBusy ? 'busy' : 'free'],
+      ['🗄️', 'ชั้นเก็บของ / ตู้เอกสารพัสดุ', '2 จุด (ชั้นแนวนอนใต้โต๊ะคอม 5-6 และชั้นแนวตั้ง)'],
       ['🚻', 'ห้องน้ำ', '1 ห้อง (2 ห้องสุขา, 2 อ่างล้างหน้า)'],
       ['🪜', 'บันไดขึ้นชั้น 2', 'บันไดเชื่อมต่อไปยังชั้น 2 พร้อมราวจับ'],
       ['🚪', 'ประตูยาว (Main Cargo Doors)', 'ประตูบานเลื่อนคู่ขนาดใหญ่รับ-ส่งของด้านหน้าอาคาร'],
-      ['🚪', 'ประตูห้องและประตูกั้นภายใน', '4 บาน ตามผัง']
+      ['🚪', 'ประตูห้องและประตูกั้นภายใน', '5 บาน ตามผัง']
     ];
 
     return {
       group: g,
       labels: L,
-      title: 'อาคารพัสดุ - ชั้น 1 (คลังยา • สนง.พัสดุ • ลิฟต์ส่งของ)',
-      sub: 'ผังชั้น 1: คลังเก็บยาขนาดใหญ่ • ลิฟต์ส่งของ 1,500 kg • สนง.พัสดุ (โต๊ะคอม 1-3, 5-6) • ห้องหัวหน้าพัสดุ (โต๊ะคอม 4) • โต๊ะประชุม • เครื่องถ่ายเอกสาร • ทางเดินสีฟ้า • ห้องน้ำ • บันไดขึ้นชั้น 2',
+      title: 'อาคารพัสดุ - ชั้น 1 (คลังยา • สนง.พัสดุ • โต๊ะกลมนั่งรอ)',
+      sub: 'ผังชั้น 1: คลังเก็บยาขนาดใหญ่ • สนง.พัสดุ (โต๊ะคอม 1-3, 5-6) • โต๊ะกลมนั่งรอพัสดุ • ห้องหัวหน้าพัสดุ (โต๊ะคอม 4) • เครื่องถ่ายเอกสารติดประตูเข้า • กำแพงกั้นห้อง • ห้องน้ำ • บันไดขึ้นชั้น 2',
       floors: [
-        { num: 1, label: 'ชั้น 1 (คลังยา • สนง.พัสดุ • ลิฟต์ส่งของ)' },
-        { num: 2, label: 'ชั้น 2 (รอดำเนินการ)' }
+        { num: 1, label: 'ชั้น 1 (คลังยา • สนง.พัสดุ • โต๊ะกลมนั่งรอ)' },
+        { num: 2, label: 'ชั้น 2 (คลังเก็บพัสดุอุปกรณ์ • คลังยา)' }
       ],
       currentFloor: storeState.currentFloor,
       onSelectFloor: (f) => {
@@ -8126,8 +8193,8 @@
         storeState.headOccupied = !storeState.headOccupied;
         return true;
       }
-      if (id === 'store-meeting') {
-        storeState.meetingOccupied = !storeState.meetingOccupied;
+      if (id === 'store-waiting' || id === 'store-meeting') {
+        storeState.waitingOccupied = !storeState.waitingOccupied;
         return true;
       }
       if (id === 'store-copier') {
