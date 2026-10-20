@@ -645,9 +645,29 @@
     listEl.innerHTML = '';
     data.items.forEach(it => {
       const li = document.createElement('li');
-      const toggleId = it[3];
-      const badgeCls = it[4] || '';
-      const pcInfo = it[5] || null;
+      let icon = '📌';
+      let title = '';
+      let status = '';
+      let toggleId = null;
+      let badgeCls = '';
+      let pcInfo = null;
+
+      if (Array.isArray(it)) {
+        icon = it[0] || '📌';
+        title = it[1] || '';
+        status = it[2] || '';
+        toggleId = it[3] || null;
+        badgeCls = it[4] || '';
+        pcInfo = it[5] || null;
+      } else if (typeof it === 'object' && it !== null) {
+        icon = it.icon || (it.name && it.name.includes('คอม') ? '🖥️' : (it.name && it.name.includes('ห้อง') ? '🚪' : '📌'));
+        title = it.name || it.title || '';
+        status = it.status || '';
+        toggleId = it.toggleId || it.id || null;
+        badgeCls = it.badgeCls || (status.includes('🔴') || status.includes('ไม่ว่าง') || status.includes('ตรวจ') || status.includes('ประชุม') ? 'busy' : 'free');
+        pcInfo = it.pcInfo || null;
+      }
+
       if (toggleId) {
         li.className = 'clickable';
         li.title = 'คลิกเพื่อสลับสถานะ ว่าง / ไม่ว่าง';
@@ -663,7 +683,7 @@
           showPcModal(pcInfo);
         };
       }
-      li.innerHTML = `<span class="e">${it[0]}</span><span class="t">${it[1]}</span><span class="q ${badgeCls}">${it[2]}</span>`;
+      li.innerHTML = `<span class="e">${icon}</span><span class="t">${title}</span><span class="q ${badgeCls}">${status}</span>`;
       listEl.appendChild(li);
     });
 

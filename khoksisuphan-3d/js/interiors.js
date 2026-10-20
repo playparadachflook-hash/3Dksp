@@ -4216,30 +4216,35 @@
     );
 
     // ข้อมูลช่องบริการ 1–4 (เรียงจากล่างขึ้นบน หรือ ช่อง 1 หน้าสุด ถึง ช่อง 4 ในสุด)
+    const pcSpec1 = makePharPcSpec(1, 'เคาน์เตอร์ช่อง 1', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก');
+    const pcSpec2 = makePharPcSpec(2, 'เคาน์เตอร์ช่อง 2', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก');
+    const pcSpec3 = makePharPcSpec(3, 'เคาน์เตอร์ช่อง 3', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก');
+    const pcSpec4 = makePharPcSpec(4, 'เคาน์เตอร์ช่อง 4', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก');
+
     const pharStations = [
       {
         num: 4,
         z: -5.475,
         color: 0x10b981,
-        spec: makePharPcSpec(4, 'เคาน์เตอร์ช่อง 4', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก')
+        spec: pcSpec4
       },
       {
         num: 3,
         z: -2.025,
         color: 0x0284c7,
-        spec: makePharPcSpec(3, 'เคาน์เตอร์ช่อง 3', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก')
+        spec: pcSpec3
       },
       {
         num: 2,
         z: 1.425,
         color: 0x2563eb,
-        spec: makePharPcSpec(2, 'เคาน์เตอร์ช่อง 2', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก')
+        spec: pcSpec2
       },
       {
         num: 1,
         z: 4.875,
         color: 0x7c3aed,
-        spec: makePharPcSpec(1, 'เคาน์เตอร์ช่อง 1', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก')
+        spec: pcSpec1
       }
     ];
 
@@ -9726,19 +9731,19 @@ function buildOpdInterior(b) {
       toggleId: 'opd-director'
     });
 
-    // Build items list for interior panel
+    // Build items list for interior panel (Array schema for KSS.app.js)
     const itemsList = [
-      { id: 'opd-exam-1', name: 'ห้องตรวจ 1 (นพ.ธนกฤต)', status: opdState.examRooms[0].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง' },
-      { id: 'opd-exam-2', name: 'ห้องตรวจ 2 (พญ.ศิรินทิพย์)', status: opdState.examRooms[1].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง' },
-      { id: 'opd-exam-3', name: 'ห้องตรวจ 3 (นพ.วรวิทย์)', status: opdState.examRooms[2].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง' },
-      { id: 'opd-exam-4', name: 'ห้องตรวจ 4 (พญ.กานดา)', status: opdState.examRooms[3].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง' },
-      { id: 'opd-exam-5', name: 'ห้องตรวจ 5 (นพ.ชยพล)', status: opdState.examRooms[4].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง' },
-      { id: 'opd-exam-6', name: 'ห้องตรวจ 6 (พญ.ณัฐธิดา)', status: opdState.examRooms[5].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง' },
-      { id: 'opd-ekg', name: 'ห้องตรวจคลื่นไฟฟ้าหัวใจ (EKG)', status: opdState.ekgOccupied ? '🔴 กำลังบันทึก' : '🟢 ว่าง' },
-      { id: 'opd-server', name: 'ห้องแม่ข่ายคอมพิวเตอร์ (Server)', status: opdState.serverOnline ? '🟢 ระบบออนไลน์ 100%' : '🟡 ซ่อมบำรุง' },
-      { id: 'opd-conf-med', name: 'ห้องประชุมองค์กรแพทย์', status: opdState.confMedOccupied ? '🔴 มีการประชุม' : '🟢 ว่าง' },
-      { id: 'opd-conf-gov', name: 'ห้องประชุมธรรมาภิบาล', status: opdState.confGovOccupied ? '🔴 มีการประชุม' : '🟢 ว่าง' },
-      { id: 'opd-director', name: 'ห้องผู้อำนวยการโรงพยาบาล', status: opdState.directorOccupied ? '🔴 ปฏิบัติราชการ' : '🟢 พร้อมต้อนรับ' }
+      ['🚪', 'ห้องตรวจ 1 (นพ.ธนกฤต)', opdState.examRooms[0].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-1', opdState.examRooms[0].occupied ? 'busy' : 'free'],
+      ['🚪', 'ห้องตรวจ 2 (พญ.ศิรินทิพย์)', opdState.examRooms[1].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-2', opdState.examRooms[1].occupied ? 'busy' : 'free'],
+      ['🚪', 'ห้องตรวจ 3 (นพ.วรวิทย์)', opdState.examRooms[2].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-3', opdState.examRooms[2].occupied ? 'busy' : 'free'],
+      ['🚪', 'ห้องตรวจ 4 (พญ.กานดา)', opdState.examRooms[3].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-4', opdState.examRooms[3].occupied ? 'busy' : 'free'],
+      ['🚪', 'ห้องตรวจ 5 (นพ.ชยพล)', opdState.examRooms[4].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-5', opdState.examRooms[4].occupied ? 'busy' : 'free'],
+      ['🚪', 'ห้องตรวจ 6 (พญ.ณัฐธิดา)', opdState.examRooms[5].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-6', opdState.examRooms[5].occupied ? 'busy' : 'free'],
+      ['🫀', 'ห้องตรวจคลื่นไฟฟ้าหัวใจ (EKG)', opdState.ekgOccupied ? '🔴 กำลังบันทึก' : '🟢 ว่าง', 'opd-ekg', opdState.ekgOccupied ? 'busy' : 'free'],
+      ['🖥️', 'ห้องแม่ข่ายคอมพิวเตอร์ (Server)', opdState.serverOnline ? '🟢 ระบบออนไลน์ 100%' : '🟡 ซ่อมบำรุง', 'opd-server', opdState.serverOnline ? 'free' : 'busy'],
+      ['🩺', 'ห้องประชุมองค์กรแพทย์', opdState.confMedOccupied ? '🔴 มีการประชุม' : '🟢 ว่าง', 'opd-conf-med', opdState.confMedOccupied ? 'busy' : 'free'],
+      ['⚖️', 'ห้องประชุมธรรมาภิบาล', opdState.confGovOccupied ? '🔴 มีการประชุม' : '🟢 ว่าง', 'opd-conf-gov', opdState.confGovOccupied ? 'busy' : 'free'],
+      ['👑', 'ห้องผู้อำนวยการโรงพยาบาล', opdState.directorOccupied ? '🔴 ปฏิบัติราชการ' : '🟢 พร้อมต้อนรับ', 'opd-director', opdState.directorOccupied ? 'busy' : 'free']
     ];
 
     return {
