@@ -7465,6 +7465,638 @@
     };
   }
 
+  // =========================================================================
+  // อาคารพัสดุ (Store & Logistics Building - 2 Floors)
+  // =========================================================================
+
+  const STORE_PC_SPECS = [
+    {
+      code: 'PC-STORE-01',
+      name: 'โต๊ะคอมพัสดุ 1 (ตรวจรับพัสดุ)',
+      role: 'ตรวจรับเวชภัณฑ์และพัสดุเข้าคลัง บันทึกรายการตรวจรับและพิมพ์ใบรับสินค้า',
+      specs: [
+        ['CPU', 'Intel Core i5-12400 (6 Cores / 12 Threads, up to 4.40 GHz)'],
+        ['RAM', '16 GB DDR4 3200MHz'],
+        ['Storage', '512 GB M.2 NVMe PCIe SSD'],
+        ['Monitor', 'Dell 24" Full HD IPS (Anti-Glare)'],
+        ['OS', 'Windows 11 Pro 64-bit'],
+        ['Barcode Scanner', 'Zebra DS2208 2D Barcode Scanner']
+      ],
+      software: [
+        'HOSxP Inventory & Material Management Module',
+        'ระบบตรวจรับเวชภัณฑ์และครุภัณฑ์กลาง',
+        'Microsoft Excel / Office 365',
+        'ระบบสแกนบาร์โค้ดคลังพัสดุ'
+      ]
+    },
+    {
+      code: 'PC-STORE-02',
+      name: 'โต๊ะคอมพัสดุ 2 (เบิกจ่ายพัสดุ)',
+      role: 'จัดการใบขอเบิกพัสดุจากทุกแผนกในโรงพยาบาล ตรวจสอบสต็อก และตัดยอดจ่าย',
+      specs: [
+        ['CPU', 'Intel Core i5-12400 (6 Cores / 12 Threads, up to 4.40 GHz)'],
+        ['RAM', '16 GB DDR4 3200MHz'],
+        ['Storage', '512 GB M.2 NVMe PCIe SSD'],
+        ['Monitor', 'Dell 24" Full HD IPS'],
+        ['OS', 'Windows 11 Pro 64-bit'],
+        ['Printer', 'Brother High-Speed Document Printer']
+      ],
+      software: [
+        'HOSxP Material Dispensing & Requisition System',
+        'ระบบเบิกพัสดุออนไลน์โรงพยาบาล (e-Requisition)',
+        'ระบบรายงานยอดคงเหลือคลังพัสดุ',
+        'Hospital Intranet Portal'
+      ]
+    },
+    {
+      code: 'PC-STORE-03',
+      name: 'โต๊ะคอมพัสดุ 3 (จัดซื้อจัดจ้าง e-GP)',
+      role: 'งานจัดซื้อจัดจ้างภาครัฐด้วยระบบอิเล็กทรอนิกส์ (e-GP) และการบริหารสัญญาพัสดุ',
+      specs: [
+        ['CPU', 'Intel Core i5-12500 (6 Cores / 12 Threads, up to 4.60 GHz)'],
+        ['RAM', '16 GB DDR4 3200MHz'],
+        ['Storage', '512 GB M.2 NVMe SSD + 1TB HDD'],
+        ['Monitor', 'Dell 24" FHD Dual-Monitor setup'],
+        ['OS', 'Windows 11 Pro 64-bit'],
+        ['Token', 'Government e-GP Digital Token Key']
+      ],
+      software: [
+        'ระบบจัดซื้อจัดจ้างภาครัฐ (e-GP Phase 5)',
+        'ระบบจัดทำสัญญาและหลักประกันสัญญาพัสดุ',
+        'HOSxP Procurement & PO Management',
+        'Adobe Acrobat Pro (Document Signature)'
+      ]
+    },
+    {
+      code: 'PC-STORE-04',
+      name: 'โต๊ะคอมหัวหน้าพัสดุ (บริหารคลังกลาง)',
+      role: 'กำกับดูแลงานพัสดุ คลังยาและเวชภัณฑ์ ตรวจสอบงบประมาณ และอนุมัติใบสั่งซื้อ (PO)',
+      specs: [
+        ['CPU', 'Intel Core i7-12700 (12 Cores / 20 Threads, up to 4.90 GHz)'],
+        ['RAM', '32 GB DDR4 3200MHz'],
+        ['Storage', '1 TB M.2 NVMe PCIe 4.0 SSD'],
+        ['Monitor', 'Dell UltraSharp 27" 4K IPS'],
+        ['OS', 'Windows 11 Pro 64-bit Workstation'],
+        ['Security', 'Smart Card Reader + Fingerprint Scanner']
+      ],
+      software: [
+        'HOSxP Executive Inventory Dashboard',
+        'ระบบอนุมัติจัดซื้อจัดจ้างอิเล็กทรอนิกส์ (e-Approval)',
+        'ระบบสารสนเทศคลังเวชภัณฑ์ระดับจังหวัด (VMI System)',
+        'Microsoft 365 Enterprise'
+      ]
+    },
+    {
+      code: 'PC-STORE-05',
+      name: 'โต๊ะคอมพัสดุ 5 (ทะเบียนคุมทรัพย์สิน)',
+      role: 'จัดทำทะเบียนคุมทรัพย์สิน ครุภัณฑ์โรงพยาบาล รหัสครุภัณฑ์ และคำนวณค่าเสื่อมราคา',
+      specs: [
+        ['CPU', 'Intel Core i5-12400 (6 Cores / 12 Threads, up to 4.40 GHz)'],
+        ['RAM', '16 GB DDR4 3200MHz'],
+        ['Storage', '512 GB M.2 NVMe PCIe SSD'],
+        ['Monitor', 'Dell 24" Full HD IPS'],
+        ['OS', 'Windows 11 Pro 64-bit'],
+        ['Label Printer', 'TSC Barcode & Asset Tag Label Printer']
+      ],
+      software: [
+        'ระบบทะเบียนครุภัณฑ์โรงพยาบาล (Asset Management)',
+        'GFMIS Token & Depreciation Calculator',
+        'ระบบพิมพ์สติกเกอร์ QR-Code ครุภัณฑ์',
+        'HOSxP Asset Register Module'
+      ]
+    },
+    {
+      code: 'PC-STORE-06',
+      name: 'โต๊ะคอมพัสดุ 6 (คลังยาและโลจิสติกส์)',
+      role: 'ควบคุมคลังเก็บยาขนาดใหญ่ เช็ควันหมดอายุ (FEFO) การกระจายยา และอุณหภูมิคลัง',
+      specs: [
+        ['CPU', 'Intel Core i5-12400 (6 Cores / 12 Threads, up to 4.40 GHz)'],
+        ['RAM', '16 GB DDR4 3200MHz'],
+        ['Storage', '512 GB M.2 NVMe PCIe SSD'],
+        ['Monitor', 'Dell 24" Full HD IPS'],
+        ['OS', 'Windows 11 Pro 64-bit'],
+        ['IoT Gateway', 'Wireless Cold Chain & Temp Logger Interface']
+      ],
+      software: [
+        'HOSxP Main Pharmacy & Warehouse Stock Module',
+        'ระบบตรวจสอบยาใกล้หมดอายุ (Near-Expiry Alert)',
+        'IoT Warehouse Temperature & Humidity Monitor',
+        'ระบบโลจิสติกส์และเบิกจ่ายยาภายในโรงพยาบาล'
+      ]
+    }
+  ];
+
+  const storeState = {
+    currentFloor: 1,
+    liftRunning: false,
+    headOccupied: false,
+    meetingOccupied: false,
+    copierBusy: false
+  };
+
+  function buildStoreInterior(b) {
+    const g = new THREE.Group();
+    const L = [];
+
+    const W = 32.0;
+    const D = 18.0;
+    const WH = 2.8;
+    const wThick = 0.2;
+    const xMin = -W / 2;
+    const xMax = W / 2;
+    const zMin = -D / 2;
+    const zMax = D / 2;
+
+    function storeBox(w, h, d, color, opacity = 1) {
+      const mat = M.mat(color, { roughness: 0.5, transparent: opacity < 1, opacity });
+      const m = M.box(null, w, h, d, mat, 0, 0, 0);
+      addEdges(m, 0x475569);
+      return m;
+    }
+
+    function storeWall(w, h, d, color = 0x1e293b) {
+      const mat = M.mat(color, { roughness: 0.6 });
+      const m = M.box(null, w, h, d, mat, 0, 0, 0);
+      addEdges(m, 0x0f172a);
+      return m;
+    }
+
+    function storeAt(mesh, x, y, z) {
+      mesh.position.set(x, y, z);
+      return mesh;
+    }
+
+    function storeDoor(x, z, w, d, rotY = 0) {
+      const dg = new THREE.Group();
+      dg.position.set(x, 0, z);
+      const isHoriz = w >= d;
+      const pad = storeBox(w, 0.04, d, 0xe2e8f0);
+      pad.position.set(0, 0.02, 0);
+      dg.add(pad);
+      const leafW = isHoriz ? w * 0.85 : 0.07;
+      const leafD = isHoriz ? 0.07 : d * 0.85;
+      const leaf = storeBox(leafW, 1.95, leafD, 0x0284c7);
+      leaf.position.set(0, 0.98, 0);
+      leaf.rotation.y = rotY;
+      dg.add(leaf);
+      const winW = isHoriz ? 0.22 : 0.08;
+      const winD = isHoriz ? 0.08 : 0.22;
+      const win = storeBox(winW, 0.38, winD, 0xbae6fd);
+      win.position.set(0, 1.25, 0);
+      dg.add(win);
+      g.add(dg);
+    }
+
+    function createStorePcDesk(x, z, rotY, spec, labelText, personOpts) {
+      const dg = new THREE.Group();
+      dg.position.set(x, 0, z);
+      dg.rotation.y = rotY;
+
+      const deskTop = storeBox(1.5, 0.05, 0.8, 0xd97706);
+      deskTop.position.set(0, 0.725, 0);
+      const legL = storeBox(0.05, 0.7, 0.75, 0x334155);
+      legL.position.set(-0.7, 0.35, 0);
+      const legR = storeBox(0.05, 0.7, 0.75, 0x334155);
+      legR.position.set(0.7, 0.35, 0);
+      const backPanel = storeBox(1.35, 0.4, 0.03, 0x475569);
+      backPanel.position.set(0, 0.45, -0.36);
+
+      const monBase = storeBox(0.24, 0.02, 0.18, 0x0f172a);
+      monBase.position.set(0, 0.76, -0.15);
+      const monPole = storeBox(0.04, 0.22, 0.04, 0x334155);
+      monPole.position.set(0, 0.87, -0.15);
+      const monScreen = storeBox(0.55, 0.34, 0.03, 0x0f172a);
+      monScreen.position.set(0, 1.05, -0.15);
+      const monGlass = storeBox(0.51, 0.30, 0.01, 0x38bdf8);
+      monGlass.position.set(0, 1.05, -0.13);
+
+      const pcCase = storeBox(0.2, 0.38, 0.42, 0x1e293b);
+      pcCase.position.set(0.5, 0.2, 0.05);
+      const kbd = storeBox(0.42, 0.02, 0.14, 0x0f172a);
+      kbd.position.set(0, 0.76, 0.15);
+      const mouse = storeBox(0.06, 0.02, 0.1, 0x0f172a);
+      mouse.position.set(0.28, 0.76, 0.15);
+
+      const chairSeat = storeBox(0.46, 0.06, 0.46, 0x0284c7);
+      chairSeat.position.set(0, 0.45, 0.55);
+      const chairBack = storeBox(0.44, 0.46, 0.05, 0x0284c7);
+      chairBack.position.set(0, 0.72, 0.75);
+      const chairStem = storeBox(0.06, 0.38, 0.06, 0x64748b);
+      chairStem.position.set(0, 0.22, 0.55);
+
+      dg.add(deskTop, legL, legR, backPanel, monBase, monPole, monScreen, monGlass, pcCase, kbd, mouse, chairSeat, chairBack, chairStem);
+
+      if (personOpts) {
+        const staff = makePerson({
+          role: personOpts.role || 'nurse',
+          shirtColor: personOpts.shirtColor || 0x0284c7,
+          pantsColor: personOpts.pantsColor || 0x1e293b,
+          pose: 'sit',
+          rotY: Math.PI
+        });
+        staff.position.set(0, 0.02, 0.55);
+        dg.add(staff);
+      }
+
+      [deskTop, monScreen, monGlass, pcCase].forEach((m) => {
+        m.userData = { pcInfo: spec };
+      });
+
+      g.add(dg);
+
+      L.push({
+        text: labelText,
+        pos: V(x, 1.6, z),
+        cls: 'int-label pc-tag',
+        pcInfo: spec
+      });
+    }
+
+    // =========================================================================
+    // ตรวจสอบชั้น (Floor 1 vs Floor 2)
+    // =========================================================================
+    if (storeState.currentFloor === 2) {
+      // --- FLOOR 2: รอดำเนินการหลังจากชั้น 1 เสร็จสิ้น ---
+      floor(g, W, D, '#f8fafc', '#cbd5e1', 0.8, 0, 0);
+
+      // กำแพงรอบนอกชั้น 2
+      g.add(
+        storeAt(storeWall(W, WH, wThick, 0x1e293b), 0, WH / 2, zMin + wThick / 2),
+        storeAt(storeWall(W, WH, wThick, 0x1e293b), 0, WH / 2, zMax - wThick / 2),
+        storeAt(storeWall(wThick, WH, D, 0x1e293b), xMin + wThick / 2, WH / 2, 0),
+        storeAt(storeWall(wThick, WH, D, 0x1e293b), xMax - wThick / 2, WH / 2, 0)
+      );
+
+      // โถงเปิดช่องลิฟต์ส่งของชั้น 2
+      const liftShaft = storeBox(5.2, WH, 7.5, 0x334155, 0.25);
+      liftShaft.position.set(-5.4, WH / 2, -5.25);
+      g.add(liftShaft);
+      const liftDoorF2 = storeBox(2.4, 2.2, 0.1, 0x94a3b8);
+      liftDoorF2.position.set(-5.4, 1.1, -1.5);
+      g.add(liftDoorF2);
+      L.push({ text: '🛗 ลิฟต์ส่งของ (ชั้น 2)', pos: V(-5.4, 2.2, -1.5), cls: 'int-label sub-tag' });
+
+      // ช่องเปิดบันไดขึ้นมาจากชั้น 1
+      const stairOpening = storeBox(6.5, 0.1, 3.5, 0x0f172a);
+      stairOpening.position.set(12.75, 0.05, 7.25);
+      const stairRail = storeBox(6.5, 0.9, 0.08, 0x94a3b8);
+      stairRail.position.set(12.75, 0.45, 5.5);
+      g.add(stairOpening, stairRail);
+      L.push({ text: '🪜 ทางลงบันไดไปชั้น 1', pos: V(12.75, 1.6, 7.25), cls: 'int-label sub-tag' });
+
+      L.push({
+        text: '🏗️ พื้นที่ชั้น 2 (รอดำเนินการหลังจากชั้น 1 เสร็จสิ้นตามคำขอ)',
+        pos: V(0, 2.2, 0),
+        cls: 'int-label zone-pcu'
+      });
+
+      const itemsF2 = [
+        ['🏢', 'อาคารพัสดุ - ชั้น 2', 'พื้นที่โล่งโครงสร้างอาคาร (รอแผนผังรายละเอียดจากผู้ใช้งาน)'],
+        ['🛗', 'ลิฟต์ส่งของ (Freight Lift)', 'เชื่อมต่อชั้น 1-2 รองรับน้ำหนัก 1,500 กิโลกรัม'],
+        ['🪜', 'ช่องบันไดขึ้น-ลง', 'เชื่อมต่อลงไปยังชั้น 1']
+      ];
+
+      return {
+        group: g,
+        labels: L,
+        title: 'อาคารพัสดุ - ชั้น 2 (รอดำเนินการ)',
+        sub: 'พื้นที่ชั้น 2: โครงสร้างอาคารพร้อมช่องลิฟต์ส่งของและบันได (รอดำเนินการจัดสรรห้องหลังจากชั้น 1 เสร็จสิ้น)',
+        floors: [
+          { num: 1, label: 'ชั้น 1 (คลังยา • สนง.พัสดุ • ลิฟต์ส่งของ)' },
+          { num: 2, label: 'ชั้น 2 (รอดำเนินการ)' }
+        ],
+        currentFloor: 2,
+        onSelectFloor: (f) => {
+          storeState.currentFloor = f;
+        },
+        items: itemsF2,
+        cam: { pos: V(0, 26.0, 24.0), target: V(0, 0, 0) }
+      };
+    }
+
+    // =========================================================================
+    // FLOOR 1 (ตามแผนผังที่ผู้ใช้มอบหมายอย่างแม่นยำ)
+    // =========================================================================
+
+    // --- 1. พื้นแยกโซน ---
+    // คลังเก็บยาขนาดใหญ่ (ซ้ายสุด)
+    floor(g, 8.0, 18.0, '#e2e8f0', '#94a3b8', 1.0, -12.0, 0.0);
+    // ลิฟต์ส่งของ
+    floor(g, 5.2, 7.5, '#475569', '#334155', 0.8, -5.4, -5.25);
+    // ห้องหัวหน้าพัสดุ (ขวาบน)
+    floor(g, 8.0, 7.5, '#fef3c7', '#fde68a', 0.6, 12.0, -5.25);
+    // ห้องน้ำ (ขวากลาง)
+    floor(g, 6.5, 6.0, '#ecfdf5', '#a7f3d0', 0.5, 12.75, 2.5);
+    // โซนบันได (ขวาล่าง)
+    floor(g, 6.5, 3.5, '#f1f5f9', '#cbd5e1', 0.5, 12.75, 7.25);
+    // สำนักงานพัสดุกลาง
+    floor(g, 17.5, 18.0, '#f8fafc', '#cbd5e1', 0.8, 0.75, 0.0);
+
+    // --- 2. กำแพงรอบนอก (Exterior Walls) ---
+    g.add(
+      // กำแพงบนสุด (Z = -9.0)
+      storeAt(storeWall(W, WH, wThick, 0x1e293b), 0, WH / 2, zMin + wThick / 2),
+      // กำแพงซ้ายสุด (X = -16.0)
+      storeAt(storeWall(wThick, WH, D, 0x1e293b), xMin + wThick / 2, WH / 2, 0),
+      // กำแพงขวาสุด (X = +16.0)
+      storeAt(storeWall(wThick, WH, D, 0x1e293b), xMax - wThick / 2, WH / 2, 0),
+      // กำแพงล่างสุด (Z = +9.0) พร้อม "ประตูยาว" ขนาดใหญ่ (X: 2.5 .. 8.5)
+      storeAt(storeWall(18.5, WH, wThick, 0x1e293b), -6.75, WH / 2, zMax - wThick / 2),
+      storeAt(storeWall(6.0, 0.4, wThick, 0x1e293b), 5.5, WH - 0.2, zMax - wThick / 2),
+      storeAt(storeWall(7.5, WH, wThick, 0x1e293b), 12.25, WH / 2, zMax - wThick / 2)
+    );
+    // ประตูยาว: ประตูเลื่อนคู่รับส่งของขนาดใหญ่
+    const cargoDoorL = storeBox(2.9, 2.3, 0.08, 0x0284c7);
+    cargoDoorL.position.set(4.0, 1.15, zMax - wThick / 2);
+    const cargoDoorR = storeBox(2.9, 2.3, 0.08, 0x0284c7);
+    cargoDoorR.position.set(7.0, 1.15, zMax - wThick / 2);
+    const cargoWinL = storeBox(1.2, 0.8, 0.1, 0xbae6fd);
+    cargoWinL.position.set(4.0, 1.35, zMax - wThick / 2);
+    const cargoWinR = storeBox(1.2, 0.8, 0.1, 0xbae6fd);
+    cargoWinR.position.set(7.0, 1.35, zMax - wThick / 2);
+    g.add(cargoDoorL, cargoDoorR, cargoWinL, cargoWinR);
+    L.push(maintTag('🚪 ประตูยาว', V(5.5, 1.6, zMax), 'room', null, 'ประตูรับ-ส่งของขนาดใหญ่ (ประตูยาว)'));
+
+    // --- 3. กำแพงกั้นห้องภายใน ---
+    // (A) กำแพงแบ่ง คลังเก็บยาขนาดใหญ่ (X = -8.0) พร้อมประตูที่ Z = 6.0
+    g.add(
+      storeAt(storeWall(wThick, WH, 14.0, 0x1e293b), -8.0 + wThick / 2, WH / 2, -2.0),
+      storeAt(storeWall(wThick, 0.4, 1.2, 0x1e293b), -8.0 + wThick / 2, WH - 0.2, 6.0),
+      storeAt(storeWall(wThick, WH, 2.0, 0x1e293b), -8.0 + wThick / 2, WH / 2, 8.0)
+    );
+    storeDoor(-8.0 + wThick / 2, 6.0, 0.45, 1.2, 0.35);
+    L.push(maintTag('🚪 ประตู', V(-8.0 + 0.35, 1.45, 6.0), 'room', null, 'ประตูเข้าคลังเก็บยาขนาดใหญ่'));
+
+    // (B) กำแพงห้องลิฟต์ส่งของ (X: -8.0 .. -2.8, Z: -9.0 .. -1.5)
+    g.add(
+      // กำแพงฝั่งตะวันออกของลิฟต์ (X = -2.8)
+      storeAt(storeWall(wThick, WH, 7.5, 0x1e293b), -2.8 - wThick / 2, WH / 2, -5.25),
+      // กำแพงล่างของลิฟต์ (Z = -1.5) พร้อมช่องประตูลิฟต์ขนาดใหญ่
+      storeAt(storeWall(1.3, WH, wThick, 0x1e293b), -7.35, WH / 2, -1.5),
+      storeAt(storeWall(2.6, 0.4, wThick, 0x1e293b), -5.4, WH - 0.2, -1.5),
+      storeAt(storeWall(1.3, WH, wThick, 0x1e293b), -3.45, WH / 2, -1.5)
+    );
+    // ประตูลิฟต์ส่งของเหล็กหนาพร้อมแถบสีเหลือง-ดำ
+    const liftDoorSteel = storeBox(2.5, 2.3, 0.08, 0x334155);
+    liftDoorSteel.position.set(-5.4, 1.15, -1.5);
+    const liftHazardPad = storeBox(2.6, 0.04, 0.4, 0xfacc15);
+    liftHazardPad.position.set(-5.4, 0.02, -1.25);
+    g.add(liftDoorSteel, liftHazardPad);
+    L.push({
+      text: `🛗 ลิฟต์ส่งของ (${storeState.liftRunning ? '🔴 กำลังขนส่ง' : '🟢 พร้อมใช้งาน'})`,
+      pos: V(-5.4, 2.2, -1.5),
+      cls: `int-label ${storeState.liftRunning ? 'busy' : 'free'} toggleable`,
+      toggleId: 'store-lift'
+    });
+
+    // (C) กำแพงห้องหัวหน้าพัสดุ (X: 8.0 .. 16.0, Z: -9.0 .. -1.5)
+    g.add(
+      // กำแพงล่าง (Z = -1.5)
+      storeAt(storeWall(8.0, WH, wThick, 0x1e293b), 12.0, WH / 2, -1.5),
+      // กำแพงซ้าย (X = 8.0) พร้อมประตูที่ Z = -3.8
+      storeAt(storeWall(wThick, WH, 4.4, 0x1e293b), 8.0 - wThick / 2, WH / 2, -6.8),
+      storeAt(storeWall(wThick, 0.4, 1.2, 0x1e293b), 8.0 - wThick / 2, WH - 0.2, -3.8),
+      storeAt(storeWall(wThick, WH, 1.9, 0x1e293b), 8.0 - wThick / 2, WH / 2, -2.45)
+    );
+    storeDoor(8.0 - wThick / 2, -3.8, 0.45, 1.2, 0.35);
+    L.push(maintTag('🚪 ประตู', V(8.0 - 0.35, 1.45, -3.8), 'room', null, 'ประตูห้องหัวหน้าพัสดุ'));
+
+    // (D) กำแพงห้องน้ำ (X: 9.5 .. 16.0, Z: -0.5 .. +5.5)
+    g.add(
+      // กำแพงบนห้องน้ำ (Z = -0.5)
+      storeAt(storeWall(6.5, WH, wThick, 0x1e293b), 12.75, WH / 2, -0.5),
+      // กำแพงล่างห้องน้ำ (Z = +5.5)
+      storeAt(storeWall(6.5, WH, wThick, 0x1e293b), 12.75, WH / 2, 5.5),
+      // กำแพงซ้ายห้องน้ำ (X = 9.5) พร้อมประตูที่ Z = 2.5
+      storeAt(storeWall(wThick, WH, 2.4, 0x1e293b), 9.5 - wThick / 2, WH / 2, 0.7),
+      storeAt(storeWall(wThick, 0.4, 1.2, 0x1e293b), 9.5 - wThick / 2, WH - 0.2, 2.5),
+      storeAt(storeWall(wThick, WH, 2.4, 0x1e293b), 9.5 - wThick / 2, WH / 2, 4.3)
+    );
+    storeDoor(9.5 - wThick / 2, 2.5, 0.45, 1.2, 0.35);
+    L.push(maintTag('🚪 ประตู', V(9.5 - 0.35, 1.45, 2.5), 'room', null, 'ประตูห้องน้ำ'));
+
+    // (E) กำแพงและประตูกั้นโถงพัสดุ (Z = 5.2)
+    g.add(
+      storeAt(storeWall(0.7, WH, wThick, 0x1e293b), 5.35, WH / 2, 5.2),
+      storeAt(storeWall(1.2, 0.4, wThick, 0x1e293b), 6.3, WH - 0.2, 5.2),
+      storeAt(storeWall(2.3, WH, wThick, 0x1e293b), 8.05, WH / 2, 5.2)
+    );
+    storeDoor(6.3, 5.2, 1.2, 0.45, 0.3);
+    L.push(maintTag('🚪 ประตู', V(6.3, 1.45, 5.2), 'room', null, 'ประตูกั้นโถงพัสดุ'));
+
+    // --- 4. ทางเดินสีฟ้าแบบตึก ER (ตามเส้นสีฟ้าในแผนผัง) ---
+    // เส้นทางเดินสีฟ้า 5 ช่วง เชื่อมต่อต่อเนื่อง
+    walkwayStrip(g, -2.5, 2.0, 7.2, 1.35, Math.PI / 2);     // ดิ่งลงมาจากข้างลิฟต์
+    walkwayStrip(g, 3.2, 5.2, 12.0, 1.35, 0);              // แนวนอนผ่านหน้าเครื่องถ่ายเอกสารและลอดประตู
+    walkwayStrip(g, 9.2, 2.35, 6.0, 1.35, Math.PI / 2);     // ดิ่งขึ้นเลียบชั้นเก็บของแนวตั้ง
+    walkwayStrip(g, 11.2, -0.6, 4.5, 1.35, 0);             // แนวนอนเข้าหน้าห้องน้ำ
+    walkwayStrip(g, 9.2, 7.25, 4.0, 1.35, Math.PI / 2);     // สาขาลงสู่บันไดขึ้นชั้น 2
+
+    // --- 5. คลังเก็บยาขนาดใหญ่ (เฟอร์นิเจอร์และอุปกรณ์) ---
+    L.push({ text: '💊 คลังเก็บยาขนาดใหญ่', pos: V(-12.0, 2.2, 0.0), cls: 'int-label zone-pcu' });
+    L.push({ text: '🌡️ คลังยา: 22.5°C / 55% RH', pos: V(-12.0, 2.3, -8.8), cls: 'int-label sub-tag' });
+
+    // ชั้นวางพาเลทเหล็กขนาดใหญ่ (Heavy-Duty Pallet Racks)
+    function makePalletRack(x, z, d, color) {
+      const rack = new THREE.Group();
+      rack.position.set(x, 0, z);
+      // เสาเหล็ก 4 มุม
+      [-0.55, 0.55].forEach((ox) => {
+        [-d / 2, d / 2].forEach((oz) => {
+          const col = storeBox(0.08, 2.5, 0.08, color);
+          col.position.set(ox, 1.25, oz);
+          rack.add(col);
+        });
+      });
+      // คานชั้นวาง 3 ชั้น
+      [0.6, 1.4, 2.2].forEach((h) => {
+        const shelfBeam = storeBox(1.2, 0.08, d, color);
+        shelfBeam.position.set(0, h, 0);
+        rack.add(shelfBeam);
+        // ลังยาและเวชภัณฑ์บนชั้น
+        for (let sz = -d / 2 + 0.6; sz < d / 2; sz += 1.2) {
+          const boxMat = Math.abs(Math.sin(sz + h)) > 0.5 ? 0xd97706 : 0x0284c7;
+          const medBox = storeBox(0.95, 0.45, 0.85, boxMat);
+          medBox.position.set(0, h + 0.265, sz);
+          rack.add(medBox);
+        }
+      });
+      g.add(rack);
+    }
+    makePalletRack(-14.2, -4.5, 6.5, 0x0284c7);
+    makePalletRack(-14.2, 3.5, 6.5, 0x0284c7);
+    makePalletRack(-9.8, -4.5, 6.5, 0xd97706);
+    makePalletRack(-9.8, 1.5, 4.0, 0xd97706);
+
+    // พาเลทไม้และกองลังยาบนพื้น
+    const pallet1 = storeBox(1.2, 0.12, 1.2, 0x92400e);
+    pallet1.position.set(-12.0, 0.06, -5.0);
+    const boxOnPallet1 = storeBox(1.1, 0.8, 1.1, 0xd97706);
+    boxOnPallet1.position.set(-12.0, 0.52, -5.0);
+    g.add(pallet1, boxOnPallet1);
+
+    // รถลากพาเลท (Hand Pallet Jack) สีเหลือง
+    const jackGroup = new THREE.Group();
+    jackGroup.position.set(-12.0, 0, 5.5);
+    const jackForkL = storeBox(0.16, 0.08, 1.1, 0xfacc15);
+    jackForkL.position.set(-0.25, 0.06, 0);
+    const jackForkR = storeBox(0.16, 0.08, 1.1, 0xfacc15);
+    jackForkR.position.set(0.25, 0.06, 0);
+    const jackHead = storeBox(0.4, 0.5, 0.3, 0xfacc15);
+    jackHead.position.set(0, 0.3, -0.6);
+    const jackHandle = storeBox(0.06, 0.8, 0.06, 0x0f172a);
+    jackHandle.position.set(0, 0.75, -0.65);
+    jackGroup.add(jackForkL, jackForkR, jackHead, jackHandle);
+    g.add(jackGroup);
+
+    // --- 6. ห้องหัวหน้าพัสดุ (เฟอร์นิเจอร์) ---
+    L.push({
+      text: `👔 ห้องหัวหน้าพัสดุ (${storeState.headOccupied ? '🔴 ติดภารกิจ' : '🟢 ว่าง พร้อมติดต่อ'})`,
+      pos: V(12.0, 2.2, -5.25),
+      cls: `int-label ${storeState.headOccupied ? 'busy' : 'free'} toggleable`,
+      toggleId: 'store-head'
+    });
+    // โต๊ะทำงานหัวหน้า (PC-STORE-04)
+    createStorePcDesk(12.5, -6.5, Math.PI, STORE_PC_SPECS[3], '🖥️ PC-STORE-04: โต๊ะคอมหัวหน้าพัสดุ', { role: 'doctor', shirtColor: 0x1e293b });
+    // เก้าอี้รับรองแขก 2 ตัว
+    const vChair1 = storeBox(0.44, 0.45, 0.44, 0x334155);
+    vChair1.position.set(11.8, 0.225, -5.3);
+    const vChair2 = storeBox(0.44, 0.45, 0.44, 0x334155);
+    vChair2.position.set(13.2, 0.225, -5.3);
+    // ตู้เอกสารผู้บริหารชิดผนัง
+    const headCab = storeBox(2.4, 1.8, 0.55, 0x92400e);
+    headCab.position.set(12.0, 0.9, -8.65);
+    const headSofa = storeBox(2.0, 0.65, 0.85, 0x334155);
+    headSofa.position.set(9.5, 0.325, -3.5);
+    g.add(vChair1, vChair2, headCab, headSofa);
+
+    // --- 7. ห้องน้ำ (สุขภัณฑ์) ---
+    L.push({ text: '🚻 ห้องน้ำ', pos: V(12.75, 2.2, 2.5), cls: 'int-label room-title' });
+    const toilet1 = storeBox(0.45, 0.45, 0.65, 0xffffff);
+    toilet1.position.set(14.8, 0.225, 0.8);
+    const toilet2 = storeBox(0.45, 0.45, 0.65, 0xffffff);
+    toilet2.position.set(14.8, 0.225, 4.2);
+    const tPartition = storeBox(2.2, 1.8, 0.05, 0x94a3b8);
+    tPartition.position.set(14.5, 0.9, 2.5);
+    const wash1 = storeBox(0.55, 0.8, 0.45, 0xffffff);
+    wash1.position.set(11.0, 0.4, 0.25);
+    const wash2 = storeBox(0.55, 0.8, 0.45, 0xffffff);
+    wash2.position.set(11.0, 0.4, 4.75);
+    g.add(toilet1, toilet2, tPartition, wash1, wash2);
+
+    // --- 8. บันไดขึ้นชั้น 2 ---
+    L.push({ text: '🪜 บันไดขึ้นชั้น 2 ➔', pos: V(12.75, 1.6, 7.25), cls: 'int-label sub-tag' });
+    const stairSteps = 10;
+    for (let st = 0; st < stairSteps; st++) {
+      const step = storeBox(0.55, 0.18, 2.6, 0x475569);
+      step.position.set(10.2 + st * 0.52, st * 0.18 + 0.09, 7.25);
+      g.add(step);
+    }
+    const sRail = storeBox(5.2, 0.9, 0.08, 0x94a3b8);
+    sRail.position.set(12.75, 1.25, 5.8);
+    g.add(sRail);
+
+    // --- 9. สำนักงานพัสดุกลาง (โต๊ะคอม, โต๊ะประชุม, เครื่องถ่ายเอกสาร, ชั้นเก็บของ) ---
+    // โต๊ะคอม 1 & โต๊ะคอม 2 (แถวบน)
+    createStorePcDesk(-0.5, -7.5, Math.PI, STORE_PC_SPECS[0], '🖥️ PC-STORE-01: โต๊ะคอมพัสดุ 1', { role: 'nurse', shirtColor: 0x0284c7 });
+    createStorePcDesk(4.0, -7.5, Math.PI, STORE_PC_SPECS[1], '🖥️ PC-STORE-02: โต๊ะคอมพัสดุ 2', { role: 'nurse', shirtColor: 0x0284c7 });
+
+    // โต๊ะคอม 3 (ชิดผนังห้องหัวหน้า หันหน้าไปทางซ้าย)
+    createStorePcDesk(6.8, -4.5, -Math.PI / 2, STORE_PC_SPECS[2], '🖥️ PC-STORE-03: โต๊ะคอมพัสดุ 3', { role: 'nurse', shirtColor: 0x0284c7 });
+
+    // โต๊ะคอม 6 & โต๊ะคอม 5 (แนวตั้งกลางห้อง)
+    createStorePcDesk(-1.2, 0.5, Math.PI / 2, STORE_PC_SPECS[5], '🖥️ PC-STORE-06: โต๊ะคอมพัสดุ 6', { role: 'nurse', shirtColor: 0x0284c7 });
+    createStorePcDesk(2.2, 0.5, -Math.PI / 2, STORE_PC_SPECS[4], '🖥️ PC-STORE-05: โต๊ะคอมพัสดุ 5', { role: 'nurse', shirtColor: 0x0284c7 });
+
+    // ชั้นเก็บของ (แนวนอน: ใต้โต๊ะคอม 5-6)
+    const shelfHoriz = storeBox(5.4, 1.8, 0.8, 0x475569);
+    shelfHoriz.position.set(0.5, 0.9, 2.8);
+    g.add(shelfHoriz);
+    L.push({ text: '🗄️ ชั้นเก็บของ', pos: V(0.5, 1.8, 2.8), cls: 'int-label sub-tag' });
+
+    // เครื่องถ่ายเอกสาร (ใต้ชั้นเก็บของ)
+    const copierGroup = new THREE.Group();
+    copierGroup.position.set(1.5, 0, 4.3);
+    const copBody = storeBox(0.9, 0.85, 0.75, 0xe2e8f0);
+    copBody.position.set(0, 0.425, 0);
+    const copScreen = storeBox(0.2, 0.12, 0.04, 0x38bdf8);
+    copScreen.position.set(-0.25, 0.95, 0.28);
+    const copTray = storeBox(0.45, 0.04, 0.45, 0x94a3b8);
+    copTray.position.set(0.55, 0.65, 0);
+    const copFeeder = storeBox(0.85, 0.12, 0.7, 0x334155);
+    copFeeder.position.set(0, 0.92, 0);
+    copierGroup.add(copBody, copScreen, copTray, copFeeder);
+    g.add(copierGroup);
+    L.push({
+      text: `🖨️ เครื่องถ่ายเอกสาร (${storeState.copierBusy ? '🔴 กำลังพิมพ์' : '🟢 พร้อมใช้งาน'})`,
+      pos: V(1.5, 1.6, 4.3),
+      cls: `int-label ${storeState.copierBusy ? 'busy' : 'free'} toggleable`,
+      toggleId: 'store-copier'
+    });
+
+    // โต๊ะประชุม (Center-Right)
+    const meetTable = storeBox(2.6, 0.74, 3.8, 0xd97706);
+    meetTable.position.set(5.8, 0.37, 0.5);
+    g.add(meetTable);
+    [-1.2, 0, 1.2].forEach((oz) => {
+      const cL = storeBox(0.44, 0.45, 0.44, 0x334155);
+      cL.position.set(4.0, 0.225, 0.5 + oz);
+      const cR = storeBox(0.44, 0.45, 0.44, 0x334155);
+      cR.position.set(7.6, 0.225, 0.5 + oz);
+      g.add(cL, cR);
+    });
+    L.push({
+      text: `🤝 โต๊ะประชุม (${storeState.meetingOccupied ? '🔴 มีประชุม' : '🟢 ว่าง'})`,
+      pos: V(5.8, 1.9, 0.5),
+      cls: `int-label ${storeState.meetingOccupied ? 'busy' : 'free'} toggleable`,
+      toggleId: 'store-meeting'
+    });
+
+    // ชั้นเก็บของ (แนวตั้ง: ทางขวาของโต๊ะประชุม)
+    const shelfVert = storeBox(0.8, 1.8, 3.6, 0x475569);
+    shelfVert.position.set(8.8, 0.9, 2.8);
+    g.add(shelfVert);
+    L.push({ text: '🗄️ ชั้นเก็บของ', pos: V(8.8, 1.8, 2.8), cls: 'int-label sub-tag' });
+
+    const items = [
+      ['🏢', 'อาคารพัสดุ - ชั้น 1', 'คลังเก็บยาขนาดใหญ่, สำนักงานพัสดุ, ห้องหัวหน้าพัสดุ, ลิฟต์ส่งของ'],
+      ['💊', 'คลังเก็บยาขนาดใหญ่', 'ชั้นวางพาเลทเหล็ก 4 ชุด, พาเลทไม้, ลังยา, รถลากพาเลท, เซ็นเซอร์อุณหภูมิ'],
+      ['🛗', 'ลิฟต์ส่งของ (Freight Lift 1,500 kg)', 'ลิฟต์ขนส่งพัสดุ/ยา เชื่อมต่อไปยังชั้น 2', 'store-lift', storeState.liftRunning ? 'busy' : 'free'],
+      ['👔', 'ห้องหัวหน้าพัสดุ', '1 ห้อง (โต๊ะทำงานหัวหน้า, ตู้เอกสาร, โซฟารับรอง)', 'store-head', storeState.headOccupied ? 'busy' : 'free'],
+      ['🖥️', 'PC-STORE-04: โต๊ะคอมหัวหน้าพัสดุ', 'ดูสเปก', null, 'free', STORE_PC_SPECS[3]],
+      ['🤝', 'โต๊ะประชุมพัสดุ', 'โต๊ะประชุมใหญ่ 6 ที่นั่ง สำหรับประชุมและประสานงานจัดซื้อ', 'store-meeting', storeState.meetingOccupied ? 'busy' : 'free'],
+      ['🖥️', 'PC-STORE-01: โต๊ะคอมพัสดุ 1 (ตรวจรับ)', 'ดูสเปก', null, 'free', STORE_PC_SPECS[0]],
+      ['🖥️', 'PC-STORE-02: โต๊ะคอมพัสดุ 2 (เบิกจ่าย)', 'ดูสเปก', null, 'free', STORE_PC_SPECS[1]],
+      ['🖥️', 'PC-STORE-03: โต๊ะคอมพัสดุ 3 (จัดซื้อ e-GP)', 'ดูสเปก', null, 'free', STORE_PC_SPECS[2]],
+      ['🖥️', 'PC-STORE-05: โต๊ะคอมพัสดุ 5 (ทะเบียนครุภัณฑ์)', 'ดูสเปก', null, 'free', STORE_PC_SPECS[4]],
+      ['🖥️', 'PC-STORE-06: โต๊ะคอมพัสดุ 6 (คลังยา/โลจิสติกส์)', 'ดูสเปก', null, 'free', STORE_PC_SPECS[5]],
+      ['🖨️', 'เครื่องถ่ายเอกสาร & พิมพ์เอกสาร', 'เครื่องถ่ายเอกสารมัลติฟังก์ชันระบบเครือข่าย', 'store-copier', storeState.copierBusy ? 'busy' : 'free'],
+      ['🗄️', 'ชั้นเก็บของ / ตู้เอกสารพัสดุ', '2 จุด (ชั้นแนวนอน และชั้นแนวตั้ง)'],
+      ['🚶', 'ทางเดินสีฟ้าแบบตึก ER', 'เส้นทางเดินเชื่อมต่อคลังยา ลิฟต์ส่งของ โต๊ะประชุม และบันได'],
+      ['🚻', 'ห้องน้ำ', '1 ห้อง (2 ห้องสุขา, 2 อ่างล้างหน้า)'],
+      ['🪜', 'บันไดขึ้นชั้น 2', 'บันไดเชื่อมต่อไปยังชั้น 2 พร้อมราวจับ'],
+      ['🚪', 'ประตูยาว (Main Cargo Doors)', 'ประตูบานเลื่อนคู่ขนาดใหญ่รับ-ส่งของด้านหน้าอาคาร'],
+      ['🚪', 'ประตูห้องและประตูกั้นภายใน', '4 บาน ตามผัง']
+    ];
+
+    return {
+      group: g,
+      labels: L,
+      title: 'อาคารพัสดุ - ชั้น 1 (คลังยา • สนง.พัสดุ • ลิฟต์ส่งของ)',
+      sub: 'ผังชั้น 1: คลังเก็บยาขนาดใหญ่ • ลิฟต์ส่งของ 1,500 kg • สนง.พัสดุ (โต๊ะคอม 1-3, 5-6) • ห้องหัวหน้าพัสดุ (โต๊ะคอม 4) • โต๊ะประชุม • เครื่องถ่ายเอกสาร • ทางเดินสีฟ้า • ห้องน้ำ • บันไดขึ้นชั้น 2',
+      floors: [
+        { num: 1, label: 'ชั้น 1 (คลังยา • สนง.พัสดุ • ลิฟต์ส่งของ)' },
+        { num: 2, label: 'ชั้น 2 (รอดำเนินการ)' }
+      ],
+      currentFloor: storeState.currentFloor,
+      onSelectFloor: (f) => {
+        storeState.currentFloor = f;
+      },
+      items,
+      cam: { pos: V(0, 26.0, 24.0), target: V(0, 0, 0) }
+    };
+  }
+
   K.Interiors = {
     build(b) {
       if (b.interior === 'guard') return guard(b);
@@ -7482,9 +8114,26 @@
       if (b.interior === 'dental') return buildDentalInterior(b);
       if (b.interior === 'thaimed') return buildThaimedInterior(b);
       if (b.interior === 'rompho') return buildRomphoInterior(b);
+      if (b.interior === 'store') return buildStoreInterior(b);
       return null;
     },
     toggleStatus(id) {
+      if (id === 'store-lift') {
+        storeState.liftRunning = !storeState.liftRunning;
+        return true;
+      }
+      if (id === 'store-head') {
+        storeState.headOccupied = !storeState.headOccupied;
+        return true;
+      }
+      if (id === 'store-meeting') {
+        storeState.meetingOccupied = !storeState.meetingOccupied;
+        return true;
+      }
+      if (id === 'store-copier') {
+        storeState.copierBusy = !storeState.copierBusy;
+        return true;
+      }
       if (id.startsWith('vip-')) {
         const vRoom = romphoState.vipRooms.find((r) => r.id === id);
         if (vRoom) {
