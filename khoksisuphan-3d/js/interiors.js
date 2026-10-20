@@ -5733,6 +5733,27 @@
     ]
   };
 
+  const VIP_PC_SPECS = {
+    name: 'เค้าเตอร์โต๊ะคอมห้องพิเศษ (PC-VIP-01)',
+    code: 'PC-VIP-01',
+    role: 'ระบบบริหารจัดการหอผู้ป่วยพิเศษ บันทึกเวชระเบียนผู้ป่วยใน (IPD Charting) และระบบจัดสรรห้องพักพิเศษ',
+    specs: [
+      ['CPU', 'Intel Core i5-12400 (6 Cores / 12 Threads, up to 4.40 GHz)'],
+      ['RAM', '16 GB DDR4 3200MHz'],
+      ['Storage', '512 GB M.2 NVMe SSD (High Speed)'],
+      ['Monitor', 'Dell 24" Full HD IPS (Anti-Glare, ComfortView Plus)'],
+      ['OS', 'Windows 11 Pro 64-bit'],
+      ['Network', 'LAN Gigabit + Hospital Medical VLAN (VIP Ward)']
+    ],
+    software: [
+      'HOSxP / HIS Inpatient Department (IPD Ward)',
+      'ระบบบริหารจัดการจองห้องพักพิเศษและคำนวณค่าบริการ',
+      'EHR Electronic Health Record & Nursing Note',
+      'LIS Lab & X-Ray PACS Viewer Integration',
+      'Microsoft Edge / Hospital Intranet'
+    ]
+  };
+
   const romphoState = {
     currentFloor: 1,
     // Floor 1 (ห้องคลอดและสูติกรรม)
@@ -5752,7 +5773,26 @@
       name: `เตียงฟอกไต ${i + 1}`,
       occupied: i === 0 || i === 2 || i === 5 || i === 8 || i === 11 || i === 14
     })),
-    roRunning: true
+    roRunning: true,
+
+    // Floor 3 (หอผู้ป่วยพิเศษ 13 ห้อง)
+    vipRooms: [
+      { id: 'vip-301', num: '301', name: 'ห้องพิเศษ 301', occupied: false },
+      { id: 'vip-302', num: '302', name: 'ห้องพิเศษ 302', occupied: true },
+      { id: 'vip-303', num: '303', name: 'ห้องพิเศษ 303', occupied: false },
+      { id: 'vip-304', num: '304', name: 'ห้องพิเศษ 304', occupied: true },
+      { id: 'vip-305', num: '305', name: 'ห้องพิเศษ 305', occupied: false },
+      { id: 'vip-306', num: '306', name: 'ห้องพิเศษ 306', occupied: true },
+      { id: 'vip-307', num: '307', name: 'ห้องพิเศษ 307', occupied: false },
+      { id: 'vip-308', num: '308', name: 'ห้องพิเศษ 308', occupied: false },
+      { id: 'vip-309', num: '309', name: 'ห้องพิเศษ 309', occupied: true },
+      { id: 'vip-311', num: '311', name: 'ห้องพิเศษ 311', occupied: false },
+      { id: 'vip-312', num: '312', name: 'ห้องพิเศษ 312', occupied: true },
+      { id: 'vip-313', num: '313', name: 'ห้องพิเศษ 313', occupied: false },
+      { id: 'vip-314', num: '314', name: 'ห้องพิเศษ 314', occupied: false }
+    ],
+    vipMeetingOccupied: false,
+    vipStaffRestOccupied: false
   };
 
   function buildRomphoInterior(b) {
@@ -5766,96 +5806,407 @@
     const zMin = -D / 2; // -8.0
     const zMax = D / 2;  // +8.0
 
-    // ถ้าเป็นชั้น 3: สร้างห้องโล่งๆ ตามที่ผู้ใช้สั่ง ("ส่วนชั้นที่ 3 ให้ทำห้องโล่งๆไว้")
+    // =========================================================================
+    // ชั้น 3: หอผู้ป่วยพิเศษ (VIP Inpatient Ward) ตามผังรูปภาพอย่างแม่นยำ
+    // =========================================================================
     if (romphoState.currentFloor === 3) {
-      // 1. พื้นห้องโถงขนาดใหญ่แบบโล่ง ปูกระเบื้องแกรนิตโต้หรูหรา 1x1 ม.
-      floor(g, W, D, '#f8fafc', '#cbd5e1', 1.0, 0, 0);
+      function makeRomphoDoor(x, z, w, d, rotY = 0) {
+        const dg = new THREE.Group();
+        dg.position.set(x, 0, z);
+        const isHoriz = w >= d;
+        const pad = maintBox(w, 0.04, d, 0xe2e8f0);
+        pad.position.set(0, 0.02, 0);
+        dg.add(pad);
+        const leafW = isHoriz ? w * 0.85 : 0.07;
+        const leafD = isHoriz ? 0.07 : d * 0.85;
+        const leaf = maintBox(leafW, 1.95, leafD, 0xd97706);
+        leaf.position.set(0, 0.98, 0);
+        leaf.rotation.y = rotY;
+        dg.add(leaf);
+        const winW = isHoriz ? 0.22 : 0.08;
+        const winD = isHoriz ? 0.08 : 0.22;
+        const win = maintBox(winW, 0.38, winD, 0xbae6fd);
+        win.position.set(0, 1.25, 0);
+        dg.add(win);
+        g.add(dg);
+      }
 
-      // 2. กำแพงรอบนอก 4 ด้าน พร้อมกระจกบานใหญ่รับแสงธรรมชาติ
-      g.add(
-        maintAt(maintWall(5.0, WH, wThick, 0x1e293b), -9.5, WH / 2, zMin + wThick / 2),
-        maintAt(maintWall(5.0, WH, wThick, 0x1e293b), 9.5, WH / 2, zMin + wThick / 2),
-        maintAt(maintBox(14.0, 1.4, 0.08, 0x93c5fd), 0, 1.3, zMin + wThick / 2),
-        maintAt(maintWall(14.0, 0.5, wThick, 0x1e293b), 0, 0.25, zMin + wThick / 2),
-        maintAt(maintWall(14.0, 0.5, wThick, 0x1e293b), 0, WH - 0.25, zMin + wThick / 2)
-      );
+      function makeVipRoomSuite(x1, z1, x2, z2, room) {
+        const rw = Math.abs(x2 - x1);
+        const rd = Math.abs(z2 - z1);
+        const cx = (x1 + x2) / 2;
+        const cz = (z1 + z2) / 2;
+        const isLeft = x1 < 0;
 
-      g.add(
-        maintAt(maintWall(5.0, WH, wThick, 0x1e293b), -9.5, WH / 2, zMax - wThick / 2),
-        maintAt(maintWall(5.0, WH, wThick, 0x1e293b), 9.5, WH / 2, zMax - wThick / 2),
-        maintAt(maintBox(14.0, 1.4, 0.08, 0x93c5fd), 0, 1.3, zMax - wThick / 2),
-        maintAt(maintWall(14.0, 0.5, wThick, 0x1e293b), 0, 0.25, zMax - wThick / 2),
-        maintAt(maintWall(14.0, 0.5, wThick, 0x1e293b), 0, WH - 0.25, zMax - wThick / 2)
-      );
+        // พื้นห้องพิเศษลายไม้และครีมอบอุ่นหรูหรา
+        floor(g, rw, rd, '#fffbeb', '#fde68a', 0.6, cx, cz);
 
+        // เตียงผู้ป่วยปรับระดับไฟฟ้า
+        const bedX = isLeft ? x1 + 2.2 : x2 - 2.2;
+        const bedZ = cz;
+        const bg = new THREE.Group();
+        bg.position.set(bedX, 0, bedZ);
+        bg.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2;
+
+        const bw = 0.95, bd = 1.95;
+        const frame = maintBox(bw, 0.42, bd, 0x64748b);
+        frame.position.set(0, 0.21, 0);
+        bg.add(frame);
+
+        const matCol = room.occupied ? 0xf43f5e : 0x10b981;
+        const sheet = maintBox(bw - 0.06, 0.16, bd - 0.06, matCol);
+        sheet.position.set(0, 0.50, 0);
+        bg.add(sheet);
+
+        const head = maintBox(bw + 0.04, 0.45, 0.06, 0x0284c7);
+        head.position.set(0, 0.65, -bd / 2 + 0.03);
+        const pillow = maintBox(bw * 0.65, 0.08, 0.32, 0xffffff);
+        pillow.position.set(0, 0.62, -bd / 2 + 0.26);
+        const blanket = maintBox(bw - 0.04, 0.08, bd * 0.58, room.occupied ? 0xfecdd3 : 0xd1fae5);
+        blanket.position.set(0, 0.62, bd * 0.18);
+        bg.add(head, pillow, blanket);
+
+        // โต๊ะข้างเตียง
+        const sTable = maintBox(0.42, 0.65, 0.42, 0xffffff);
+        sTable.position.set(bw / 2 + 0.30, 0.325, -bd / 2 + 0.3);
+        bg.add(sTable);
+
+        // เสาน้ำเกลือ
+        const pole = maintCyl(0.015, 0.015, 1.7, 0x94a3b8);
+        pole.position.set(-bw / 2 - 0.18, 0.85, -bd / 2 + 0.25);
+        bg.add(pole);
+        const ivBag = maintBox(0.08, 0.18, 0.05, 0x38bdf8);
+        ivBag.position.set(-bw / 2 - 0.18, 1.55, -bd / 2 + 0.25);
+        bg.add(ivBag);
+
+        if (room.occupied) {
+          const pat = makePerson({ role: 'patient', pose: 'lie', rotY: 0 });
+          bg.add(pat);
+          const nurse = makePerson({ role: 'nurse', pose: 'stand', rotY: -Math.PI / 2 });
+          nurse.position.set(bw / 2 + 0.35, 0, 0.1);
+          bg.add(nurse);
+        }
+        g.add(bg);
+
+        // โซฟาสำหรับญาติเฝ้าไข้
+        const sofaX = isLeft ? x1 + 5.0 : x2 - 5.0;
+        const relSofa = maintBox(1.8, 0.52, 0.75, 0x475569);
+        relSofa.position.set(sofaX, 0.26, cz);
+        g.add(relSofa);
+
+        // ทีวีติดผนัง & ตู้เสื้อผ้า
+        const tv = maintBox(1.1, 0.65, 0.06, 0x0f172a);
+        tv.position.set(isLeft ? x1 + 0.1 : x2 - 0.1, 1.45, cz);
+        const wardrobe = maintBox(0.65, 1.8, 0.85, 0x78350f);
+        wardrobe.position.set(isLeft ? x2 - 0.8 : x1 + 0.8, 0.9, cz);
+        g.add(tv, wardrobe);
+
+        // ห้องน้ำในตัวห้องพิเศษ (สุขภัณฑ์ & อ่างล้างหน้า)
+        const toilet = maintBox(0.42, 0.42, 0.55, 0xffffff);
+        toilet.position.set(isLeft ? x2 - 1.8 : x1 + 1.8, 0.21, cz);
+        g.add(toilet);
+
+        const statusText = room.occupied ? '🔴 มีผู้ป่วยพัก' : '🟢 ว่าง';
+        L.push({
+          text: `${room.name} (${statusText})`,
+          pos: V(cx, 1.85, cz),
+          cls: `int-label ${room.occupied ? 'busy' : 'free'} toggleable`,
+          toggleId: room.id
+        });
+      }
+
+      function createVipPcDesk(x, z, rotY, spec, labelText, personOpts = null) {
+        const dg = new THREE.Group();
+        dg.position.set(x, 0, z);
+        dg.rotation.y = rotY;
+
+        dg.add(
+          maintAt(maintBox(2.2, 0.76, 0.85, 0xffffff), 0, 0.38, 0),
+          maintAt(maintBox(2.24, 0.05, 0.90, 0x0284c7), 0, 0.78, 0),
+          maintAt(maintBox(2.24, 0.35, 0.06, 0x38bdf8), 0, 0.95, -0.42)
+        );
+
+        const mon = maintBox(0.55, 0.34, 0.04, 0x0f172a);
+        mon.position.set(0, 0.98, -0.15);
+        const scr = maintBox(0.51, 0.30, 0.01, 0x0284c7);
+        scr.position.set(0, 0.98, -0.12);
+        const stand = maintBox(0.06, 0.16, 0.06, 0x475569);
+        stand.position.set(0, 0.86, -0.15);
+        const base = maintBox(0.24, 0.02, 0.18, 0x475569);
+        base.position.set(0, 0.79, -0.15);
+        dg.add(mon, scr, stand, base);
+
+        const kb = maintBox(0.42, 0.015, 0.15, 0x1e293b);
+        kb.position.set(0, 0.81, 0.12);
+        const mouse = maintBox(0.06, 0.015, 0.09, 0x1e293b);
+        mouse.position.set(0.30, 0.81, 0.12);
+        dg.add(kb, mouse);
+
+        const pcCase = maintBox(0.18, 0.40, 0.38, 0x1e293b);
+        pcCase.position.set(0.85, 0.38, 0.05);
+        dg.add(pcCase);
+
+        const chair = maintBox(0.48, 0.46, 0.48, 0x334155);
+        chair.position.set(0, 0.23, 0.58);
+        const back = maintBox(0.48, 0.46, 0.06, 0x334155);
+        back.position.set(0, 0.69, 0.79);
+        dg.add(chair, back);
+
+        if (personOpts) {
+          const staff = makePerson(personOpts);
+          staff.position.set(0, 0, 0.55);
+          dg.add(staff);
+        }
+
+        g.add(dg);
+
+        if (labelText) {
+          L.push({
+            text: labelText,
+            pos: V(x, 1.95, z),
+            cls: 'int-label pc-tag',
+            pcInfo: spec
+          });
+        }
+        return dg;
+      }
+
+      // 1. พื้นโถงทางเดินและโซนต่างๆ
+      // ทางเดินกลาง (Corridor: X: -3.8 .. -1.2, Z: -8.0 .. +8.0)
+      floor(g, 2.6, 16.0, '#f8fafc', '#cbd5e1', 0.6, -2.5, 0);
+      walkwayStrip(g, -2.5, 0, 15.0, 1.4, Math.PI / 2);
+
+      // โซนพยาบาลและห้องน้ำเจ้าหน้าที่ (Right Wing: X: -1.2 .. +12.0, Z: -1.6 .. +2.8)
+      floor(g, 9.8, 4.4, '#f8fafc', '#cbd5e1', 0.6, 3.7, 0.6); // โซนเคาน์เตอร์และโต๊ะประชุม
+      floor(g, 3.4, 4.4, '#e0f2fe', '#93c5fd', 0.6, 10.3, 0.6); // ห้องน้ำเจ้าหน้าที่
+
+      // ห้องพักเจ้าหน้าที่ (ล่างขวา: X: -1.2 .. +12.0, Z: +6.4 .. +8.0)
+      floor(g, 13.2, 1.6, '#fef3c7', '#fde68a', 0.6, 5.4, 7.2);
+
+      // โถงลิฟต์ (ล่างซ้าย: X: -12.0 .. -3.8, Z: +6.24 .. +8.0)
+      floor(g, 8.2, 1.76, '#f8fafc', '#cbd5e1', 0.6, -7.9, 7.12);
+
+      // 2. กำแพงรอบนอก (Outer Perimeter Walls)
       g.add(
+        maintAt(maintWall(W, WH, wThick, 0x1e293b), 0, WH / 2, zMin + wThick / 2),
+        // กำแพงล่างพร้อมช่องประตูด้านล่างของโถงทางเดิน
+        maintAt(maintWall(8.65, WH, wThick, 0x1e293b), -7.67, WH / 2, zMax - wThick / 2),
+        maintAt(maintWall(1.4, 0.35, wThick, 0x1e293b), -2.5, WH - 0.175, zMax - wThick / 2),
+        maintAt(maintWall(13.95, WH, wThick, 0x1e293b), 5.02, WH / 2, zMax - wThick / 2),
         maintAt(maintWall(wThick, WH, D, 0x1e293b), xMin + wThick / 2, WH / 2, 0),
         maintAt(maintWall(wThick, WH, D, 0x1e293b), xMax - wThick / 2, WH / 2, 0)
       );
+      makeRomphoDoor(-2.5, zMax - wThick / 2, 1.4, 0.45, 0.3);
+      L.push(maintTag('🚪 ประตู', V(-2.5, 1.45, zMax - 0.35), 'room', null, 'ประตูทางเข้าโถงชั้น 3 (ล่าง)'));
 
-      // 3. เสาโครงสร้างทรงกระบอก 6 ต้น
-      const pillarCoords = [
-        [-6.0, -3.0], [0, -3.0], [6.0, -3.0],
-        [-6.0, 3.0],  [0, 3.0],  [6.0, 3.0]
+      // 3. กำแพงปีกซ้าย (Left Wing: 8 ห้องพิเศษ + ลิฟต์)
+      const leftZBounds = [
+        -8.0, -6.22, -4.44, -2.66, -0.88, 0.90, 2.68, 4.46, 6.24, 8.00
       ];
-      pillarCoords.forEach(([px, pz]) => {
-        const pil = maintCyl(0.32, 0.32, WH, 0x334155, 16);
-        pil.position.set(px, WH / 2, pz);
-        const bBase = maintBox(0.85, 0.12, 0.85, 0x475569);
-        bBase.position.set(px, 0.06, pz);
-        const bCap = maintBox(0.85, 0.12, 0.85, 0x475569);
-        bCap.position.set(px, WH - 0.06, pz);
-        g.add(pil, bBase, bCap);
-      });
+      // ผนังกั้นแนวนอนฝั่งซ้าย
+      for (let i = 1; i < leftZBounds.length; i++) {
+        g.add(maintAt(maintWall(8.2, WH, wThick, 0x1e293b), -7.9, WH / 2, leftZBounds[i]));
+      }
 
-      // 4. บันไดและโถงลิฟต์ประจำชั้น
-      const coreW = 3.6, coreD = 3.4;
-      const coreX = xMin + coreW / 2 + 0.18;
-      const coreZ = zMax - coreD / 2 - 0.18;
+      // ผนังฝั่งซ้ายของโถงทางเดิน (X = -3.8) พร้อมประตูเข้า 8 ห้องพิเศษ และโถงลิฟต์
+      const vipLeftRooms = [
+        romphoState.vipRooms[7], // 308
+        romphoState.vipRooms[6], // 307
+        romphoState.vipRooms[5], // 306
+        romphoState.vipRooms[4], // 305
+        romphoState.vipRooms[3], // 304
+        romphoState.vipRooms[2], // 303
+        romphoState.vipRooms[1], // 302
+        romphoState.vipRooms[0]  // 301
+      ];
+
+      for (let i = 0; i < 8; i++) {
+        const topZ = leftZBounds[i];
+        const btmZ = leftZBounds[i + 1];
+        const midZ = (topZ + btmZ) / 2;
+        const hSpan = btmZ - topZ;
+
+        g.add(
+          maintAt(maintWall(wThick, WH, (hSpan - 1.1) / 2, 0x1e293b), -3.8, WH / 2, topZ + (hSpan - 1.1) / 4),
+          maintAt(maintWall(wThick, 0.35, 1.1, 0x1e293b), -3.8, WH - 0.175, midZ),
+          maintAt(maintWall(wThick, WH, (hSpan - 1.1) / 2, 0x1e293b), -3.8, WH / 2, btmZ - (hSpan - 1.1) / 4)
+        );
+        makeRomphoDoor(-3.8, midZ, 0.45, 1.1, 0.35);
+        L.push(maintTag('🚪 ประตู', V(-3.45, 1.45, midZ), 'room', null, `ประตู${vipLeftRooms[i].name}`));
+
+        // สร้างเฟอร์นิเจอร์ภายในห้องพิเศษ
+        makeVipRoomSuite(-12.0, topZ, -3.8, btmZ, vipLeftRooms[i]);
+      }
+
+      // โถงลิฟต์ชั้น 3 (ล่างซ้าย)
+      const elevGroup = new THREE.Group();
+      elevGroup.position.set(-7.9, 0, 7.12);
+      const elevFrame = maintBox(2.2, 2.2, 0.14, 0x64748b);
+      elevFrame.position.set(0, 1.1, 0);
+      const elevDoorL = maintBox(0.8, 2.0, 0.05, 0x94a3b8);
+      elevDoorL.position.set(-0.41, 1.0, 0.06);
+      const elevDoorR = maintBox(0.8, 2.0, 0.05, 0x94a3b8);
+      elevDoorR.position.set(0.41, 1.0, 0.06);
+      const elevDisplay = maintBox(0.32, 0.16, 0.05, 0x0284c7);
+      elevDisplay.position.set(0, 2.05, 0.09);
+      elevGroup.add(elevFrame, elevDoorL, elevDoorR, elevDisplay);
+      g.add(elevGroup);
+      L.push({ text: '🛗 ลิฟต์ชั้น 3', pos: V(-7.9, 2.1, 7.12), cls: 'int-label room-title' });
+
+      // 4. กำแพงปีกขวา (Right Wing: 5 ห้องพิเศษ + โซนพยาบาล + ห้องพักเจ้าหน้าที่)
+      // ผนังฝั่งขวาของโถงทางเดิน (X = -1.2)
       g.add(
-        maintAt(maintWall(coreW, WH, wThick, 0x1e293b), coreX, WH / 2, zMax - coreD),
-        maintAt(maintWall(wThick, WH, coreD, 0x1e293b), xMin + coreW, WH / 2, coreZ)
+        // ประตูห้องพิเศษ 309
+        maintAt(maintWall(wThick, WH, 0.55, 0x1e293b), -1.2, WH / 2, -7.72),
+        maintAt(maintWall(wThick, 0.35, 1.1, 0x1e293b), -1.2, WH - 0.175, -6.9),
+        maintAt(maintWall(wThick, WH, 0.55, 0x1e293b), -1.2, WH / 2, -6.08),
+        // ประตูห้องพิเศษ 311
+        maintAt(maintWall(wThick, 0.35, 1.1, 0x1e293b), -1.2, WH - 0.175, -4.75),
+        maintAt(maintWall(wThick, WH, 1.0, 0x1e293b), -1.2, WH / 2, -3.7),
+        // ประตูห้องพิเศษ 312
+        maintAt(maintWall(wThick, 0.35, 1.1, 0x1e293b), -1.2, WH - 0.175, -2.65),
+        maintAt(maintWall(wThick, WH, 0.55, 0x1e293b), -1.2, WH / 2, -1.82),
+        // ผนังเคาน์เตอร์โต๊ะคอมห้องพิเศษ
+        maintAt(maintWall(wThick, WH, 2.6, 0x1e293b), -1.2, WH / 2, -0.2),
+        maintAt(maintWall(wThick, 0.35, 1.2, 0x1e293b), -1.2, WH - 0.175, 2.0), // ประตูเข้าโซนพยาบาล
+        maintAt(maintWall(wThick, WH, 0.4, 0x1e293b), -1.2, WH / 2, 2.6),
+        // ประตูห้องพิเศษ 313
+        maintAt(maintWall(wThick, 0.35, 1.1, 0x1e293b), -1.2, WH - 0.175, 3.7),
+        maintAt(maintWall(wThick, WH, 0.7, 0x1e293b), -1.2, WH / 2, 4.6),
+        // ประตูห้องพิเศษ 314
+        maintAt(maintWall(wThick, 0.35, 1.1, 0x1e293b), -1.2, WH - 0.175, 5.5),
+        maintAt(maintWall(wThick, WH, 0.5, 0x1e293b), -1.2, WH / 2, 6.15),
+        // ประตูห้องพักเจ้าหน้าที่
+        maintAt(maintWall(wThick, 0.35, 1.1, 0x1e293b), -1.2, WH - 0.175, 7.2),
+        maintAt(maintWall(wThick, WH, 0.3, 0x1e293b), -1.2, WH / 2, 7.85)
       );
-      const coreDoor = maintBox(1.2, 2.0, 0.06, 0xd97706);
-      coreDoor.position.set(coreX, 1.0, zMax - coreD);
-      g.add(coreDoor);
+      makeRomphoDoor(-1.2, -6.9, 0.45, 1.1, -0.35);
+      L.push(maintTag('🚪 ประตู', V(-1.55, 1.45, -6.9), 'room', null, 'ประตูห้องพิเศษ 309'));
+      makeRomphoDoor(-1.2, -4.75, 0.45, 1.1, -0.35);
+      L.push(maintTag('🚪 ประตู', V(-1.55, 1.45, -4.75), 'room', null, 'ประตูห้องพิเศษ 311'));
+      makeRomphoDoor(-1.2, -2.65, 0.45, 1.1, -0.35);
+      L.push(maintTag('🚪 ประตู', V(-1.55, 1.45, -2.65), 'room', null, 'ประตูห้องพิเศษ 312'));
+      makeRomphoDoor(-1.2, 2.0, 0.45, 1.2, -0.35);
+      L.push(maintTag('🚪 ประตู', V(-1.55, 1.45, 2.0), 'room', null, 'ประตูเข้าเคาน์เตอร์พยาบาล'));
+      makeRomphoDoor(-1.2, 3.7, 0.45, 1.1, -0.35);
+      L.push(maintTag('🚪 ประตู', V(-1.55, 1.45, 3.7), 'room', null, 'ประตูห้องพิเศษ 313'));
+      makeRomphoDoor(-1.2, 5.5, 0.45, 1.1, -0.35);
+      L.push(maintTag('🚪 ประตู', V(-1.55, 1.45, 5.5), 'room', null, 'ประตูห้องพิเศษ 314'));
+      makeRomphoDoor(-1.2, 7.2, 0.45, 1.1, -0.35);
+      L.push(maintTag('🚪 ประตู', V(-1.55, 1.45, 7.2), 'room', null, 'ประตูห้องพักเจ้าหน้าที่'));
 
-      L.push({
-        text: '🏢 ตึกร่มโพธิ์ 3 - ชั้น 3 (ห้องโถงอเนกประสงค์ / พื้นที่โล่ง)',
-        pos: V(0, 2.65, 0),
-        cls: 'int-label zone-er'
+      // ผนังกั้นแนวนอนฝั่งขวา
+      g.add(
+        maintAt(maintWall(13.2, WH, wThick, 0x1e293b), 5.4, WH / 2, -5.8),
+        maintAt(maintWall(13.2, WH, wThick, 0x1e293b), 5.4, WH / 2, -3.7),
+        maintAt(maintWall(13.2, WH, wThick, 0x1e293b), 5.4, WH / 2, -1.6),
+        maintAt(maintWall(13.2, WH, wThick, 0x1e293b), 5.4, WH / 2, 2.8),
+        maintAt(maintWall(13.2, WH, wThick, 0x1e293b), 5.4, WH / 2, 4.6),
+        maintAt(maintWall(13.2, WH, wThick, 0x1e293b), 5.4, WH / 2, 6.4)
+      );
+
+      // สร้างห้องพิเศษฝั่งขวา 5 ห้อง
+      makeVipRoomSuite(-1.2, -8.0, 12.0, -5.8, romphoState.vipRooms[8]);  // 309
+      makeVipRoomSuite(-1.2, -5.8, 12.0, -3.7, romphoState.vipRooms[9]);  // 311
+      makeVipRoomSuite(-1.2, -3.7, 12.0, -1.6, romphoState.vipRooms[10]); // 312
+      makeVipRoomSuite(-1.2, 2.8, 12.0, 4.6, romphoState.vipRooms[11]);   // 313
+      makeVipRoomSuite(-1.2, 4.6, 12.0, 6.4, romphoState.vipRooms[12]);   // 314
+
+      // 5. โซนเคาน์เตอร์พยาบาล & เจ้าหน้าที่ (Center-Right: Z = -1.6 .. +2.8)
+      // เค้าเตอร์โต๊ะคอมห้องพิเศษ (ติดผนังโถงทางเดิน)
+      createVipPcDesk(-0.6, 0.4, Math.PI / 2, VIP_PC_SPECS, '🖥️ เค้าเตอร์โต๊ะคอมห้องพิเศษ', { role: 'nurse', pose: 'sit', rotY: Math.PI / 2 });
+
+      // เค้าเตอร์พยาบาล (Reception L-counter แนวนอน)
+      const nurseCounter = maintBox(7.2, 1.05, 0.65, 0x0284c7);
+      nurseCounter.position.set(4.8, 0.525, -1.2);
+      const counterTop = maintBox(7.25, 0.06, 0.75, 0xffffff);
+      counterTop.position.set(4.8, 1.05, -1.2);
+      g.add(nurseCounter, counterTop);
+      L.push({ text: '👩‍⚕️ เค้าเตอร์พยาบาล', pos: V(4.8, 1.85, -1.2), cls: 'int-label zone-er' });
+
+      // โต๊ะประชุม (Conference table ตรงกลาง)
+      const meetTable = maintBox(2.6, 0.74, 1.2, 0xd97706);
+      meetTable.position.set(4.5, 0.37, 0.6);
+      [-0.8, 0, 0.8].forEach((ox) => {
+        const chairU = maintBox(0.42, 0.45, 0.42, 0x334155);
+        chairU.position.set(4.5 + ox, 0.225, 0.0);
+        const chairD = maintBox(0.42, 0.45, 0.42, 0x334155);
+        chairD.position.set(4.5 + ox, 0.225, 1.2);
+        g.add(chairU, chairD);
       });
-      L.push({
-        text: '🚪 โถงบันไดและลิฟต์โดยสาร',
-        pos: V(coreX, 1.95, zMax - coreD + 0.3),
-        cls: 'int-label room-title'
-      });
+      g.add(meetTable);
+      L.push({ text: '📊 โต๊ะประชุม', pos: V(4.5, 1.6, 0.6), cls: 'int-label sub-tag' });
+
+      // ชั้นเก็บของ (ทางขวาของโต๊ะประชุม)
+      const storShelf = maintBox(0.65, 1.8, 2.6, 0x64748b);
+      storShelf.position.set(8.2, 0.9, 0.6);
+      g.add(storShelf);
+      L.push({ text: 'ชั้นเก็บของ', pos: V(8.2, 1.6, 0.6), cls: 'int-label sub-tag' });
+
+      // โต๊ะทำงาน 2 ตัวใต้โต๊ะประชุม
+      const t1 = maintBox(1.6, 0.74, 0.8, 0x64748b);
+      t1.position.set(2.4, 0.37, 2.1);
+      const c1 = maintBox(0.42, 0.45, 0.42, 0x334155);
+      c1.position.set(2.4, 0.225, 2.5);
+      const t2 = maintBox(1.6, 0.74, 0.8, 0x64748b);
+      t2.position.set(5.8, 0.37, 2.1);
+      const c2 = maintBox(0.42, 0.45, 0.42, 0x334155);
+      c2.position.set(5.8, 0.225, 2.5);
+      g.add(t1, c1, t2, c2);
+
+      // ผนังห้องน้ำเจ้าหน้าที่ (X = +8.6 .. +12.0, Z: -1.6 .. +2.8)
+      g.add(
+        maintAt(maintWall(wThick, WH, 1.6, 0x1e293b), 8.6, WH / 2, -0.8),
+        maintAt(maintWall(wThick, 0.35, 1.1, 0x1e293b), 8.6, WH - 0.175, 0.55),
+        maintAt(maintWall(wThick, WH, 1.7, 0x1e293b), 8.6, WH / 2, 1.95)
+      );
+      makeRomphoDoor(8.6, 0.55, 0.45, 1.1, 0.35);
+      L.push(maintTag('🚪 ประตู', V(8.25, 1.45, 0.55), 'room', null, 'ประตูห้องน้ำเจ้าหน้าที่'));
+      const staffWc = maintBox(0.45, 0.45, 0.65, 0xffffff);
+      staffWc.position.set(11.2, 0.225, 0.6);
+      g.add(staffWc);
+      L.push({ text: '🚻 ห้องน้ำเจ้าหน้าที่', pos: V(10.4, 1.95, 0.6), cls: 'int-label room-title' });
+
+      // 6. ห้องพักเจ้าหน้าที่ (ล่างขวา: Z = +6.4 .. +8.0)
+      L.push({ text: '☕ ห้องพักเจ้าหน้าที่', pos: V(5.4, 1.95, 7.2), cls: 'int-label zone-pcu' });
+      const sofaSt = maintBox(3.2, 0.65, 0.85, 0x334155);
+      sofaSt.position.set(3.0, 0.325, 7.3);
+      const dineSt = maintBox(2.2, 0.74, 0.9, 0xd97706);
+      dineSt.position.set(7.8, 0.37, 7.2);
+      const fridgeSt = maintBox(0.7, 1.5, 0.65, 0xe2e8f0);
+      fridgeSt.position.set(11.2, 0.75, 7.2);
+      g.add(sofaSt, dineSt, fridgeSt);
 
       const items = [
-        ['🏢', 'ตึกร่มโพธิ์ 3 - ชั้น 3', 'ห้องโถงอเนกประสงค์ (พื้นที่โล่ง)'],
-        ['📐', 'พื้นที่ใช้สอยชั้น 3', '384 ตร.ม. (24 ม. × 16 ม.)'],
-        ['🏛️', 'เสาโครงสร้างคอนกรีต', '6 ต้น (ระยะสแปน 6 เมตร)'],
-        ['🚪', 'โถงบันไดและลิฟต์โดยสาร', 'เข้าถึงได้สะดวกทุกชั้น'],
-        ['🪟', 'ช่องกระจกรับแสงธรรมชาติ', 'รอบทิศทาง'],
-        ['💡', 'ระบบไฟฟ้าและส่องสว่าง', 'พร้อมรองรับการจัดสรรแผนก']
+        ['🏢', 'ตึกร่มโพธิ์ 3 - ชั้น 3', 'หอผู้ป่วยพิเศษ (VIP Ward)'],
+        ['🛌', 'ห้องพิเศษ 13 ห้อง (301-308, 309, 311-314)', 'คลิกห้องเพื่อสลับ ว่าง/มีผู้ป่วย'],
+        ['🖥️', 'PC-VIP-01: เค้าเตอร์โต๊ะคอมห้องพิเศษ', 'ดูสเปก', null, 'free', VIP_PC_SPECS],
+        ['👩‍⚕️', 'เค้าเตอร์พยาบาลห้องพิเศษ', '1 จุด'],
+        ['📊', 'โต๊ะประชุมแพทย์-พยาบาล', '1 ชุด (6 ที่นั่ง)'],
+        ['🗄️', 'ชั้นเก็บของและเวชภัณฑ์', '1 จุด'],
+        ['🪑', 'โต๊ะทำงานเจ้าหน้าที่', '2 ตัว'],
+        ['☕', 'ห้องพักเจ้าหน้าที่', '1 ห้อง'],
+        ['🛗', 'ลิฟต์ชั้น 3', '1 จุด'],
+        ['🚻', 'ห้องน้ำเจ้าหน้าที่', '1 ห้อง'],
+        ['🚪', 'ประตูทางเข้าและประตูห้องพักพิเศษ', '16 จุด ตามผัง']
       ];
 
       return {
         group: g,
         labels: L,
-        title: '🏢 ตึกร่มโพธิ์ 3 - ชั้น 3 (ห้องโถงอเนกประสงค์ / พื้นที่โล่ง)',
-        sub: 'พื้นที่ชั้น 3 ขนาดใหญ่ 384 ตร.ม. แบบเปิดโล่ง รองรับการจัดกิจกรรมหรือขยายแผนกในอนาคต (คลิกปุ่มชั้นด้านบนเพื่อสลับดูชั้น 1, 2, 3)',
+        title: 'ตึกร่มโพธิ์ 3 - ชั้น 3 (หอผู้ป่วยพิเศษ)',
+        sub: 'ผังหอผู้ป่วยพิเศษ: ห้องพิเศษ 13 ห้อง (301-308, 309, 311-314) • เค้าเตอร์พยาบาล • โต๊ะคอมห้องพิเศษ • โต๊ะประชุม • ลิฟต์ • ห้องพักเจ้าหน้าที่ (คลิกปุ่มชั้นด้านบนเพื่อสลับดูชั้น 1, 2, 3)',
         floors: [
           { num: 1, label: 'ชั้น 1 (ห้องคลอด)' },
           { num: 2, label: 'ชั้น 2 (ศูนย์ไตเทียม)' },
-          { num: 3, label: 'ชั้น 3 (ห้องโล่ง)' }
+          { num: 3, label: 'ชั้น 3 (หอผู้ป่วยพิเศษ)' }
         ],
         currentFloor: 3,
         onSelectFloor: (f) => {
           romphoState.currentFloor = f;
         },
         items,
-        cam: { pos: V(0, 25.0, 22.0), target: V(0, 0, 0) }
+        cam: { pos: V(0, 24.0, 20.0), target: V(0, 0, 0.5) }
       };
     }
 
@@ -6386,7 +6737,7 @@
         floors: [
           { num: 1, label: 'ชั้น 1 (ห้องคลอด)' },
           { num: 2, label: 'ชั้น 2 (ศูนย์ไตเทียม)' },
-          { num: 3, label: 'ชั้น 3 (ห้องโล่ง)' }
+          { num: 3, label: 'ชั้น 3 (หอผู้ป่วยพิเศษ)' }
         ],
         currentFloor: 2,
         onSelectFloor: (f) => {
@@ -6860,7 +7211,7 @@
       floors: [
         { num: 1, label: 'ชั้น 1 (ห้องคลอด)' },
         { num: 2, label: 'ชั้น 2 (ศูนย์ไตเทียม)' },
-        { num: 3, label: 'ชั้น 3 (ห้องโล่ง)' }
+        { num: 3, label: 'ชั้น 3 (หอผู้ป่วยพิเศษ)' }
       ],
       currentFloor: 1,
       onSelectFloor: (f) => {
@@ -6891,6 +7242,13 @@
       return null;
     },
     toggleStatus(id) {
+      if (id.startsWith('vip-')) {
+        const vRoom = romphoState.vipRooms.find((r) => r.id === id);
+        if (vRoom) {
+          vRoom.occupied = !vRoom.occupied;
+          return true;
+        }
+      }
       if (id.startsWith('hemo-bed-')) {
         const hBed = romphoState.hemoBeds.find((b) => b.id === id);
         if (hBed) {
