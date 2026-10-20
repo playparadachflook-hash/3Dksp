@@ -8681,12 +8681,12 @@
     const zMax = D / 2;  // 10.0
 
     // Floors with distinct zones
-    // 1. General polished clinical floor
+    // 1. General polished clinical floor (clean floor throughout, no blue strips)
     floor(g, W, D, '#f8fafc', '#e2e8f0', 0.6, 0, 0);
 
     // 2. Exam rooms sage green floor
-    const examFloorTex = M.tileTexture('#ecfdf5', '#a7f3d0', 19.5 / 0.5, 3.7 / 0.5);
-    const mExamFloor = M.box(g, 19.3, 0.105, 3.7, M.mat(0xffffff, { map: examFloorTex, roughness: 0.6 }), -9.15, -0.047, -5.35);
+    const examFloorTex = M.tileTexture('#ecfdf5', '#a7f3d0', 18.3 / 0.5, 3.7 / 0.5);
+    const mExamFloor = M.box(g, 18.3, 0.105, 3.7, M.mat(0xffffff, { map: examFloorTex, roughness: 0.6 }), -9.65, -0.047, -5.35);
     addEdges(mExamFloor, 0x059669);
 
     // 3. Buddha room teak wood floor
@@ -8708,15 +8708,6 @@
     const carpetTex = M.tileTexture('#fef3c7', '#d97706', 4.8 / 0.5, 3.3 / 0.5);
     const mDirFloor = M.box(g, 4.8, 0.11, 3.3, M.mat(0xffffff, { map: carpetTex, roughness: 0.8 }), 16.4, -0.045, 8.15);
     addEdges(mDirFloor, 0xb45309);
-
-    // Walkways: Main OPD corridor & connecting routes (ตึก ER style blue walkway)
-    walkwayStrip(g, -9.15, -2.5, 19.0, 1.2, 0); // Hallway in front of exam rooms
-    walkwayStrip(g, -9.15, 0.8, 19.0, 1.4, 0);  // Main waiting lobby aisle
-    walkwayStrip(g, -9.15, 3.9, 19.0, 1.3, 0);  // Walkway between screening & lower waiting
-    walkwayStrip(g, 2.5, 0.8, 5.0, 1.8, 0);    // Central connecting plaza
-    walkwayStrip(g, 11.65, -3.75, 14.3, 1.1, 0); // Corridor 1 (Top right)
-    walkwayStrip(g, 11.65, 0.85, 14.3, 1.1, 0);  // Corridor 2 (Mid right)
-    walkwayStrip(g, 11.65, 6.0, 14.3, 1.1, 0);   // Corridor 3 (Bottom right)
 
     // Materials
     const mWall = M.mat(0xffffff, { roughness: 0.85 });
@@ -9108,22 +9099,24 @@
     // ==========================================
     // 1. LEFT WING: OPD CLINIC & EXAM ROOMS 1-6
     // ==========================================
-    // Rear Nurse Rest Room corridor at top: z = -10.0 to -7.2, x = -18.8 to 0.5
-    wall(-18.8, -7.2, 0.5, -7.2, wThick, WH); // Wall separating rest room & exam rooms
+    // Rear Nurse Rest Room corridor at top: z = -10.0 to -7.2, x = -18.8 to -0.5
+    wall(-18.8, -7.2, -0.5, -7.2, wThick, WH); // Wall separating rest room & exam rooms
     // Doors into rest room from Room 6 and Room 1
     doorWay(-17.0, -7.2, 0, 1.0);
-    doorWay(-1.2, -7.2, 0, 1.0);
+    doorWay(-1.8, -7.2, 0, 1.0);
+    // Door from rest room into the new corridor on left of EKG
+    doorWay(-0.5, -8.6, Math.PI / 2, 1.0);
 
-    // Front wall of exam rooms: z = -3.5, x = -18.8 to 0.5
+    // Front wall of exam rooms: z = -3.5, x = -18.8 to -0.5
     // Openings for doors in front of Rooms 6, 5, 4, 3, 2, 1
-    const examDoorsX = [-17.0, -13.8, -10.6, -7.4, -4.2, -1.2];
+    const examDoorsX = [-17.0, -13.8, -10.6, -7.4, -4.2, -1.8];
     let lastWx = -18.8;
     examDoorsX.forEach((dx) => {
       wall(lastWx, -3.5, dx - 0.55, -3.5, wThick, WH);
       doorWay(dx, -3.5, 0, 1.1);
       lastWx = dx + 0.55;
     });
-    wall(lastWx, -3.5, 0.5, -3.5, wThick, WH);
+    wall(lastWx, -3.5, -0.5, -3.5, wThick, WH);
 
     // Vertical dividing walls between Exam rooms:
     // Room 6: [-18.8, -15.6]
@@ -9131,7 +9124,7 @@
     // Room 4: [-12.4, -9.2]
     // Room 3: [-9.2, -6.0]
     // Room 2: [-6.0, -2.8]
-    // Room 1: [-2.8, 0.5]
+    // Room 1: [-2.8, -0.5] (right wall at -0.5)
     const examDividers = [-15.6, -12.4, -9.2, -6.0, -2.8];
     examDividers.forEach((vx) => {
       // Interconnecting doors between exam rooms (as shown in blueprint)
@@ -9139,8 +9132,13 @@
       doorWay(vx, -5.35, Math.PI / 2, 1.0);
       wall(vx, -4.85, vx, -3.5, wThick, WH);
     });
-    // Wall between Room 1 and EKG room
-    wall(0.5, -10.0, 0.5, -3.5, wThick, WH);
+
+    // Right wall of Room 1 and Nurse Rest Room (bordering new corridor):
+    wall(-0.5, -10.0, -0.5, -9.1, wThick, WH);
+    // doorway at -8.6
+    wall(-0.5, -8.1, -0.5, -5.85, wThick, WH);
+    doorWay(-0.5, -5.35, Math.PI / 2, 1.0); // Door from Room 1 into corridor
+    wall(-0.5, -4.85, -0.5, -3.5, wThick, WH);
 
     // Populate Exam Rooms 1 to 6
     // USER MANDATE: "ห้องตรวจ 1-6 มีคอมพิวเตอร์ 1 เครื่องชิดกำแพงขวา"
@@ -9150,7 +9148,7 @@
       { num: 4, xL: -12.4, xR: -9.2,  doc: 'พญ.กานดา',   specCode: 'PC-EXAM-04', ip: '64' },
       { num: 3, xL: -9.2,  xR: -6.0,  doc: 'นพ.วรวิทย์', specCode: 'PC-EXAM-03', ip: '63' },
       { num: 2, xL: -6.0,  xR: -2.8,  doc: 'พญ.ศิรินทิพย์', specCode: 'PC-EXAM-02', ip: '62' },
-      { num: 1, xL: -2.8,  xR: 0.5,   doc: 'นพ.ธนกฤต',  specCode: 'PC-EXAM-01', ip: '61' }
+      { num: 1, xL: -2.8,  xR: -0.5,  doc: 'นพ.ธนกฤต',  specCode: 'PC-EXAM-01', ip: '61' }
     ];
 
     examRoomDefs.forEach((r) => {
@@ -9184,7 +9182,7 @@
     // Nurses' Rest Room (ห้องพักพยาบาล) along top
     L.push({
       text: '🛋️ ห้องพักพยาบาล (Staff Lounge)',
-      pos: V(-9.15, 2.2, -8.6),
+      pos: V(-9.65, 2.2, -8.6),
       cls: 'int-label room-title'
     });
     // Rest room furniture
@@ -9193,15 +9191,27 @@
     M.box(g, 0.5, 1.4, 0.5, M.mat(0x38bdf8), -6.0, 0.7, -8.8); // Water dispenser
     M.box(g, 2.4, 1.9, 0.5, mSteel, -3.0, 0.95, -8.8);      // Staff lockers
 
+    // =======================================================
+    // CORRIDOR ON THE LEFT OF EKG (ปรับให้ห้อง EKG ฝั่งซ้ายเป็นทางเดิน)
+    // x from -0.5 to 1.3, z from -10.0 to -3.5 (Width: 1.8m)
+    // =======================================================
+    doorWay(0.4, -10.0, 0, 1.2); // North doorway/exit of corridor
+    L.push({
+      text: '🚶 ทางเดิน (เชื่อมต่อข้างห้อง EKG)',
+      pos: V(0.4, 2.2, -6.5),
+      cls: 'int-label sub-tag'
+    });
+
     // Desks in Hallway outside exam rooms:
-    // คอม OPD 6, 5, 4, 3, 2, 1
+    // USER MANDATE: "คอมOPD1-6และคอมจุดคัดกรองให้หันหน้าไปทางทิศใต้"
+    // rotY = Math.PI (Staff sits on North side facing SOUTH +Z towards waiting patients!)
     const hallDesks = [
       { x: -17.0, z: -2.5, num: 6, code: 'PC-OPD-06', ip: '46' },
       { x: -14.2, z: -2.5, num: 5, code: 'PC-OPD-05', ip: '45' },
       { x: -12.2, z: -2.5, num: 4, code: 'PC-OPD-04', ip: '44' },
       { x: -8.2,  z: -2.5, num: 3, code: 'PC-OPD-03', ip: '43' },
       { x: -6.2,  z: -2.5, num: 2, code: 'PC-OPD-02', ip: '42' },
-      { x: -1.2,  z: -2.5, num: 1, code: 'PC-OPD-01', ip: '41' }
+      { x: -1.8,  z: -2.5, num: 1, code: 'PC-OPD-01', ip: '41' }
     ];
     hallDesks.forEach((hd) => {
       workDesk({
@@ -9209,70 +9219,75 @@
         z: hd.z,
         w: 1.15,
         d: 0.6,
-        rotY: 0,
+        rotY: Math.PI, // หันหน้าไปทางทิศใต้ (South)
         label: `🖳 คอม OPD ${hd.num}`,
         pcInfo: pcSpec(hd.code, `คอม OPD ${hd.num}`, `จุดบริการซักประวัติและเรียกคิวหน้าห้องตรวจ ${hd.num}`, `พยาบาลวิชาชีพ/ผู้ช่วยพยาบาล`, hd.ip, 'HOSxP Queue & OPD Station')
       });
     });
 
-    // Far Left Desk: คอม OPD 7 (oriented vertically)
+    // Far Left Desk: คอม OPD 7
+    // USER MANDATE: "คอมOPD7ให้หันไปทางทิศตะวันออก"
+    // rotY = -Math.PI / 2 (Staff sits near West wall facing EAST +X towards waiting area!)
     workDesk({
       x: -18.2,
       z: 0.5,
       w: 1.2,
       d: 0.6,
-      rotY: Math.PI / 2,
+      rotY: -Math.PI / 2, // หันไปทางทิศตะวันออก (East)
       label: '🖳 คอม OPD 7',
       pcInfo: pcSpec('PC-OPD-07', 'คอม OPD 7', 'จุดคัดกรองเบื้องต้น/ประสานงานผู้ป่วยนอก', 'เจ้าหน้าที่เวชสถิติ/พยาบาล', '47')
     });
 
     // ==========================================
-    // 2. WAITING LOBBY, SCREENING & BUDDHA ROOM
+    // 2. WAITING LOBBY (เพิ่มเป็น 60 ที่นั่ง), SCREENING & BUDDHA ROOM
     // ==========================================
-    // Upper Waiting Seats (20 seats back-to-back facing -Z and +Z)
-    waitingBenches(-10.0, -1.0, 10, 0);       // 10 seats facing +Z
-    waitingBenches(-10.0, -0.2, 10, Math.PI); // 10 seats facing -Z
-    // 4 Side waiting seats
-    waitingBenches(-2.5, -1.0, 2, Math.PI / 2);
-    waitingBenches(-2.5, -0.2, 2, -Math.PI / 2);
+    // USER MANDATE: "ที่นั่งจุดพักคอยผู้มารับบริการเพิ่มเป็น60ตัว"
+    // Block A: Upper-North Waiting Seats (20 seats back-to-back facing -Z and +Z)
+    waitingBenches(-9.5, -1.2, 10, 0);       // 10 seats facing +Z (South)
+    waitingBenches(-9.5, -0.4, 10, Math.PI); // 10 seats facing -Z (North)
+
+    // Block B: Upper-South Waiting Seats (20 seats back-to-back facing -Z and +Z)
+    waitingBenches(-9.5, 0.5, 10, 0);       // 10 seats facing +Z (South)
+    waitingBenches(-9.5, 1.3, 10, Math.PI); // 10 seats facing -Z (North)
 
     L.push({
-      text: '🪑 จุดพักคอยผู้รับบริการ (20 ที่นั่ง)',
-      pos: V(-10.0, 1.8, -0.6),
+      text: '🪑 จุดพักคอยผู้รับบริการ (โซน 1–2: 40 ที่นั่ง)',
+      pos: V(-9.5, 1.8, 0.0),
       cls: 'int-label sub-tag'
     });
 
     // Screening Counters & BP Kiosks: z = 2.4
-    // จุดคัดกรอง 1
-    const scr1 = M.box(g, 1.6, 0.85, 0.8, M.mat(0x0284c7), -15.5, 0.425, 2.4);
+    // USER MANDATE: "และคอมจุดคัดกรองให้หันหน้าไปทางทิศใต้"
+    // จุดคัดกรอง 1 (หันหน้าไปทางทิศใต้)
+    const scr1 = M.box(g, 1.6, 0.85, 0.8, M.mat(0x0284c7), -15.5, 0.425, 2.5);
     addEdges(scr1, 0x0369a1);
-    makePerson({ role: 'nurse', shirtColor: 0xffffff, pantsColor: 0xffffff, pose: 'stand', rotY: 0 }).position.set(-15.5, 0, 2.8);
-    L.push({ text: '📋 จุดคัดกรอง 1', pos: V(-15.5, 1.7, 2.4), cls: 'int-label room-title' });
+    makePerson({ role: 'nurse', shirtColor: 0xffffff, pantsColor: 0xffffff, pose: 'stand', rotY: Math.PI }).position.set(-15.5, 0, 1.95);
+    L.push({ text: '📋 จุดคัดกรอง 1', pos: V(-15.5, 1.7, 2.5), cls: 'int-label room-title' });
 
-    // จุดคัดกรอง 2 + คอม OPD 8
+    // จุดคัดกรอง 2 + คอม OPD 8 (หันหน้าไปทางทิศใต้: rotY = Math.PI)
     const scr2 = workDesk({
       x: -13.0,
-      z: 2.4,
+      z: 2.5,
       w: 1.4,
       d: 0.7,
-      rotY: 0,
+      rotY: Math.PI, // หันหน้าไปทางทิศใต้
       label: '🖳 คอม OPD 8 (คัดกรอง 2)',
       pcInfo: pcSpec('PC-OPD-08', 'คอม OPD 8', 'ระบบคัดกรอง ประเมินสัญญาณชีพ และบันทึกประวัติแรกรับ', 'พยาบาลคัดกรอง', '48', 'HOSxP Triage & Vital Signs')
     });
-    L.push({ text: '🩺 จุดคัดกรอง 2 (คอม OPD 8)', pos: V(-13.0, 1.8, 2.4), cls: 'int-label room-title' });
+    L.push({ text: '🩺 จุดคัดกรอง 2 (คอม OPD 8)', pos: V(-13.0, 1.8, 2.5), cls: 'int-label room-title' });
 
     // 6 Blood Pressure Kiosks (BP 1 to BP 6)
     const bpPositions = [-10.5, -8.8, -7.1, -5.4, -3.7, -2.0];
     bpPositions.forEach((bpx, idx) => {
-      bpStation(bpx, 2.4, idx + 1);
+      bpStation(bpx, 2.5, idx + 1);
     });
 
-    // Lower Waiting Seats (16 seats back-to-back: 8 facing -Z, 8 facing +Z)
-    waitingBenches(-10.5, 5.2, 8, 0);
-    waitingBenches(-10.5, 6.0, 8, Math.PI);
+    // Block C: Lower Waiting Seats (20 seats back-to-back: 10 facing -Z, 10 facing +Z)
+    waitingBenches(-9.5, 4.8, 10, 0);       // 10 seats facing +Z (South)
+    waitingBenches(-9.5, 5.6, 10, Math.PI); // 10 seats facing -Z (North)
     L.push({
-      text: '🪑 จุดพักคอยวัดความดัน/รอพบแพทย์ (16 ที่นั่ง)',
-      pos: V(-10.5, 1.8, 5.6),
+      text: '🪑 จุดพักคอยวัดความดัน/รอพบแพทย์ (โซน 3: 20 ที่นั่ง)',
+      pos: V(-9.5, 1.8, 5.2),
       cls: 'int-label sub-tag'
     });
 
@@ -9291,42 +9306,43 @@
     // ==========================================
     // 3. RIGHT WING: ROW 1 (TOP / NORTH)
     // ==========================================
-    // EKG Room: x = 0.5 to 4.5, z = -10.0 to -4.5
-    wall(4.5, -10.0, 4.5, -4.5, wThick, WH); // East wall of EKG
-    wall(0.5, -4.5, 4.5, -4.5, wThick, WH);  // South wall of EKG
-    doorWay(0.5, -6.5, Math.PI / 2, 1.1);   // Door from corridor into EKG
+    // EKG Room: now located at x = 1.3 to 4.8 (east of the new corridor)
+    wall(1.3, -10.0, 1.3, -4.5, wThick, WH); // West wall of EKG
+    wall(4.8, -10.0, 4.8, -4.5, wThick, WH); // East wall of EKG
+    wall(1.3, -4.5, 4.8, -4.5, wThick, WH);  // South wall of EKG
+    doorWay(1.3, -6.5, Math.PI / 2, 1.1);   // Door from new corridor into EKG
 
     // คอม EKG & 2 Exam beds
     workDesk({
-      x: 1.2,
+      x: 1.9,
       z: -7.0,
       w: 1.1,
       d: 0.6,
-      rotY: Math.PI / 2,
+      rotY: -Math.PI / 2,
       label: '🖳 คอม EKG',
       pcInfo: pcSpec('PC-EKG-01', 'คอมห้อง EKG', 'ระบบตรวจบันทึกคลื่นไฟฟ้าหัวใจและส่งต่อแพทย์เฉพาะทาง', 'เจ้าหน้าที่ตรวจ EKG', '71', 'ECG Analysis Software / PACS Link')
     });
-    examBed(3.6, -8.2, 0);
-    examBed(3.6, -5.8, 0);
+    examBed(3.9, -8.2, 0);
+    examBed(3.9, -5.8, 0);
 
     L.push({
       text: `🫀 ห้อง EKG ${opdState.ekgOccupied ? '🔴 กำลังบันทึก' : '🟢 ว่าง'}`,
-      pos: V(2.5, 2.2, -7.0),
+      pos: V(3.05, 2.2, -7.0),
       cls: `int-label toggleable ${opdState.ekgOccupied ? 'busy' : 'free'}`,
       toggleId: 'opd-ekg'
     });
 
-    // Nursing Administration: x = 4.5 to 9.5, z = -10.0 to -4.5
+    // Nursing Administration: x = 4.8 to 9.5, z = -10.0 to -4.5
     wall(9.5, -10.0, 9.5, -4.5, wThick, WH);
-    wall(4.5, -4.5, 9.5, -4.5, wThick, WH);
-    doorWay(7.0, -4.5, 0, 1.1);
+    wall(4.8, -4.5, 9.5, -4.5, wThick, WH);
+    doorWay(7.15, -4.5, 0, 1.1);
 
     // 4 Nurse PCs: คอม 1, 2, 3, 4
     const nurseDesks = [
-      { x: 5.6, z: -8.5, num: 1, ip: '81' },
-      { x: 5.6, z: -6.5, num: 2, ip: '82' },
-      { x: 8.4, z: -8.5, num: 3, ip: '83' },
-      { x: 8.4, z: -6.5, num: 4, ip: '84' }
+      { x: 5.8, z: -8.5, num: 1, ip: '81' },
+      { x: 5.8, z: -6.5, num: 2, ip: '82' },
+      { x: 8.5, z: -8.5, num: 3, ip: '83' },
+      { x: 8.5, z: -6.5, num: 4, ip: '84' }
     ];
     nurseDesks.forEach((nd) => {
       workDesk({
@@ -9341,7 +9357,7 @@
     });
     L.push({
       text: '👩‍⚕️ ห้องกลุ่มงานการพยาบาล',
-      pos: V(7.0, 2.2, -7.5),
+      pos: V(7.15, 2.2, -7.5),
       cls: 'int-label room-title'
     });
 
@@ -9669,7 +9685,7 @@
       labels: L,
       size: { w: W, d: D, h: WH },
       title: '🩺 ผังภายใน ตึกผู้ป่วยนอก (OPD & บริหาร)',
-      sub: 'ห้องตรวจ 1–6 (คอมชิดกำแพงขวา), จุดคัดกรอง, ความดัน BP, ห้องพระ, ห้อง EKG, กลุ่มการพยาบาล, ห้อง Server, ห้องประชุมองค์กรแพทย์/ธรรมาภิบาล, ห้อง IT, พักแพทย์, และห้อง ผอ.',
+      sub: 'ห้องตรวจ 1–6 (คอมชิดกำแพงขวา), ทางเดินข้างห้อง EKG, จุดคัดกรอง, ความดัน BP, ที่นั่งพักคอย 60 ตัว, ห้องพระ, ห้อง EKG, กลุ่มการพยาบาล, ห้อง Server, ห้องประชุม, ห้อง IT, พักแพทย์, และห้อง ผอ.',
       items: itemsList,
       cam: { pos: V(0, 26, 26), target: V(0, 1.0, 0) }
     };
