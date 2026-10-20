@@ -5212,6 +5212,458 @@
     };
   }
 
+  // =========================================================================
+  // แพทย์แผนไทย (Thai Traditional Medicine Interior)
+  // ผังตามแบบแปลน:
+  // - โถงทางเข้า (ยื่นล่าง): ประตูทางเข้าหลัก • ม้านั่งพักคอยซ้าย-ขวา
+  // - ทางเดินกลาง: วิ่งยาวจากโถงทางเข้าไปถึงห้องน้ำชายและหญิงด้านบนสุด
+  // - ห้องน้ำชายและหญิง (บนสุดกลางโถง)
+  // - ฝั่งซ้ายบน: ห้องเก็บอุปกรณ์ (ชั้นวางสมุนไพร, ลูกประคบ, หม้อต้ม)
+  // - ฝั่งซ้ายล่าง: ห้องนวด (เตียงนวดแผนไทย 12 เตียง เรียง 2 แถว แถวละ 6 เตียง)
+  // - ฝั่งขวาบน: ห้องเก็บอุปกรณ์ ห้องซาวน่า (ห้องอบไอน้ำสมุนไพร/ซาวน่าไม้ + ชั้นเก็บของ)
+  // - ฝั่งขวาล่าง: ห้องทำงานแพทย์แผนไทย (โต๊ะคอม 1 มุมซ้ายบน, โต๊ะคอม 2 ฝั่งขวา, โต๊ะทำงาน 6 ตัว)
+  // =========================================================================
+  const thaimedState = {
+    beds: Array.from({ length: 12 }, (_, i) => ({
+      id: `thaimed-bed-${i + 1}`,
+      name: `เตียงนวด ${i + 1}`,
+      occupied: false
+    })),
+    saunaActive: true
+  };
+
+  function buildThaimedInterior() {
+    const g = new THREE.Group();
+    const L = [];
+
+    // ขนาดอาคารแพทย์แผนไทย:
+    // ตัวอาคารหลัก: กว้าง 20.0 ม. (X: -10.0 .. +10.0), ลึก 14.0 ม. (Z: -8.0 .. +6.0)
+    // โถงทางเข้าด้านหน้า: กว้าง 6.4 ม. (X: -3.2 .. +3.2), ลึก 3.0 ม. (Z: +6.0 .. +9.0)
+    const WH = 2.4;
+    const wThick = 0.18;
+
+    // 1. พื้นแต่ละโซนตามผัง
+    // โถงทางเข้าด้านหน้า (X: -3.2 .. +3.2, Z: +6.0 .. +9.0)
+    floor(g, 6.4, 3.0, '#fefce8', '#cbd5e1', 0.6, 0, 7.5);
+
+    // ทางเดินโถงกลาง (X: -2.0 .. +2.0, Z: -5.8 .. +6.0)
+    floor(g, 4.0, 11.8, '#f8fafc', '#cbd5e1', 0.6, 0, 0.1);
+
+    // ห้องน้ำชายและหญิง (X: -2.0 .. +2.0, Z: -8.0 .. -5.8)
+    floor(g, 4.0, 2.2, '#e0f2fe', '#93c5fd', 0.6, 0, -6.9);
+
+    // ห้องเก็บอุปกรณ์ (ฝั่งซ้ายบน: X: -10.0 .. -2.0, Z: -8.0 .. -1.0)
+    floor(g, 8.0, 7.0, '#fffbeb', '#fef3c7', 0.6, -6.0, -4.5);
+
+    // ห้องนวดแผนไทย (ฝั่งซ้ายล่าง: X: -10.0 .. -2.0, Z: -1.0 .. +6.0)
+    floor(g, 8.0, 7.0, '#f0fdf4', '#bbf7d0', 0.6, -6.0, 2.5);
+
+    // ห้องเก็บอุปกรณ์ ห้องซาวน่า (ฝั่งขวาบน: X: +2.0 .. +10.0, Z: -8.0 .. -1.0)
+    floor(g, 8.0, 7.0, '#fefce8', '#fef08a', 0.6, 6.0, -4.5);
+
+    // ห้องทำงานแพทย์แผนไทย (ฝั่งขวาล่าง: X: +2.0 .. +10.0, Z: -1.0 .. +6.0)
+    floor(g, 8.0, 7.0, '#f8fafc', '#cbd5e1', 0.6, 6.0, 2.5);
+
+    // 2. ฟังก์ชันสร้างประตูไม้แผนไทย
+    function makeThaimedDoor(x, z, w, d, rotY = 0) {
+      const dg = new THREE.Group();
+      dg.position.set(x, 0, z);
+      const isHoriz = w >= d;
+      const pad = maintBox(w, 0.04, d, 0xe2e8f0);
+      pad.position.set(0, 0.02, 0);
+      dg.add(pad);
+      const leafW = isHoriz ? w * 0.82 : 0.07;
+      const leafD = isHoriz ? 0.07 : d * 0.82;
+      const leaf = maintBox(leafW, 1.95, leafD, 0xd97706);
+      leaf.position.set(0, 0.98, 0);
+      leaf.rotation.y = rotY;
+      dg.add(leaf);
+      g.add(dg);
+    }
+
+    // 3. กำแพงรอบนอกอาคาร (Outer Walls)
+    // กำแพงบนสุด (Z = -7.91, X: -10.0 .. +10.0)
+    g.add(maintAt(maintWall(20.0, WH, wThick, 0x1e293b), 0, WH / 2, -7.91));
+
+    // กำแพงซ้ายสุด (X = -9.91, Z: -8.0 .. +6.0)
+    g.add(maintAt(maintWall(wThick, WH, 14.0, 0x1e293b), -9.91, WH / 2, -1.0));
+
+    // กำแพงขวาสุด (X = +9.91, Z: -8.0 .. +6.0)
+    g.add(maintAt(maintWall(wThick, WH, 14.0, 0x1e293b), 9.91, WH / 2, -1.0));
+
+    // กำแพงล่างของตัวอาคารหลัก (Z = +5.91):
+    // ฝั่งซ้าย (X: -10.0 .. -3.2)
+    g.add(maintAt(maintWall(6.8, WH, wThick, 0x1e293b), -6.6, WH / 2, 5.91));
+    // ฝั่งขวา (X: +3.2 .. +10.0)
+    g.add(maintAt(maintWall(6.8, WH, wThick, 0x1e293b), 6.6, WH / 2, 5.91));
+
+    // ประตูทางเข้าหลักจากโถงยื่นเข้าสู่ตัวอาคาร (Double Door at X = 0, Z = +5.91)
+    g.add(
+      maintAt(maintWall(2.0, 0.35, wThick, 0x1e293b), -2.2, WH - 0.175, 5.91),
+      maintAt(maintWall(2.0, 0.35, wThick, 0x1e293b), 2.2, WH - 0.175, 5.91)
+    );
+    makeThaimedDoor(0, 5.91, 2.4, 0.45, 0.35);
+    L.push(maintTag('🚪 ประตูทางเข้าหลัก', V(0, 1.45, 5.91), 'room', null, 'ประตูทางเข้าหลักอาคารแพทย์แผนไทย'));
+
+    // กำแพงโถงทางเข้ายื่นด้านหน้า (X: -3.2 .. +3.2, Z: +6.0 .. +9.0):
+    // ผนังซ้ายของโถง (X = -3.29, Z: +6.0 .. +9.0)
+    g.add(maintAt(maintWall(wThick, WH, 3.0, 0x1e293b), -3.2, WH / 2, 7.5));
+    // ผนังขวาของโถง (X = +3.29, Z: +6.0 .. +9.0)
+    g.add(maintAt(maintWall(wThick, WH, 3.0, 0x1e293b), 3.2, WH / 2, 7.5));
+    // ผนังด้านหน้าสุด (Z = +8.91) เว้นช่องทางเข้าเปิดโล่งตรงกลาง
+    g.add(
+      maintAt(maintWall(2.0, WH, wThick, 0x1e293b), -2.2, WH / 2, 8.91),
+      maintAt(maintWall(2.4, 0.45, wThick, 0x1e293b), 0, WH - 0.225, 8.91),
+      maintAt(maintWall(2.0, WH, wThick, 0x1e293b), 2.2, WH / 2, 8.91)
+    );
+
+    // ม้านั่งพักคอยซ้าย-ขวาในโถงทางเข้า
+    g.add(
+      // ม้านั่งฝั่งซ้าย
+      maintAt(maintBox(0.65, 0.44, 2.2, 0x0284c7), -2.6, 0.22, 7.5),
+      maintAt(maintBox(0.08, 0.46, 2.2, 0x0369a1), -2.95, 0.65, 7.5),
+      // ม้านั่งฝั่งขวา
+      maintAt(maintBox(0.65, 0.44, 2.2, 0x0284c7), 2.6, 0.22, 7.5),
+      maintAt(maintBox(0.08, 0.46, 2.2, 0x0369a1), 2.95, 0.65, 7.5)
+    );
+    L.push(maintTag('🪑 ที่นั่ง', V(-2.6, 1.15, 7.5), 'sub', null, 'ม้านั่งพักคอยสำหรับผู้มารับบริการ (ฝั่งซ้าย)'));
+    L.push(maintTag('🪑 ที่นั่ง', V(2.6, 1.15, 7.5), 'sub', null, 'ม้านั่งพักคอยสำหรับผู้มารับบริการ (ฝั่งขวา)'));
+    L.push(maintTag('🏛️ โถงทางเข้า', V(0, 1.35, 7.5), 'room', null, 'โถงทางเข้าและจุดพักคอยด้านหน้าอาคาร'));
+
+    // 4. กำแพงกั้นห้องภายใน (Internal Dividing Walls)
+    // (1) กำแพงแนวนอนคั่นห้องบนกับห้องล่าง (Z = -1.0):
+    // ฝั่งซ้าย (X: -10.0 .. -2.0) คั่นห้องเก็บอุปกรณ์ กับ ห้องนวด
+    g.add(maintAt(maintWall(8.0, WH, wThick, 0x1e293b), -6.0, WH / 2, -1.0));
+    // ฝั่งขวา (X: +2.0 .. +10.0) คั่นห้องซาวน่า กับ ห้องทำงานแพทย์แผนไทย
+    g.add(maintAt(maintWall(8.0, WH, wThick, 0x1e293b), 6.0, WH / 2, -1.0));
+
+    // (2) กำแพงแนวตั้งทางเดินกลางฝั่งซ้าย (X = -2.0, Z: -5.8 .. +6.0):
+    // มีประตูห้องเก็บอุปกรณ์ (Z = -2.0) และประตูห้องนวด (Z = +2.5)
+    g.add(
+      maintAt(maintWall(wThick, WH, 3.1, 0x1e293b), -2.0, WH / 2, -4.25),
+      maintAt(maintWall(wThick, 0.35, 1.4, 0x1e293b), -2.0, WH - 0.175, -2.0),
+      maintAt(maintWall(wThick, WH, 3.1, 0x1e293b), -2.0, WH / 2, 0.25),
+      maintAt(maintWall(wThick, 0.35, 1.4, 0x1e293b), -2.0, WH - 0.175, 2.5),
+      maintAt(maintWall(wThick, WH, 2.8, 0x1e293b), -2.0, WH / 2, 4.6)
+    );
+    makeThaimedDoor(-2.0, -2.0, 0.45, 1.4, 0.35);
+    L.push(maintTag('🚪 ประตู', V(-2.0, 1.45, -2.0), 'sub', null, 'ประตูเข้าห้องเก็บอุปกรณ์'));
+    makeThaimedDoor(-2.0, 2.5, 0.45, 1.4, 0.35);
+    L.push(maintTag('🚪 ประตู', V(-2.0, 1.45, 2.5), 'sub', null, 'ประตูเข้าห้องนวดแผนไทย'));
+
+    // (3) กำแพงแนวตั้งทางเดินกลางฝั่งขวา (X = +2.0, Z: -5.8 .. +6.0):
+    // มีประตูห้องเก็บอุปกรณ์/ซาวน่า (Z = -2.0) และประตูห้องทำงานแพทย์แผนไทย (Z = +2.5)
+    g.add(
+      maintAt(maintWall(wThick, WH, 3.1, 0x1e293b), 2.0, WH / 2, -4.25),
+      maintAt(maintWall(wThick, 0.35, 1.4, 0x1e293b), 2.0, WH - 0.175, -2.0),
+      maintAt(maintWall(wThick, WH, 3.1, 0x1e293b), 2.0, WH / 2, 0.25),
+      maintAt(maintWall(wThick, 0.35, 1.4, 0x1e293b), 2.0, WH - 0.175, 2.5),
+      maintAt(maintWall(wThick, WH, 2.8, 0x1e293b), 2.0, WH / 2, 4.6)
+    );
+    makeThaimedDoor(2.0, -2.0, 0.45, 1.4, -0.35);
+    L.push(maintTag('🚪 ประตู', V(2.0, 1.45, -2.0), 'sub', null, 'ประตูเข้าห้องเก็บอุปกรณ์ ห้องซาวน่า'));
+    makeThaimedDoor(2.0, 2.5, 0.45, 1.4, -0.35);
+    L.push(maintTag('🚪 ประตู', V(2.0, 1.45, 2.5), 'sub', null, 'ประตูเข้าห้องทำงานแพทย์แผนไทย'));
+
+    // (4) กำแพงห้องน้ำชายและหญิง (บนสุดของโถง: Z = -5.8, X: -2.0 .. +2.0)
+    g.add(
+      maintAt(maintWall(1.3, WH, wThick, 0x1e293b), -1.35, WH / 2, -5.8),
+      maintAt(maintWall(1.4, 0.35, wThick, 0x1e293b), 0, WH - 0.175, -5.8),
+      maintAt(maintWall(1.3, WH, wThick, 0x1e293b), 1.35, WH / 2, -5.8),
+      // ผนังกั้นกลางระหว่างห้องน้ำชายกับหญิง
+      maintAt(maintWall(wThick, WH, 2.2, 0x475569), 0, WH / 2, -6.9)
+    );
+    makeThaimedDoor(0, -5.8, 1.4, 0.45, 0.35);
+    L.push(maintTag('🚻 ห้องน้ำชายและหญิง', V(0, 1.55, -5.8), 'room', null, 'ห้องน้ำชายและหญิงสำหรับผู้มารับบริการและเจ้าหน้าที่'));
+
+    // สุขภัณฑ์ในห้องน้ำ
+    g.add(
+      // อ่างล้างหน้าและกระจก
+      maintAt(maintBox(0.7, 0.82, 0.5, 0xf1f5f9), -0.9, 0.41, -6.1),
+      maintAt(maintBox(0.7, 0.82, 0.5, 0xf1f5f9), 0.9, 0.41, -6.1),
+      // โถสุขภัณฑ์
+      maintAt(maintBox(0.45, 0.72, 0.65, 0xffffff), -1.0, 0.36, -7.4),
+      maintAt(maintBox(0.45, 0.72, 0.65, 0xffffff), 1.0, 0.36, -7.4)
+    );
+
+    // =========================================================================
+    // 5. ห้องนวดแผนไทย (เตียงนวด 12 เตียง เรียง 2 แถว แถวละ 6 เตียง)
+    // =========================================================================
+    function makeMassageBed(x, z, num, bedId, isOccupied) {
+      const bg = new THREE.Group();
+      bg.position.set(x, 0, z);
+
+      // สีเบาะเตียงนวดแผนไทย: สีเขียวสมุนไพร/ทอง เมื่อว่าง, สีแดงส้มเมื่อมีผู้รับบริการ
+      const padCol = isOccupied ? 0xe11d48 : 0x15803d;
+      const padTop = isOccupied ? 0xf43f5e : 0xca8a04;
+
+      bg.add(
+        // โครงเตียงไม้ยกสูงแบบดั้งเดิม
+        maintAt(maintBox(1.15, 0.38, 2.05, 0x78350f), 0, 0.19, 0),
+        // ฟูกที่นอนนวดแผนไทยนุ่มแน่น
+        maintAt(maintBox(1.05, 0.14, 1.95, padCol), 0, 0.45, 0),
+        // หมอนขวาน/หมอนหนุนศีรษะ
+        maintAt(maintBox(0.45, 0.15, 0.28, padTop), 0, 0.58, -0.75),
+        // ผ้าปูและผ้าห่มพับเรียบร้อย
+        maintAt(maintBox(0.65, 0.04, 0.45, 0xfef08a), 0, 0.54, 0.55),
+        // หม้อนึ่งลูกประคบสมุนไพรไฟฟ้าตั้งข้างเตียง
+        maintAt(maintBox(0.24, 0.18, 0.24, 0x94a3b8), 0.72, 0.15, -0.6),
+        maintAt(maintBox(0.12, 0.12, 0.12, 0xfef3c7), 0.72, 0.30, -0.6) // ลูกประคบสมุนไพร
+      );
+
+      // เมื่อมีผู้รับบริการกำลังนวดรักษา
+      if (isOccupied) {
+        // คนไข้นอนคว่ำ/หงายรับบริการ
+        const patient = makePerson({ role: 'patient', shirtColor: 0x9333ea, pose: 'sit', rotY: 0 });
+        patient.position.set(0, 0.25, 0);
+        bg.add(patient);
+
+        // แพทย์แผนไทย/หมอนวดประจำเตียง
+        const masseur = makePerson({ role: 'doctor', shirtColor: 0xca8a04, pose: 'sit', rotY: Math.PI / 2 });
+        masseur.position.set(-0.65, 0, 0);
+        bg.add(masseur);
+      }
+
+      g.add(bg);
+
+      L.push(
+        maintTag(
+          `🛏️ เตียงนวด ${num} (${isOccupied ? '🔴 กำลังนวดรักษา' : '🟢 ว่าง พร้อมใช้'})`,
+          V(x, 1.35, z),
+          'room ' + (isOccupied ? 'busy' : 'free'),
+          bedId,
+          `คลิกเพื่อสลับสถานะเตียงนวด ${num}`
+        )
+      );
+    }
+
+    // ติดตั้ง 12 เตียงนวด:
+    // แถวบน: เตียงนวด 1–6 (Z = +0.5)
+    // แถวล่าง: เตียงนวด 7–12 (Z = +4.2)
+    const bedXs = [-9.2, -7.9, -6.6, -5.3, -4.0, -2.8];
+    // แถวบน
+    bedXs.forEach((bx, idx) => {
+      const num = idx + 1;
+      const bState = thaimedState.beds.find((b) => b.id === `thaimed-bed-${num}`);
+      makeMassageBed(bx, 0.5, num, `thaimed-bed-${num}`, bState ? bState.occupied : false);
+    });
+    // แถวล่าง
+    bedXs.forEach((bx, idx) => {
+      const num = idx + 7;
+      const bState = thaimedState.beds.find((b) => b.id === `thaimed-bed-${num}`);
+      makeMassageBed(bx, 4.2, num, `thaimed-bed-${num}`, bState ? bState.occupied : false);
+    });
+
+    L.push(maintTag('🌿 ห้องนวดแผนไทย (12 เตียง)', V(-6.0, 1.85, 2.3), 'sub', null, 'ห้องนวดแผนไทย นวดประคบสมุนไพร และนวดแก้อาการ'));
+
+    // =========================================================================
+    // 6. ห้องเก็บอุปกรณ์ (ฝั่งซ้ายบน: X: -10.0 .. -2.0, Z: -8.0 .. -1.0)
+    // =========================================================================
+    const storeLeft = new THREE.Group();
+    // ชั้นวางสมุนไพรอบแห้ง ลูกประคบ และน้ำมันนวดตามแนวผนัง
+    const shelfL1 = makeStorageShelf(4.5, 0.65, 2.05, 0x15803d);
+    shelfL1.position.set(-6.5, 0, -7.5);
+    storeLeft.add(shelfL1);
+
+    const shelfL2 = makeStorageShelf(3.8, 0.65, 2.05, 0xd97706);
+    shelfL2.rotation.y = Math.PI / 2;
+    shelfL2.position.set(-9.4, 0, -4.5);
+    storeLeft.add(shelfL2);
+
+    // โต๊ะเตรียมสมุนไพรและหม้อต้มสกัดสมุนไพร
+    storeLeft.add(
+      maintAt(maintBox(2.2, 0.82, 1.0, 0x334155), -4.5, 0.41, -4.5),
+      maintAt(maintBox(2.26, 0.06, 1.06, 0xf8fafc), -4.5, 0.85, -4.5),
+      maintAt(maintBox(0.45, 0.35, 0.45, 0x94a3b8), -5.0, 1.05, -4.5), // หม้อต้มสมุนไพร
+      maintAt(maintBox(0.35, 0.18, 0.35, 0x78350f), -4.0, 0.96, -4.5)  // ครกบดยาไทย
+    );
+    g.add(storeLeft);
+    L.push(maintTag('📦 ห้องเก็บอุปกรณ์', V(-6.0, 1.85, -4.5), 'room', null, 'ห้องจัดเก็บสมุนไพรแห้ง ลูกประคบ น้ำมันนวด และเวชภัณฑ์แผนไทย'));
+
+    // =========================================================================
+    // 7. ห้องเก็บอุปกรณ์ ห้องซาวน่า (ฝั่งขวาบน: X: +2.0 .. +10.0, Z: -8.0 .. -1.0)
+    // =========================================================================
+    const saunaGroup = new THREE.Group();
+    // ห้องซาวน่า/ห้องอบไอน้ำสมุนไพรไม้สน (Sauna & Herbal Steam Cabin)
+    // ขนาด 4.5 ม. x 3.5 ม. ตั้งที่ X = +6.8, Z = -4.5
+    saunaGroup.add(
+      // ตัวตู้ห้องซาวน่าไม้สน
+      maintAt(maintBox(4.5, 2.2, 3.5, 0xb45309), 6.8, 1.1, -4.5),
+      maintAt(maintBox(4.56, 0.12, 3.56, 0x78350f), 6.8, 2.26, -4.5),
+      // กระจกมองตรวจดูภายในห้องซาวน่า
+      maintAt(
+        new THREE.Mesh(
+          new THREE.BoxGeometry(0.06, 1.2, 1.4),
+          new THREE.MeshStandardMaterial({
+            color: 0xfef08a,
+            transparent: true,
+            opacity: 0.65,
+            roughness: 0.2
+          })
+        ),
+        4.52,
+        1.25,
+        -4.5
+      ),
+      // เตาต้มไอน้ำสมุนไพรและท่อกระจายไอน้ำ
+      maintAt(maintBox(0.55, 0.85, 0.55, 0x1e293b), 8.5, 0.425, -5.6),
+      maintAt(maintBox(0.35, 0.45, 0.35, 0xd97706), 8.5, 0.85, -5.6),
+      // ม้านั่งไม้ 2 ชั้นภายในห้องซาวน่า
+      maintAt(maintBox(3.4, 0.44, 0.65, 0xd97706), 6.8, 0.22, -3.4),
+      maintAt(maintBox(3.4, 0.44, 0.65, 0xd97706), 6.8, 0.66, -5.6)
+    );
+
+    // ชั้นวางอุปกรณ์และผ้าขนหนู/ชุดเปลี่ยนสำหรับผู้รับบริการซาวน่า
+    const shelfSauna = makeStorageShelf(3.2, 0.65, 2.05, 0xd97706);
+    shelfSauna.rotation.y = Math.PI / 2;
+    shelfSauna.position.set(2.6, 0, -4.5);
+    saunaGroup.add(shelfSauna);
+
+    g.add(saunaGroup);
+    L.push(
+      maintTag(
+        `🧖 ห้องซาวน่า/อบสมุนไพร (${thaimedState.saunaActive ? '🟢 พร้อมใช้งาน 42°C' : '🔴 พักการใช้งาน'})`,
+        V(6.8, 2.05, -4.5),
+        'room ' + (thaimedState.saunaActive ? 'free' : 'busy'),
+        'thaimed-sauna',
+        'คลิกเพื่อสลับสถานะห้องอบสมุนไพรและซาวน่า'
+      )
+    );
+    L.push(maintTag('📦 ห้องเก็บอุปกรณ์', V(3.5, 1.85, -4.5), 'sub', null, 'จุดเก็บผ้าสะอาดและครุภัณฑ์ห้องซาวน่า'));
+
+    // =========================================================================
+    // 8. ห้องทำงานแพทย์แผนไทย (ฝั่งขวาล่าง: X: +2.0 .. +10.0, Z: -1.0 .. +6.0)
+    // =========================================================================
+    // ฟังก์ชันสร้างโต๊ะคอมพิวเตอร์แพทย์แผนไทย
+    function makeThaiPcSpec(code, name, roleDesc, ip) {
+      return {
+        code,
+        name,
+        role: roleDesc,
+        user: 'แพทย์แผนไทย / นักวิชาการสาธารณสุข โรงพยาบาลโคกศรีสุพรรณ',
+        os: 'Windows 11 Pro 64-bit',
+        cpu: 'Intel Core i5-12400 (6C/12T @ 4.4GHz)',
+        ram: '16 GB DDR4 3200MHz',
+        storage: 'SSD NVMe 512 GB',
+        monitor: '24" FHD IPS Display',
+        ip: `192.168.16.${ip}`,
+        software: 'ระบบแพทย์แผนไทย HOSxP Traditional Thai Medicine • บันทึกเวชระเบียนธาตุเจ้าเรือน • ระบบคลังยาสมุนไพร • e-Prescription',
+        peripherals: 'เครื่องอ่าน Smart Card • เครื่องพิมพ์ใบสั่งยาสมุนไพร • เครื่องสแกนบาร์โค้ด • เครื่องสำรองไฟ UPS 1000VA',
+        status: '🟢 ออนไลน์ปกติ'
+      };
+    }
+
+    function createThaiPcDesk(x, z, rotY, spec, labelText, personOpts = null) {
+      const dg = new THREE.Group();
+      dg.position.set(x, 0, z);
+      dg.rotation.y = rotY;
+
+      dg.add(
+        // โต๊ะทำงานไม้สีอบอุ่น
+        maintAt(maintBox(1.25, 0.74, 0.75, 0x78350f), 0, 0.37, 0),
+        maintAt(maintBox(1.30, 0.06, 0.80, 0xfef3c7), 0, 0.76, 0),
+        // จอภาพ 24"
+        maintAt(maintBox(0.58, 0.36, 0.05, 0x0f172a), 0, 1.02, -0.22),
+        maintAt(maintBox(0.52, 0.30, 0.02, 0x10b981), 0, 1.02, -0.19),
+        maintAt(maintBox(0.14, 0.12, 0.12, 0x475569), 0, 0.82, -0.22),
+        // คีย์บอร์ดและเมาส์
+        maintAt(maintBox(0.38, 0.02, 0.14, 0x1e293b), 0, 0.79, 0.12),
+        maintAt(maintBox(0.08, 0.02, 0.06, 0x334155), 0.28, 0.79, 0.12),
+        // เคสคอมพิวเตอร์ mini-tower
+        maintAt(maintBox(0.22, 0.42, 0.44, 0x1e293b), 0.45, 0.98, -0.08),
+        // เครื่องอ่าน Smart Card
+        maintAt(maintBox(0.18, 0.08, 0.20, 0x0284c7), -0.45, 0.82, -0.05),
+        // เก้าอี้ทำงาน
+        maintAt(maintBox(0.46, 0.45, 0.46, 0x0284c7), 0, 0.23, 0.62),
+        maintAt(maintBox(0.44, 0.48, 0.08, 0x0369a1), 0, 0.65, 0.82)
+      );
+
+      dg.traverse((child) => {
+        if (child.isMesh) child.userData.pcInfo = spec;
+      });
+      g.add(dg);
+
+      if (personOpts) {
+        const staff = makePerson(personOpts);
+        staff.position.set(0, 0, 0.62);
+        dg.add(staff);
+      }
+
+      L.push(
+        maintTag(
+          `🖥️ ${labelText}`,
+          V(x, 1.65, z),
+          'pc',
+          null,
+          `คลิกเพื่อดูสเปก ${labelText} (${spec.code})`,
+          spec
+        )
+      );
+    }
+
+    // 1. โต๊ะคอม แพทย์แผนไทย 1 (มุมซ้ายบนของห้องทำงาน: X = +3.6, Z = +0.0)
+    // ผนังกั้นคอกตรวจวินิจฉัยธาตุเจ้าเรือน (X: +2.0 .. +5.2, Z: -1.0 .. +1.2)
+    g.add(
+      maintAt(maintWall(wThick, WH, 2.2, 0x1e293b), 5.2, WH / 2, 0.1),
+      maintAt(maintWall(1.8, WH, wThick, 0x1e293b), 4.3, WH / 2, 1.2)
+    );
+    const pcSpec1 = makeThaiPcSpec('PC-THAI-01', 'โต๊ะคอมแพทย์แผนไทย 1', 'ตรวจวินิจฉัยธาตุเจ้าเรือน แมะจับชีพจร และสั่งการรักษาทางหัตถการ', 10);
+    createThaiPcDesk(3.6, 0.0, 0, pcSpec1, 'โต๊ะคอม แพทย์แผนไทย 1', { role: 'doctor', shirtColor: 0x15803d, pose: 'sit', rotY: 0 });
+
+    // 2. โต๊ะคอม แพทย์แผนไทย 2 (ชิดผนังขวา: X = +9.4, Z = +2.0)
+    const pcSpec2 = makeThaiPcSpec('PC-THAI-02', 'โต๊ะคอมแพทย์แผนไทย 2', 'จ่ายยาสมุนไพร บันทึกผลการรักษา และนัดหมายผู้ป่วย', 11);
+    createThaiPcDesk(9.4, 2.0, -Math.PI / 2, pcSpec2, 'โต๊ะคอม แพทย์แผนไทย 2', { role: 'nurse', shirtColor: 0xca8a04, pose: 'sit', rotY: 0 });
+
+    // 3. โต๊ะทำงานและซักประวัติ 6 ตัวในห้องทำงานแพทย์แผนไทย
+    // แถวล่าง 4 ตัวชิดผนังล่าง (Z = +4.8)
+    [3.0, 4.8, 6.6, 8.4].forEach((tx, idx) => {
+      g.add(
+        maintAt(maintBox(1.35, 0.74, 0.75, 0x78350f), tx, 0.37, 4.8),
+        maintAt(maintBox(1.40, 0.06, 0.80, 0xfef3c7), tx, 0.76, 4.8),
+        maintAt(maintBox(0.44, 0.44, 0.44, 0x0284c7), tx, 0.22, 4.2),
+        maintAt(maintBox(0.40, 0.42, 0.08, 0x0369a1), tx, 0.62, 4.0)
+      );
+      L.push(maintTag('🪑 โต๊ะ', V(tx, 1.25, 4.8), 'sub', null, `โต๊ะปฏิบัติงานแพทย์แผนไทย ตัวที่ ${idx + 1}`));
+    });
+
+    // แถวกลาง 2 ตัว (Z = +2.0)
+    [5.4, 7.4].forEach((tx, idx) => {
+      g.add(
+        maintAt(maintBox(1.35, 0.74, 0.75, 0x78350f), tx, 0.37, 2.0),
+        maintAt(maintBox(1.40, 0.06, 0.80, 0xfef3c7), tx, 0.76, 2.0),
+        maintAt(maintBox(0.44, 0.44, 0.44, 0x059669), tx, 0.22, 1.4),
+        maintAt(maintBox(0.40, 0.42, 0.08, 0x047857), tx, 0.62, 1.2)
+      );
+      L.push(maintTag('🪑 โต๊ะ', V(tx, 1.25, 2.0), 'sub', null, `โต๊ะปฏิบัติงานแพทย์แผนไทย ตัวที่ ${idx + 5}`));
+    });
+
+    L.push(maintTag('📋 ห้องทำงานแพทย์แผนไทย', V(6.0, 1.85, 2.5), 'room', null, 'ห้องปฏิบัติงานแพทย์แผนไทย จุดตรวจวินิจฉัย และจ่ายยาสมุนไพร'));
+
+    // รายการสรุปสิ่งที่อยู่ภายในสำหรับแถบด้านข้าง
+    const items = [
+      ['🌿', 'ห้องนวดแผนไทย (เตียงนวด 1–12 • ประคบสมุนไพร)', '12 เตียง', null, 'free'],
+      ['🧖', 'ห้องซาวน่า / อบสมุนไพรไม้สน (42°C)', thaimedState.saunaActive ? '🟢 พร้อมใช้งาน' : '🔴 พักการใช้งาน', 'thaimed-sauna', thaimedState.saunaActive ? 'free' : 'busy'],
+      ['📋', 'ห้องทำงานแพทย์แผนไทย (โต๊ะคอม 1–2 • โต๊ะทำงาน 6 ตัว)', 'พร้อมใช้งาน', null, 'free'],
+      ['📦', 'ห้องเก็บอุปกรณ์สมุนไพร (ซ้ายบน) & ห้องเก็บของ (ขวาบน)', '2 ห้อง', null, 'free'],
+      ['🚻', 'ห้องน้ำชายและหญิง (โถงบน)', 'พร้อมใช้งาน', null, 'free'],
+      ['🏛️', 'โถงทางเข้าด้านหน้า & ม้านั่งพักคอย', '2 ม้านั่ง', null, 'free'],
+      ['🖥️', 'PC-THAI-01: โต๊ะคอมแพทย์แผนไทย 1 (จุดตรวจวินิจฉัย)', 'ดูสเปก', null, 'free', pcSpec1],
+      ['🖥️', 'PC-THAI-02: โต๊ะคอมแพทย์แผนไทย 2 (จ่ายยาสมุนไพร)', 'ดูสเปก', null, 'free', pcSpec2],
+      ['🪑', 'โต๊ะทำงานแพทย์แผนไทย', '6 ตัว'],
+      ['🚪', 'ประตูทางเข้าหลักและประตูห้องภายใน', '7 บาน']
+    ];
+
+    return {
+      group: g,
+      labels: L,
+      size: 26,
+      title: '🌿 ผังภายในแพทย์แผนไทย: ห้องนวด 12 เตียง • ห้องซาวน่า • ห้องทำงาน • โถงทางเข้า • ห้องน้ำ',
+      sub: 'คลิกเตียงนวดเพื่อสลับสถานะกำลังรักษา • คลิกป้าย "🖥️ โต๊ะคอม" เพื่อดูสเปกคอมพิวเตอร์',
+      items,
+      cam: { pos: V(0, 24.5, 20.0), target: V(0, 0, 0.5) }
+    };
+  }
+
   K.Interiors = {
     build(b) {
       if (b.interior === 'guard') return guard(b);
@@ -5227,9 +5679,21 @@
       if (b.interior === 'kitchen') return buildKitchenInterior(b);
       if (b.interior === 'pharmacy') return buildPharmacyInterior(b);
       if (b.interior === 'dental') return buildDentalInterior(b);
+      if (b.interior === 'thaimed') return buildThaimedInterior(b);
       return null;
     },
     toggleStatus(id) {
+      if (id.startsWith('thaimed-bed-')) {
+        const bed = thaimedState.beds.find((b) => b.id === id);
+        if (bed) {
+          bed.occupied = !bed.occupied;
+          return true;
+        }
+      }
+      if (id === 'thaimed-sauna') {
+        thaimedState.saunaActive = !thaimedState.saunaActive;
+        return true;
+      }
       if (id.startsWith('dental-room-')) {
         const dRoom = dentalState.rooms.find((r) => r.id === id);
         if (dRoom) {
