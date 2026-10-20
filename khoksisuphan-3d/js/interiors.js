@@ -3926,6 +3926,472 @@
     };
   }
 
+  // ==================== ห้องยา (โซนจ่ายยา • โต๊ะคอมจ่ายยา 1–7 • โต๊ะจัดยา • คลังยา • คลังน้ำเกลือ+ตู้แช่ยา) ====================
+  const pharmacyState = {
+    dispensingOpen: true,
+    mainStoreOpen: true,
+    coldStoreActive: true
+  };
+
+  function buildPharmacyInterior() {
+    const g = new THREE.Group();
+    const L = [];
+    const WH = 2.4;
+
+    // ขนาดห้องยารวม: กว้าง 24.0 ม. (X: -12.0..+12.0), ลึก 17.0 ม. (Z: -8.5..+8.5)
+    // 1. พื้นแต่ละโซนตามผัง
+    // โซนจ่ายยาและจัดยาฝั่งซ้าย (X: -12.0 .. -6.8, Z: -8.5 .. +8.5)
+    floor(g, 5.2, 17.0, '#f0fdf4', '#bbf7d0', 0.6, -9.4, 0);
+    // คลังยาห้องใหญ่ (X: -6.8 .. +2.8, Z: -8.5 .. -0.8)
+    floor(g, 9.6, 7.7, '#fefce8', '#cbd5e1', 0.6, -2.0, -4.65);
+    // คลังยาห้องกลาง (X: +2.8 .. +6.8, Z: -8.5 .. -0.8)
+    floor(g, 4.0, 7.7, '#fffbeb', '#cbd5e1', 0.6, 4.8, -4.65);
+    // คลังน้ำเกลือและตู้แช่ยาห้องขวาบน (X: +6.8 .. +12.0, Z: -8.5 .. -0.8)
+    floor(g, 5.2, 7.7, '#e0f2fe', '#93c5fd', 0.6, 9.4, -4.65);
+    // โถงกลางและพื้นที่โต๊ะทำงาน (X: -6.8 .. +9.5, Z: -0.8 .. +8.5)
+    floor(g, 16.3, 9.3, '#f8fafc', '#cbd5e1', 0.6, 1.35, 3.85);
+    // ห้องฝั่งขวาล่าง (X: +9.5 .. +12.0, Z: -0.8 .. +8.5)
+    floor(g, 2.5, 9.3, '#f5f3ff', '#ddd6fe', 0.6, 10.75, 3.85);
+
+    // 2. ผนังรอบนอกอาคารห้องยา (กว้าง 24.0 ม. X: -12.0 .. +12.0, ลึก 17.0 ม. Z: -8.5 .. +8.5)
+    // ผนังบน (Z = -8.5, X: -12.0 .. +12.0) เว้นช่องประตูด้านบนขวาของคลังน้ำเกลือ (X: +9.8 .. +11.4)
+    g.add(
+      maintAt(maintWall(21.8, WH, 0.18, 0x1e293b), -1.1, WH / 2, -8.5),
+      maintAt(maintWall(0.6, WH, 0.18, 0x1e293b), 11.7, WH / 2, -8.5),
+      maintAt(maintWall(1.6, 0.35, 0.18, 0x1e293b), 10.6, WH - 0.175, -8.5)
+    );
+
+    // ผนังซ้ายสุด (X = -12.0, Z: -8.5 .. +8.5) พร้อมช่องกระจกส่งยา/จ่ายยา
+    g.add(
+      maintAt(maintWall(0.18, WH, 17.0, 0x1e293b), -12.0, WH / 2, 0),
+      // กระจกเคาน์เตอร์จ่ายยาภายนอก
+      maintAt(
+        new THREE.Mesh(
+          new THREE.BoxGeometry(0.06, 0.9, 14.8),
+          new THREE.MeshStandardMaterial({
+            color: 0xbae6fd,
+            transparent: true,
+            opacity: 0.45,
+            roughness: 0.15
+          })
+        ),
+        -12.0,
+        1.45,
+        0
+      )
+    );
+
+    // ผนังขวาสุด (X = +12.0, Z: -8.5 .. +8.5)
+    g.add(maintAt(maintWall(0.18, WH, 17.0, 0x1e293b), 12.0, WH / 2, 0));
+
+    // ผนังล่าง (Z = +8.5, X: -12.0 .. +12.0) เว้นช่องประตู 2 บาน (X: -11.6 .. -10.2 และ X: -3.5 .. -2.1)
+    g.add(
+      maintAt(maintWall(0.4, WH, 0.18, 0x1e293b), -11.8, WH / 2, 8.5),
+      maintAt(maintWall(1.4, 0.35, 0.18, 0x1e293b), -10.9, WH - 0.175, 8.5),
+      maintAt(maintWall(6.7, WH, 0.18, 0x1e293b), -6.85, WH / 2, 8.5),
+      maintAt(maintWall(1.4, 0.35, 0.18, 0x1e293b), -2.8, WH - 0.175, 8.5),
+      maintAt(maintWall(14.1, WH, 0.18, 0x1e293b), 4.95, WH / 2, 8.5)
+    );
+
+    // 3. ผนังกั้นภายในห้องยา
+    // ผนังกั้นระหว่างโซนจ่ายยา (ซ้าย) กับ โถงหลัก (X = -6.8):
+    // ช่วงบน (Z: -8.5 .. +4.4) เป็นผนังทึบ, เว้นช่องประตู (Z: +4.4 .. +6.0, กึ่งกลาง Z = +5.2), ช่วงล่าง (Z: +6.0 .. +8.5) เป็นกระจก/ผนังเบา
+    g.add(
+      maintAt(maintWall(0.18, WH, 12.9, 0x1e293b), -6.8, WH / 2, -2.05),
+      maintAt(maintWall(0.18, 0.35, 1.6, 0x1e293b), -6.8, WH - 0.175, 5.2),
+      maintAt(maintWall(0.18, WH, 2.5, 0x2563eb), -6.8, WH / 2, 7.25)
+    );
+
+    // ผนังแนวนอนกั้นโซนคลังยาด้านบน (Z = -0.8, X: -6.8 .. +12.0):
+    // - ช่วงคลังยาห้องใหญ่: เว้นช่องประตูที่ X = +0.8 .. +2.4
+    // - ช่วงคลังยาห้องกลาง: เว้นช่องประตูที่ X = +3.1 .. +4.7
+    // - ช่วงคลังน้ำเกลือ: ผนังทึบ
+    g.add(
+      maintAt(maintWall(7.6, WH, 0.18, 0x1e293b), -3.0, WH / 2, -0.8),
+      maintAt(maintWall(1.6, 0.35, 0.18, 0x1e293b), 1.6, WH - 0.175, -0.8),
+      maintAt(maintWall(0.7, WH, 0.18, 0x1e293b), 2.75, WH / 2, -0.8),
+      maintAt(maintWall(1.6, 0.35, 0.18, 0x1e293b), 3.9, WH - 0.175, -0.8),
+      maintAt(maintWall(7.3, WH, 0.18, 0x1e293b), 8.35, WH / 2, -0.8)
+    );
+
+    // ผนังกั้นห้องแนวตั้งระหว่างคลังยา:
+    // (1) กั้นระหว่างคลังยาใหญ่กับคลังยากลาง (X = +2.8, Z: -8.5 .. -0.8)
+    g.add(maintAt(maintWall(0.16, WH, 7.7, 0x1e293b), 2.8, WH / 2, -4.65));
+    // (2) กั้นระหว่างคลังยากลางกับคลังน้ำเกลือ (X = +6.8, Z: -8.5 .. -0.8) เว้นช่องประตูเชื่อมช่วง Z: -7.8 .. -6.2
+    g.add(
+      maintAt(maintWall(0.16, WH, 0.7, 0x1e293b), 6.8, WH / 2, -8.15),
+      maintAt(maintWall(0.16, 0.35, 1.6, 0x1e293b), 6.8, WH - 0.175, -7.0),
+      maintAt(maintWall(0.16, WH, 5.4, 0x1e293b), 6.8, WH / 2, -3.5)
+    );
+
+    // (3) ผนังกั้นห้องฝั่งขวาล่าง (X = +9.5, Z: -0.8 .. +8.5) เว้นช่องประตูที่ Z: +1.0 .. +2.6
+    g.add(
+      maintAt(maintWall(0.16, WH, 1.8, 0x475569), 9.5, WH / 2, 0.1),
+      maintAt(maintWall(0.16, 0.35, 1.6, 0x475569), 9.5, WH - 0.175, 1.8),
+      maintAt(maintWall(0.16, WH, 5.9, 0x475569), 9.5, WH / 2, 5.55)
+    );
+
+    // ฟังก์ชันสร้างประตูโรงพยาบาลพร้อมกรอบ
+    function makePharDoor(x, z, w, d, rotY = 0) {
+      const dg = new THREE.Group();
+      dg.position.set(x, 0, z);
+      const pad = maintBox(w, 0.05, d, 0xe2e8f0);
+      pad.position.set(0, 0.025, 0);
+      dg.add(pad);
+      const isHoriz = w >= d;
+      const leaf = maintBox(isHoriz ? w * 0.82 : 0.08, 1.95, isHoriz ? 0.08 : d * 0.82, 0xd97706);
+      leaf.position.set(0, 0.98, 0);
+      leaf.rotation.y = rotY;
+      dg.add(leaf);
+      g.add(dg);
+    }
+
+    // ประตูทั้ง 6 จุดตามผัง:
+    // 1. ประตูด้านล่างซ้ายสุด (X = -10.9, Z = +8.5)
+    makePharDoor(-10.9, 8.5, 1.4, 0.85, 0.35);
+    L.push(maintTag('🚪 ประตู', V(-10.9, 1.45, 8.5), 'sub', null, 'ประตูเข้า-ออกโซนจ่ายยา (ฝั่งซ้ายล่าง)'));
+
+    // 2. ประตูกั้นระหว่างโซนจ่ายยากับโถงกลาง (X = -6.8, Z = +5.2)
+    makePharDoor(-6.8, 5.2, 0.85, 1.5, -0.38);
+    L.push(maintTag('🚪 ประตู', V(-6.8, 1.45, 5.2), 'sub', null, 'ประตูเชื่อมระหว่างโซนจ่ายยากับโถงห้องยา'));
+
+    // 3. ประตูด้านล่างกลางห้องยา (X = -2.8, Z = +8.5)
+    makePharDoor(-2.8, 8.5, 1.4, 0.85, 0.35);
+    L.push(maintTag('🚪 ประตู', V(-2.8, 1.45, 8.5), 'room', null, 'ประตูทางเข้าหลักห้องยา (ฝั่งด้านหน้า)'));
+
+    // 4. ประตูคลังยาห้องใหญ่ (X = +1.6, Z = -0.8)
+    makePharDoor(1.6, -0.8, 1.5, 0.85, 0.35);
+    L.push(maintTag('🚪 ประตู', V(1.6, 1.45, -0.8), 'sub', null, 'ประตูเข้าคลังยาห้องใหญ่'));
+
+    // 5. ประตูคลังยาห้องกลาง (X = +3.9, Z = -0.8)
+    makePharDoor(3.9, -0.8, 1.5, 0.85, 0.35);
+    L.push(maintTag('🚪 ประตู', V(3.9, 1.45, -0.8), 'sub', null, 'ประตูเข้าคลังยาห้องกลาง'));
+
+    // 6. ประตูเชื่อมระหว่างคลังยากลางกับคลังน้ำเกลือ (X = +6.8, Z = -7.0)
+    makePharDoor(6.8, -7.0, 0.85, 1.5, 0.38);
+    L.push(maintTag('🚪 ประตู', V(6.8, 1.45, -7.0), 'sub', null, 'ประตูเชื่อมคลังยากับคลังน้ำเกลือ'));
+
+    // 7. ประตูด้านบนขวาของคลังน้ำเกลือ (X = +10.6, Z = -8.5)
+    makePharDoor(10.6, -8.5, 1.5, 0.85, 0.35);
+    L.push(maintTag('🚪 ประตู', V(10.6, 1.45, -8.5), 'sub', null, 'ประตูโหลดสินค้าคลังน้ำเกลือ'));
+
+    // 8. ประตูเข้าห้องฝั่งขวาล่างใต้ที่นั่ง (X = +9.5, Z = +1.8)
+    makePharDoor(9.5, 1.8, 0.85, 1.5, -0.38);
+    L.push(maintTag('🚪 ประตู', V(9.5, 1.45, 1.8), 'sub', null, 'ประตูห้องเวชระเบียนยาและคลังเอกสาร'));
+
+    // 4. โต๊ะคอมพิวเตอร์จ่ายยาทั้ง 7 เครื่อง (PC-PHAR-01 ถึง PC-PHAR-07)
+    function makePharPcSpec(num, stationName, roleDesc) {
+      return {
+        code: `PC-PHAR-0${num}`,
+        name: `โต๊ะคอมจ่ายยา ${num} (${stationName})`,
+        role: roleDesc,
+        user: 'เภสัชกร / เจ้าพนักงานเภสัชกรรม โรงพยาบาลโคกศรีสุพรรณ',
+        os: 'Windows 11 Pro 64-bit',
+        cpu: 'Intel Core i5-12400 (6C/12T @ 4.4GHz)',
+        ram: '16 GB DDR4 3200MHz',
+        storage: 'SSD NVMe 512 GB',
+        monitor: '24" FHD IPS Monitor',
+        ip: `192.168.14.${10 + num}`,
+        software: 'ระบบห้องยาโรงพยาบาล (HOSxP Pharmacy) • ระบบตรวจสอบอันตรกิริยาระหว่างยา (Drug Interaction) • ระบบ e-Prescription',
+        peripherals: 'เครื่องพิมพ์สติกเกอร์ฉลากยาความเร็วสูง TSC • เครื่องสแกนบาร์โค้ดยา • เครื่องสำรองไฟ UPS 1000VA',
+        status: '🟢 ออนไลน์ปกติ'
+      };
+    }
+
+    function createPharPcDesk(x, z, rotY, spec, labelText, personOpts = null) {
+      const dg = new THREE.Group();
+      dg.position.set(x, 0, z);
+      dg.rotation.y = rotY;
+      // โต๊ะทำงาน
+      dg.add(
+        maintAt(maintBox(1.2, 0.74, 0.78, 0x334155), 0, 0.37, 0),
+        maintAt(maintBox(1.26, 0.06, 0.84, 0xf8fafc), 0, 0.76, 0),
+        // จอคอมพิวเตอร์ + เคส + คีย์บอร์ด
+        maintAt(maintBox(0.58, 0.36, 0.05, 0x0f172a), 0, 1.02, -0.2),
+        maintAt(maintBox(0.52, 0.3, 0.02, 0x38bdf8), 0, 1.02, -0.17),
+        maintAt(maintBox(0.14, 0.12, 0.12, 0x475569), 0, 0.82, -0.2),
+        maintAt(maintBox(0.38, 0.02, 0.14, 0x1e293b), 0, 0.79, 0.12),
+        maintAt(maintBox(0.22, 0.42, 0.44, 0x1e293b), 0.42, 0.98, -0.08),
+        // เครื่องพิมพ์ฉลากยา
+        maintAt(maintBox(0.28, 0.2, 0.28, 0x64748b), -0.42, 0.88, -0.05),
+        // เก้าอี้
+        maintAt(maintBox(0.46, 0.45, 0.46, 0x2563eb), 0, 0.23, 0.62),
+        maintAt(maintBox(0.44, 0.48, 0.08, 0x1d4ed8), 0, 0.65, 0.82)
+      );
+      dg.traverse((child) => {
+        if (child.isMesh) child.userData.pcInfo = spec;
+      });
+      g.add(dg);
+
+      if (personOpts && pharmacyState.dispensingOpen) {
+        const staff = makePerson(personOpts);
+        staff.position.set(0, 0, 0.62);
+        dg.add(staff);
+      }
+
+      L.push(
+        maintTag(
+          `🖥️ ${labelText}`,
+          V(x, 1.65, z),
+          'pc',
+          null,
+          `คลิกเพื่อดูสเปก ${labelText} (${spec.code})`,
+          spec
+        )
+      );
+    }
+
+    // โต๊ะคอมจ่ายยา 1–4 ฝั่งซ้าย (เรียงแนวตั้งชิดผนังซ้าย หันหน้าไปทางซ้าย -X)
+    const pcSpec4 = makePharPcSpec(4, 'จุดจ่ายยาช่อง 4', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก');
+    createPharPcDesk(-11.15, -6.4, -Math.PI / 2, pcSpec4, 'โต๊ะคอมจ่ายยา 4', { role: 'nurse', shirtColor: 0x10b981, pose: 'sit', rotY: 0 });
+
+    const pcSpec3 = makePharPcSpec(3, 'จุดจ่ายยาช่อง 3', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก');
+    createPharPcDesk(-11.15, -2.2, -Math.PI / 2, pcSpec3, 'โต๊ะคอมจ่ายยา 3', { role: 'nurse', shirtColor: 0x0284c7, pose: 'sit', rotY: 0 });
+
+    const pcSpec2 = makePharPcSpec(2, 'จุดจ่ายยาช่อง 2', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก');
+    createPharPcDesk(-11.15, 2.0, -Math.PI / 2, pcSpec2, 'โต๊ะคอมจ่ายยา 2', { role: 'nurse', shirtColor: 0x2563eb, pose: 'sit', rotY: 0 });
+
+    const pcSpec1 = makePharPcSpec(1, 'จุดจ่ายยาช่อง 1', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก');
+    createPharPcDesk(-11.15, 6.2, -Math.PI / 2, pcSpec1, 'โต๊ะคอมจ่ายยา 1', { role: 'nurse', shirtColor: 0x7c3aed, pose: 'sit', rotY: 0 });
+
+    // โต๊ะคอมจ่ายยา 5 (ชิดผนังล่างซ้าย หันหน้าลงทางใต้ +Z)
+    const pcSpec5 = makePharPcSpec(5, 'จุดตรวจสอบและจ่ายยาช่อง 5', 'ตรวจสอบความถูกต้องและพิมพ์ฉลากยา');
+    createPharPcDesk(-5.1, 7.85, 0, pcSpec5, 'โต๊ะคอมจ่ายยา 5', { role: 'nurse', shirtColor: 0x0d9488, pose: 'sit', rotY: 0 });
+
+    // โต๊ะคอมจ่ายยา 7 และ 6 (ชิดผนังล่างขวา หันหน้าลงทางใต้ +Z)
+    const pcSpec7 = makePharPcSpec(7, 'จุดให้คำปรึกษาด้านยาช่อง 7', 'ให้คำแนะนำการใช้ยาเฉพาะโรคและยาเทคนิคพิเศษ');
+    createPharPcDesk(5.8, 7.85, 0, pcSpec7, 'โต๊ะคอมจ่ายยา 7', { role: 'nurse', shirtColor: 0xca8a04, pose: 'sit', rotY: 0 });
+
+    const pcSpec6 = makePharPcSpec(6, 'จุดจัดเตรียมและจ่ายยาช่อง 6', 'จัดเตรียมยาผู้ป่วยนอกและบันทึกประวัติแพ้ยา');
+    createPharPcDesk(8.2, 7.85, 0, pcSpec6, 'โต๊ะคอมจ่ายยา 6', { role: 'nurse', shirtColor: 0xdb2777, pose: 'sit', rotY: 0 });
+
+    // 5. โต๊ะจัดยา และ ชั้นวางยา ในโซนจ่ายยาฝั่งซ้าย
+    // (1) โต๊ะจัดยา (เกาะกลางโต๊ะยาวแนวตั้ง: X = -9.2, Z = -0.5, กว้าง 1.3 ม., ลึก 8.2 ม.)
+    const prepTable = new THREE.Group();
+    prepTable.add(
+      maintAt(maintBox(1.3, 0.82, 8.2, 0xe2e8f0), -9.2, 0.41, -0.5),
+      maintAt(maintBox(1.38, 0.06, 8.28, 0xffffff), -9.2, 0.85, -0.5)
+    );
+    // ถาดจัดยาและกล่องบรรจุยาบนโต๊ะจัดยา
+    for (let tz = -4.0; tz <= 3.0; tz += 1.4) {
+      prepTable.add(
+        maintAt(maintBox(0.5, 0.12, 0.9, 0x38bdf8), -9.45, 0.94, tz),
+        maintAt(maintBox(0.5, 0.12, 0.9, 0xfbbf24), -8.95, 0.94, tz)
+      );
+    }
+    g.add(prepTable);
+    L.push(maintTag('💊 โต๊ะจัดยา', V(-9.2, 1.45, -0.5), 'room', null, 'โต๊ะจัดเตรียมยาและตรวจนับเม็ดยา'));
+
+    // (2) ชั้นวางยา (ผนังด้านบนของโซนจ่ายยา: X = -9.2, Z = -8.0, กว้าง 4.8 ม., ลึก 0.65 ม.)
+    const topMedShelf = makeStorageShelf(4.8, 0.65, 2.05, 0x0284c7);
+    topMedShelf.position.set(-9.2, 0, -8.0);
+    g.add(topMedShelf);
+    L.push(maintTag('💊 ชั้นวางยา', V(-9.2, 2.25, -8.0), 'sub', null, 'ชั้นวางยาเม็ดและยาน้ำ (ด้านบน)'));
+
+    // (3) ชั้นวางยา 2 ชั้น ชิดผนังกั้นห้องด้านขวา (X = -7.2):
+    // ชั้นบน (Z = -5.5, ลึก 4.4 ม.)
+    const rightMedShelfTop = makeStorageShelf(4.4, 0.65, 2.05, 0x16a34a);
+    rightMedShelfTop.rotation.y = Math.PI / 2;
+    rightMedShelfTop.position.set(-7.2, 0, -5.5);
+    g.add(rightMedShelfTop);
+    L.push(maintTag('💊 ชั้นวางยา', V(-7.2, 2.25, -5.5), 'sub', null, 'ชั้นวางยาสำเร็จรูป (ฝั่งขวาบน)'));
+
+    // ชั้นล่าง (Z = -0.7, ลึก 4.4 ม.)
+    const rightMedShelfBottom = makeStorageShelf(4.4, 0.65, 2.05, 0x0d9488);
+    rightMedShelfBottom.rotation.y = Math.PI / 2;
+    rightMedShelfBottom.position.set(-7.2, 0, -0.7);
+    g.add(rightMedShelfBottom);
+    L.push(maintTag('💊 ชั้นวางยา', V(-7.2, 2.25, -0.7), 'sub', null, 'ชั้นวางยาสำเร็จรูป (ฝั่งขวากลาง)'));
+
+    // (4) ตู้เก็บยา (ชิดผนังล่างซ้าย: X = -8.7, Z = +8.0, กว้าง 2.6 ม., ลึก 0.7 ม., สูง 2.0 ม.)
+    const medCabinet = new THREE.Group();
+    medCabinet.add(
+      maintAt(maintBox(2.6, 2.0, 0.7, 0x0f172a), -8.7, 1.0, 8.0),
+      // กระจกหน้าตู้เก็บยา
+      maintAt(
+        new THREE.Mesh(
+          new THREE.BoxGeometry(2.45, 1.85, 0.05),
+          new THREE.MeshStandardMaterial({
+            color: 0x93c5fd,
+            transparent: true,
+            opacity: 0.55,
+            roughness: 0.2
+          })
+        ),
+        -8.7,
+        1.0,
+        7.62
+      )
+    );
+    g.add(medCabinet);
+    L.push(maintTag('🗄️ ตู้เก็บยา', V(-8.7, 2.25, 8.0), 'sub', null, 'ตู้เก็บยาควบคุมพิเศษและยาอันตราย'));
+
+    // 6. โซนคลังยา (Top-Middle และ Top-Center-Right)
+    // คลังยาห้องใหญ่ (X: -6.8 .. +2.8, Z: -8.5 .. -0.8)
+    const mainStore = new THREE.Group();
+    [-5.4, -3.4, -1.4].forEach((sx) => {
+      const sh = makeStorageShelf(5.5, 0.75, 2.1, 0xd97706);
+      sh.rotation.y = Math.PI / 2;
+      sh.position.set(sx, 0, -4.65);
+      mainStore.add(sh);
+    });
+    g.add(mainStore);
+    L.push(
+      maintTag(
+        `📦 คลังยา (${pharmacyState.mainStoreOpen ? '🟢 เปิดเบิกจ่าย' : '🔴 ปิดตรวจนับ'})`,
+        V(-2.0, 2.35, -4.65),
+        'room ' + (pharmacyState.mainStoreOpen ? 'free' : 'busy'),
+        'pharmacy-main-store',
+        'คลิกเพื่อสลับสถานะคลังยาห้องใหญ่'
+      )
+    );
+
+    // คลังยาห้องกลาง (X: +2.8 .. +6.8, Z: -8.5 .. -0.8)
+    const midStore = new THREE.Group();
+    [4.0, 5.6].forEach((sx) => {
+      const sh = makeStorageShelf(5.5, 0.75, 2.1, 0x4f46e5);
+      sh.rotation.y = Math.PI / 2;
+      sh.position.set(sx, 0, -4.65);
+      midStore.add(sh);
+    });
+    g.add(midStore);
+    L.push(maintTag('📦 คลังยา', V(4.8, 2.35, -4.65), 'room', null, 'คลังเวชภัณฑ์และยาน้ำสำรอง'));
+
+    // 7. โซนคลังน้ำเกลือ + ตู้แช่ยา (X: +6.8 .. +12.0, Z: -8.5 .. -0.8)
+    const salineGroup = new THREE.Group();
+    // กองกล่องน้ำเกลือ NSS / Ringer's lactate บนพาเลทไม้
+    for (let bx = 8.2; bx <= 10.8; bx += 1.3) {
+      salineGroup.add(
+        maintAt(maintBox(1.1, 0.15, 1.1, 0xb45309), bx, 0.075, -6.5),
+        maintAt(maintBox(0.95, 1.25, 0.95, 0x0284c7), bx, 0.775, -6.5),
+        maintAt(maintBox(0.9, 0.12, 0.9, 0xffffff), bx, 1.45, -6.5)
+      );
+    }
+    // ตู้แช่ยาทางการแพทย์ (2–8°C) ขนาดใหญ่ 2 ตู้
+    [8.4, 10.4].forEach((fx) => {
+      salineGroup.add(
+        maintAt(maintBox(1.3, 1.95, 0.85, 0x0f172a), fx, 0.98, -2.5),
+        maintAt(
+          new THREE.Mesh(
+            new THREE.BoxGeometry(1.15, 1.7, 0.05),
+            new THREE.MeshStandardMaterial({
+              color: 0x38bdf8,
+              transparent: true,
+              opacity: 0.65,
+              roughness: 0.15
+            })
+          ),
+          fx,
+          0.98,
+          -2.05
+        ),
+        // จอดิจิทัลแสดงอุณหภูมิ 4.0°C
+        maintAt(maintBox(0.25, 0.1, 0.04, 0x22c55e), fx, 1.75, -2.03)
+      );
+    });
+    g.add(salineGroup);
+    L.push(
+      maintTag(
+        `🧊 คลังน้ำเกลือ+ตู้แช่ยา (${pharmacyState.coldStoreActive ? '🟢 อุณหภูมิปกติ 4°C' : '🔴 แจ้งเตือนอุณหภูมิ'})`,
+        V(9.4, 2.35, -4.65),
+        'room ' + (pharmacyState.coldStoreActive ? 'free' : 'busy'),
+        'pharmacy-cold-store',
+        'คลิกเพื่อสลับสถานะตู้แช่ยาและคลังน้ำเกลือ'
+      )
+    );
+
+    // 8. โต๊ะทำงานและที่นั่งในโถงกลาง
+    // (1) โต๊ะ 3 ตัวใต้คลังยาใหญ่ (X: -5.4, -3.6, -1.8 ที่ Z = +0.8)
+    [-5.4, -3.6, -1.8].forEach((tx, idx) => {
+      g.add(
+        maintAt(maintBox(1.2, 0.74, 0.75, 0xd97706), tx, 0.37, 0.8),
+        maintAt(maintBox(1.26, 0.06, 0.8, 0xfef3c7), tx, 0.76, 0.8),
+        maintAt(maintBox(0.46, 0.45, 0.46, 0x334155), tx, 0.23, 0.35)
+      );
+      L.push(maintTag('🪑 โต๊ะ', V(tx, 1.25, 0.8), 'sub', null, `โต๊ะปฏิบัติงานเภสัชกรรม ตัวที่ ${idx + 1}`));
+    });
+
+    // (2) ที่นั่งพักคอย (ใต้คลังยากลาง: X = +5.2, Z = +0.1, กว้าง 3.6 ม., ลึก 0.9 ม.)
+    const benchGroup = new THREE.Group();
+    benchGroup.add(
+      maintAt(maintBox(3.6, 0.44, 0.85, 0x2563eb), 5.2, 0.22, 0.1),
+      maintAt(maintBox(3.6, 0.46, 0.08, 0x1d4ed8), 5.2, 0.65, -0.32)
+    );
+    g.add(benchGroup);
+    L.push(maintTag('🪑 ที่นั่ง', V(5.2, 1.25, 0.1), 'room', null, 'ม้านั่งพักคอยสำหรับผู้มารับบริการ'));
+
+    // (3) โต๊ะกลางโถงแนวตั้ง (X = +3.8, Z = +4.5, กว้าง 0.75 ม., ลึก 1.4 ม.)
+    g.add(
+      maintAt(maintBox(0.75, 0.74, 1.4, 0xd97706), 3.8, 0.37, 4.5),
+      maintAt(maintBox(0.8, 0.06, 1.46, 0xfef3c7), 3.8, 0.76, 4.5),
+      maintAt(maintBox(0.46, 0.45, 0.46, 0x334155), 3.25, 0.23, 4.5)
+    );
+    L.push(maintTag('🪑 โต๊ะ', V(3.8, 1.25, 4.5), 'sub', null, 'โต๊ะทำงานและตรวจเช็กสต็อกยา'));
+
+    // (4) โต๊ะ 3 ตัวเรียงกันด้านล่าง (X: -0.6, +1.0, +2.6 ที่ Z = +7.0)
+    [-0.6, 1.0, 2.6].forEach((tx, idx) => {
+      g.add(
+        maintAt(maintBox(1.2, 0.74, 0.75, 0xd97706), tx, 0.37, 7.0),
+        maintAt(maintBox(1.26, 0.06, 0.8, 0xfef3c7), tx, 0.76, 7.0),
+        maintAt(maintBox(0.46, 0.45, 0.46, 0x334155), tx, 0.23, 6.55)
+      );
+      L.push(maintTag('🪑 โต๊ะ', V(tx, 1.25, 7.0), 'sub', null, `โต๊ะปฏิบัติงานเภสัชกรรม ตัวที่ ${idx + 4}`));
+    });
+
+    // 9. ห้องฝั่งขวาล่าง (X: +9.5 .. +12.0, Z: -0.8 .. +8.5)
+    const rightRoomShelf = makeStorageShelf(4.5, 0.65, 2.0, 0x7c3aed);
+    rightRoomShelf.rotation.y = Math.PI / 2;
+    rightRoomShelf.position.set(11.4, 0, 4.8);
+    g.add(rightRoomShelf);
+    L.push(maintTag('📁 คลังเอกสารยา', V(10.75, 1.85, 4.8), 'sub', null, 'ห้องจัดเก็บเวชระเบียนยาและคู่มือเภสัชกรรม'));
+
+    // รายการไอเทมสรุปด้านข้าง
+    const items = [
+      [
+        '💊',
+        'โซนจ่ายยา (โต๊ะคอมจ่ายยา 1–4 • โต๊ะจัดยา • ชั้นวางยา)',
+        pharmacyState.dispensingOpen ? '🟢 เปิดบริการจ่ายยา' : '🔴 พักบริการ',
+        'pharmacy-dispense',
+        pharmacyState.dispensingOpen ? 'free' : 'busy'
+      ],
+      [
+        '📦',
+        'คลังยาห้องใหญ่ & คลังยาห้องกลาง',
+        pharmacyState.mainStoreOpen ? '🟢 พร้อมเบิกจ่าย' : '🔴 ปิดตรวจนับ',
+        'pharmacy-main-store',
+        pharmacyState.mainStoreOpen ? 'free' : 'busy'
+      ],
+      [
+        '🧊',
+        'คลังน้ำเกลือ + ตู้แช่ยา (2–8°C)',
+        pharmacyState.coldStoreActive ? '🟢 พร้อมใช้งาน' : '🔴 แจ้งเตือน',
+        'pharmacy-cold-store',
+        pharmacyState.coldStoreActive ? 'free' : 'busy'
+      ],
+      ['🖥️', 'PC-PHAR-01: โต๊ะคอมจ่ายยา 1', 'ดูสเปก', null, 'free', pcSpec1],
+      ['🖥️', 'PC-PHAR-02: โต๊ะคอมจ่ายยา 2', 'ดูสเปก', null, 'free', pcSpec2],
+      ['🖥️', 'PC-PHAR-03: โต๊ะคอมจ่ายยา 3', 'ดูสเปก', null, 'free', pcSpec3],
+      ['🖥️', 'PC-PHAR-04: โต๊ะคอมจ่ายยา 4', 'ดูสเปก', null, 'free', pcSpec4],
+      ['🖥️', 'PC-PHAR-05: โต๊ะคอมจ่ายยา 5', 'ดูสเปก', null, 'free', pcSpec5],
+      ['🖥️', 'PC-PHAR-06: โต๊ะคอมจ่ายยา 6', 'ดูสเปก', null, 'free', pcSpec6],
+      ['🖥️', 'PC-PHAR-07: โต๊ะคอมจ่ายยา 7', 'ดูสเปก', null, 'free', pcSpec7],
+      ['💊', 'โต๊ะจัดยาเกาะกลาง & ชั้นวางยา', '4 จุด'],
+      ['🗄️', 'ตู้เก็บยาควบคุมพิเศษ', '1 ตู้'],
+      ['🪑', 'โต๊ะทำงานและที่นั่งพักคอย', '8 จุด'],
+      ['🚪', 'ประตูทางเข้า-ออกและเชื่อมโซน', '7 บาน']
+    ];
+
+    return {
+      group: g,
+      labels: L,
+      size: 26,
+      title: '💊 ผังภายในห้องยา: โซนจ่ายยา (คอม 1–7) • โต๊ะจัดยา • คลังยา • คลังน้ำเกลือ+ตู้แช่ยา',
+      sub: 'คลิกป้ายสถานะเพื่อสลับเปิด/พักบริการ • คลิกป้าย "🖥️ โต๊ะคอมจ่ายยา 1–7" เพื่อดูสเปกคอมพิวเตอร์',
+      items,
+      cam: { pos: V(0, 24.5, 21.0), target: V(0, 0, 0.5) }
+    };
+  }
+
   K.Interiors = {
     build(b) {
       if (b.interior === 'guard') return guard(b);
@@ -3939,6 +4405,7 @@
       if (b.interior === 'maint') return buildMaintInterior(b);
       if (b.interior === 'finance') return buildFinanceInterior(b);
       if (b.interior === 'kitchen') return buildKitchenInterior(b);
+      if (b.interior === 'pharmacy') return buildPharmacyInterior(b);
       return null;
     },
     toggleStatus(id) {
@@ -4000,6 +4467,18 @@
       }
       if (id === 'kitchen-store') {
         kitchenState.storeOpen = !kitchenState.storeOpen;
+        return true;
+      }
+      if (id === 'pharmacy-dispense') {
+        pharmacyState.dispensingOpen = !pharmacyState.dispensingOpen;
+        return true;
+      }
+      if (id === 'pharmacy-main-store') {
+        pharmacyState.mainStoreOpen = !pharmacyState.mainStoreOpen;
+        return true;
+      }
+      if (id === 'pharmacy-cold-store') {
+        pharmacyState.coldStoreActive = !pharmacyState.coldStoreActive;
         return true;
       }
       return false;
