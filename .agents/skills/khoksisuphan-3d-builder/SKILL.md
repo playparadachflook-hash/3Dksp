@@ -14,12 +14,12 @@ This skill contains the complete workflow, architectural patterns, coding conven
 
 ## 1. Project File Structure
 
-- [`index.html`](../../khoksisuphan-3d/index.html) — Main entry point, UI overlays, `#info-panel` (building details + `"🔍 ดูภายในอาคาร"` button), `#interior-panel` (room/bed/equipment status list), and `#pc-modal` (computer/equipment specification modal).
-- [`css/style.css`](../../khoksisuphan-3d/css/style.css) — Styling for floating 3D `CSS2DObject` badges (`.int-label`, `.room-title`, `.sub-tag`, `.pc-tag`, `.toggleable`, `.free`, `.busy`) and modals.
-- [`js/data.js`](../../khoksisuphan-3d/js/data.js) — Master building list (`K.BUILDINGS`), categories (`K.CATEGORIES`), roads, and map layout coordinates.
-- [`js/models.js`](../../khoksisuphan-3d/js/models.js) — 3D geometry/material helpers (`K.M`) and exterior building generators (`buildHospitalBuilding`, `buildGuardhouse`, `buildCarport`, `buildPowerHouse`, `buildHall`, etc.).
-- [`js/interiors.js`](../../khoksisuphan-3d/js/interiors.js) — All 3D interior floor plan builders (`K.Interiors.build(b)` and `K.Interiors.toggleStatus(id)`).
-- [`js/app.js`](../../khoksisuphan-3d/js/app.js) — Three.js scene setup, camera & `OrbitControls`, raycasting, `enterInterior(b)`, `exitInterior()`, `openPcModal(info)`, and UI event listeners.
+- [`index.html`](../../index.html) — Main entry point, UI overlays, `#info-panel` (building details + `"🔍 ดูภายในอาคาร"` button), `#interior-panel` (room/bed/equipment status list), and `#pc-modal` (computer/equipment specification modal).
+- [`css/style.css`](../../css/style.css) — Styling for floating 3D `CSS2DObject` badges (`.int-label`, `.room-title`, `.sub-tag`, `.pc-tag`, `.toggleable`, `.free`, `.busy`) and modals.
+- [`js/data.js`](../../js/data.js) — Master building list (`K.BUILDINGS`), categories (`K.CATEGORIES`), roads, and map layout coordinates.
+- [`js/models.js`](../../js/models.js) — 3D geometry/material helpers (`K.M`) and exterior building generators (`buildHospitalBuilding`, `buildGuardhouse`, `buildCarport`, `buildPowerHouse`, `buildHall`, etc.).
+- [`js/interiors.js`](../../js/interiors.js) — All 3D interior floor plan builders (`K.Interiors.build(b)` and `K.Interiors.toggleStatus(id)`).
+- [`js/app.js`](../../js/app.js) — Three.js scene setup, camera & `OrbitControls`, raycasting, `enterInterior(b)`, `exitInterior()`, `openPcModal(info)`, and UI event listeners.
 
 ---
 
@@ -29,10 +29,10 @@ This skill contains the complete workflow, architectural patterns, coding conven
    - Never spin up a Python (`http.server`) or Node server unless explicitly requested.
    - Always launch the app directly via PowerShell:
      ```powershell
-     Start-Process "e:\flook_Webksp\khoksisuphan-3d\index.html"
+     Start-Process "e:\flook_Webksp\Khoksisuphan-Morniter\index.html"
      ```
 2. **Cache Busting on Every Update**
-   - Whenever you edit `js/data.js`, `js/models.js`, `js/interiors.js`, `js/app.js`, or `css/style.css`, bump the query string version `?v=YYYYMMDDx` in [`index.html`](../../khoksisuphan-3d/index.html) so the browser reloads the updated scripts immediately.
+   - Whenever you edit `js/data.js`, `js/models.js`, `js/interiors.js`, `js/app.js`, or `css/style.css`, bump the query string version `?v=YYYYMMDDx` in [`index.html`](../../index.html) so the browser reloads the updated scripts immediately.
 3. **Helper Function Scoping in `js/interiors.js`**
    - Top-level helpers available across all functions in `js/interiors.js`:
      - `V(x, y, z)` -> `new THREE.Vector3(x, y, z)`
@@ -90,7 +90,7 @@ This skill contains the complete workflow, architectural patterns, coding conven
    - Add `if (b.interior === '<key>') return build<Key>Interior(b);` inside `K.Interiors.build(b)`.
    - Add status toggle lookup for `<key>State` inside `K.Interiors.toggleStatus(id)`.
 4. **Verify & Cache-Bust**
-   - Update `?v=...` in `index.html` and run `Start-Process "e:\flook_Webksp\khoksisuphan-3d\index.html"`.
+   - Update `?v=...` in `index.html` and run `Start-Process "e:\flook_Webksp\Khoksisuphan-Morniter\index.html"`.
 
 ---
 
