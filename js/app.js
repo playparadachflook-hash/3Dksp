@@ -817,8 +817,12 @@
       const hits = raycaster.intersectObjects(intClickables);
       if (hits.length > 0) {
         let curr = hits[0].object;
-        while (curr && !curr.userData?.pcInfo) {
+        while (curr && !curr.userData?.pcInfo && !curr.userData?.serverId) {
           curr = curr.parent;
+        }
+        if (curr && curr.userData?.serverId) {
+          openServerModal(curr.userData.serverId);
+          return;
         }
         if (curr && curr.userData?.pcInfo) {
           showPcModal(curr.userData.pcInfo);
@@ -882,6 +886,540 @@
 
   const pcCloseBtn = document.getElementById('pc-close');
   if (pcCloseBtn) pcCloseBtn.onclick = closePcModal;
+
+  // --- Toast Notification ---
+  function showToast(msg) {
+    const toast = document.getElementById('toast-notify');
+    if (!toast) return;
+    toast.innerText = msg;
+    toast.classList.remove('hidden');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => {
+      toast.classList.add('hidden');
+    }, 2800);
+  }
+
+  // --- Copy Helper ---
+  function copyText(text, successMsg) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(successMsg || '✓ คัดลอกสำเร็จ');
+      }).catch(() => {
+        fallbackCopy(text, successMsg);
+      });
+    } else {
+      fallbackCopy(text, successMsg);
+    }
+  }
+
+  function fallbackCopy(text, successMsg) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showToast(successMsg || '✓ คัดลอกสำเร็จ');
+    } catch (e) {
+      alert('คัดลอก: ' + text);
+    }
+    document.body.removeChild(ta);
+  }
+
+  // --- Server & Controller Dashboard Logic ---
+  let activeServerFilter = 'all';
+  let activeServerSearch = '';
+  const revealedPasswords = new Set();
+
+  function renderServerCards(targetServerId = null) {
+    const container = document.getElementById('server-cards-grid');
+    if (!container) return;
+    const devices = K.SERVER_DEVICES || [];
+    container.innerHTML = '';
+
+    const filtered = devices.filter(d => {
+      const matchType = activeServerFilter === 'all' || d.type === activeServerFilter;
+      const q = activeServerSearch.toLowerCase().trim();
+      const matchSearch = !q ||
+        d.name.toLowerCase().includes(q) ||
+        d.ip.toLowerCase().includes(q) ||
+        d.location.toLowerCase().includes(q) ||
+        d.role.toLowerCase().includes(q) ||
+        d.typeName.toLowerCase().includes(q);
+      return matchType && matchSearch;
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #94a3b8;">
+          <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+          <div>ไม่พบอุปกรณ์เครื่องแม่ข่ายที่ตรงกับคำค้นหา</div>
+        </div>
+      `;
+      return;
+    }
+
+    filtered.forEach(d => {
+      const card = document.createElement('div');
+      card.className = 'server-card';
+      card.id = `server-card-${d.id}`;
+      if (targetServerId && d.id === targetServerId) {
+        card.style.borderColor = '#38bdf8';
+        card.style.boxShadow = '0 0 20px rgba(56, 189, 248, 0.5)';
+      }
+
+      const isPassRevealed = revealedPasswords.has(d.id);
+      const displayPass = isPassRevealed ? d.password : '••••••••••••';
+
+      card.innerHTML = `
+        <div class="sc-header">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="sc-type-pill sc-type-${d.type}">${d.typeName}</span>
+            <span class="sc-loc-pill">📍 ${d.location}</span>
+          </div>
+          <span class="sc-status-pill">🟢 Online (${d.ping})</span>
+        </div>
+
+        <div>
+          <h4 class="sc-title">${d.no ? `[#${d.no}] ` : ''}${d.name}</h4>
+          <div class="sc-model">${d.model}</div>
+        </div>
+
+        <div class="sc-role">${d.role}</div>
+
+        <div class="sc-ip-box">
+          <span style="color:#94a3b8;font-size:11px;">📡 IP Address & Port:</span>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="sc-ip-val">${d.ip}</span>
+            <button class="sc-copy-btn" data-copy="${d.ip}" title="คัดลอก IP">📋</button>
+          </div>
+        </div>
+
+        <div class="sc-cred-box">
+          <div class="sc-cred-row">
+            <span class="sc-cred-label">👤 Username:</span>
+            <div class="sc-cred-val-wrap">
+              <span class="sc-cred-val">${d.username}</span>
+              <button class="sc-copy-btn" data-copy="${d.username}" title="คัดลอก Username">📋</button>
+            </div>
+          </div>
+          <div class="sc-cred-row">
+            <span class="sc-cred-label">🔑 Password:</span>
+            <div class="sc-cred-val-wrap">
+              <span class="sc-cred-val" id="pass-txt-${d.id}">${displayPass}</span>
+              <button class="sc-eye-btn" data-toggle-pass="${d.id}" title="${isPassRevealed ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}">${isPassRevealed ? '👁️‍🗨️' : '👁️'}</button>
+              <button class="sc-copy-btn" data-copy="${d.password}" title="คัดลอก Password">📋</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sc-telemetry">
+          <div class="sc-tel-item">
+            <small>CPU Load</small>
+            <strong>${d.cpuUsage}%</strong>
+          </div>
+          <div class="sc-tel-item">
+            <small>Memory</small>
+            <strong>${d.ramUsage}%</strong>
+          </div>
+          <div class="sc-tel-item">
+            <small>Temp / อุณหภูมิ</small>
+            <strong>${d.temp}</strong>
+          </div>
+        </div>
+
+        <div class="sc-actions">
+          <button class="sc-btn-login" data-login-url="${d.url}" title="เปิดหน้าต่างเข้าสู่ระบบ Web GUI จริง">
+            🚀 เข้าสู่ระบบ Web Console
+          </button>
+          <button class="sc-btn-sim" data-sim-id="${d.id}" title="เปิดหน้าจอควบคุมจำลองแบบ Real-time">
+            🖥️ หน้าจอควบคุม
+          </button>
+        </div>
+      `;
+
+      // Event listeners for card buttons
+      card.querySelectorAll('.sc-copy-btn').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const val = btn.getAttribute('data-copy');
+          copyText(val, `✓ คัดลอก "${val}" สำเร็จ`);
+        };
+      });
+
+      const eyeBtn = card.querySelector(`[data-toggle-pass="${d.id}"]`);
+      if (eyeBtn) {
+        eyeBtn.onclick = (e) => {
+          e.stopPropagation();
+          if (revealedPasswords.has(d.id)) {
+            revealedPasswords.delete(d.id);
+          } else {
+            revealedPasswords.add(d.id);
+          }
+          const passEl = document.getElementById(`pass-txt-${d.id}`);
+          const isRev = revealedPasswords.has(d.id);
+          if (passEl) passEl.innerText = isRev ? d.password : '••••••••••••';
+          eyeBtn.innerText = isRev ? '👁️‍🗨️' : '👁️';
+          eyeBtn.title = isRev ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน';
+        };
+      }
+
+      const loginBtn = card.querySelector('.sc-btn-login');
+      if (loginBtn) {
+        loginBtn.onclick = (e) => {
+          e.stopPropagation();
+          const url = loginBtn.getAttribute('data-login-url');
+          showToast(`🚀 กำลังเปิดเข้าสู่ระบบ: ${url}\n(User: ${d.username})`);
+          window.open(url, '_blank');
+        };
+      }
+
+      const simBtn = card.querySelector('.sc-btn-sim');
+      if (simBtn) {
+        simBtn.onclick = (e) => {
+          e.stopPropagation();
+          showSimulatedConsole(d.id);
+        };
+      }
+
+      container.appendChild(card);
+    });
+
+    if (targetServerId) {
+      setTimeout(() => {
+        const el = document.getElementById(`server-card-${targetServerId}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }
+
+  function openServerModal(targetServerId = null) {
+    const modal = document.getElementById('server-modal');
+    if (!modal) return;
+    if (targetServerId) {
+      activeServerFilter = 'all';
+      document.querySelectorAll('#server-filter-pills .filter-btn').forEach(b => {
+        if (b.getAttribute('data-type') === 'all') b.classList.add('active');
+        else b.classList.remove('active');
+      });
+    }
+    renderServerCards(targetServerId);
+    modal.classList.remove('hidden');
+  }
+  window.openServerModal = openServerModal;
+
+  function closeServerModal() {
+    const modal = document.getElementById('server-modal');
+    if (modal) modal.classList.add('hidden');
+  }
+  window.closeServerModal = closeServerModal;
+
+  // Filter & Search bindings
+  const filterPills = document.querySelectorAll('#server-filter-pills .filter-btn');
+  filterPills.forEach(btn => {
+    btn.onclick = () => {
+      filterPills.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeServerFilter = btn.getAttribute('data-type') || 'all';
+      renderServerCards();
+    };
+  });
+
+  const searchInput = document.getElementById('server-search-input');
+  if (searchInput) {
+    searchInput.oninput = (e) => {
+      activeServerSearch = e.target.value;
+      renderServerCards();
+    };
+  }
+
+  const serverCloseBtn = document.getElementById('server-modal-close');
+  if (serverCloseBtn) serverCloseBtn.onclick = closeServerModal;
+
+  const serverRefreshBtn = document.getElementById('server-refresh-btn');
+  if (serverRefreshBtn) {
+    serverRefreshBtn.onclick = () => {
+      serverRefreshBtn.innerHTML = '⏳ กำลัง Ping...';
+      setTimeout(() => {
+        serverRefreshBtn.innerHTML = '🔄 ทดสอบเชื่อมต่อ';
+        showToast('🟢 ตรวจสอบสถานะการเชื่อมต่อ: 9/9 เครื่อง ตอบสนองปกติ (Ping < 2ms)');
+        renderServerCards();
+      }, 600);
+    };
+  }
+
+  const btnServerToolbar = document.getElementById('btn-server');
+  if (btnServerToolbar) {
+    btnServerToolbar.onclick = () => {
+      openServerModal();
+    };
+  }
+
+  // --- Simulated Console / Web GUI Preview ---
+  function showSimulatedConsole(devId) {
+    const d = (K.SERVER_DEVICES || []).find(x => x.id === devId);
+    if (!d) return;
+
+    const modal = document.getElementById('server-console-modal');
+    if (!modal) return;
+
+    document.getElementById('cs-icon').innerText = d.type === 'firewall' ? '🛡️' : (d.type === 'controller' ? '⚡' : '🖥️');
+    document.getElementById('cs-title').innerText = `${d.name} — Web Management Console`;
+    document.getElementById('cs-subtitle').innerText = d.url;
+
+    const openRealBtn = document.getElementById('cs-open-real-btn');
+    if (openRealBtn) {
+      openRealBtn.onclick = () => {
+        window.open(d.url, '_blank');
+      };
+    }
+
+    const bodyEl = document.getElementById('cs-body');
+    let contentHtml = '';
+
+    if (d.id === 'proxmox-dell' || d.id === 'proxmox-hpe') {
+      const isDell = d.id === 'proxmox-dell';
+      contentHtml = `
+        <div style="background:#182234;border:1px solid #334155;border-radius:10px;padding:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #334155;padding-bottom:12px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="background:#e06000;color:#fff;padding:4px 8px;border-radius:6px;font-weight:700;font-size:12px;">PROXMOX VE</span>
+              <strong style="font-size:15px;color:#f8fafc;">${isDell ? 'pve-dell-t440' : 'pve-hpe-dl360'} (Cluster Node)</strong>
+              <span class="chip" style="background:#22c55e;color:#052e16;">🟢 Standalone Node / Quorum OK</span>
+            </div>
+            <div style="font-size:12px;color:#94a3b8;">
+              Logged in as: <strong style="color:#38bdf8;">${d.username}@pam</strong> | Uptime: ${d.uptime}
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 2fr;gap:14px;">
+            <div style="background:#0f172a;border-radius:8px;padding:12px;">
+              <div style="font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:8px;">📁 Virtual Machines & CTs</div>
+              <ul style="list-style:none;margin:0;padding:0;font-size:12px;display:flex;flex-direction:column;gap:6px;">
+                <li style="background:#1e293b;padding:6px 10px;border-radius:6px;display:flex;justify-content:space-between;">
+                  <span>🖥️ 100 (HOSxP-Database-Master)</span>
+                  <span style="color:#22c55e;">🟢 Running</span>
+                </li>
+                <li style="background:#1e293b;padding:6px 10px;border-radius:6px;display:flex;justify-content:space-between;">
+                  <span>🖥️ 101 (PACS-Imaging-Archive)</span>
+                  <span style="color:#22c55e;">🟢 Running</span>
+                </li>
+                <li style="background:#1e293b;padding:6px 10px;border-radius:6px;display:flex;justify-content:space-between;">
+                  <span>🖥️ 102 (LIS-Laboratory-Gateway)</span>
+                  <span style="color:#22c55e;">🟢 Running</span>
+                </li>
+                <li style="background:#1e293b;padding:6px 10px;border-radius:6px;display:flex;justify-content:space-between;">
+                  <span>🖥️ 103 (Active-Directory-DC)</span>
+                  <span style="color:#22c55e;">🟢 Running</span>
+                </li>
+                <li style="background:#1e293b;padding:6px 10px;border-radius:6px;display:flex;justify-content:space-between;">
+                  <span>🖥️ 104 (Smart-Hospital-API)</span>
+                  <span style="color:#22c55e;">🟢 Running</span>
+                </li>
+              </ul>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+                <div style="background:#0f172a;padding:12px;border-radius:8px;text-align:center;">
+                  <small style="color:#94a3b8;">CPU Usage</small>
+                  <div style="font-size:20px;font-weight:700;color:#38bdf8;margin:4px 0;">${d.cpuUsage}%</div>
+                  <small style="color:#64748b;">${d.cpu}</small>
+                </div>
+                <div style="background:#0f172a;padding:12px;border-radius:8px;text-align:center;">
+                  <small style="color:#94a3b8;">RAM Usage</small>
+                  <div style="font-size:20px;font-weight:700;color:#22c55e;margin:4px 0;">${d.ramUsage}%</div>
+                  <small style="color:#64748b;">${d.ram}</small>
+                </div>
+                <div style="background:#0f172a;padding:12px;border-radius:8px;text-align:center;">
+                  <small style="color:#94a3b8;">Storage RAID</small>
+                  <div style="font-size:20px;font-weight:700;color:#f59e0b;margin:4px 0;">${d.storageUsage}%</div>
+                  <small style="color:#64748b;">${d.storage}</small>
+                </div>
+              </div>
+
+              <div style="background:#0f172a;padding:12px;border-radius:8px;font-size:12px;">
+                <strong style="color:#f8fafc;">📋 ข้อมูลการเข้าสู่ระบบ:</strong>
+                <div style="margin-top:6px;display:flex;gap:18px;color:#cbd5e1;">
+                  <div>URL: <code style="color:#38bdf8;">${d.url}</code></div>
+                  <div>User: <code style="color:#f8fafc;">${d.username}</code></div>
+                  <div>Password: <code style="color:#f8fafc;">${d.password}</code></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (d.id === 'idrac-dell') {
+      contentHtml = `
+        <div style="background:#182234;border:1px solid #334155;border-radius:10px;padding:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #334155;padding-bottom:12px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="background:#0284c7;color:#fff;padding:4px 8px;border-radius:6px;font-weight:700;font-size:12px;">DELL iDRAC9</span>
+              <strong style="font-size:15px;color:#f8fafc;">Integrated Dell Remote Access Controller 9 Enterprise</strong>
+            </div>
+            <span class="chip" style="background:#22c55e;color:#052e16;">🟢 System Health: Healthy</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;margin-bottom:14px;">
+            <div style="background:#0f172a;padding:12px;border-radius:8px;">
+              <small style="color:#94a3b8;">Power State</small>
+              <div style="font-size:18px;font-weight:700;color:#22c55e;">🟢 ON (Operational)</div>
+              <small style="color:#64748b;">${d.power}</small>
+            </div>
+            <div style="background:#0f172a;padding:12px;border-radius:8px;">
+              <small style="color:#94a3b8;">Thermal & Fans</small>
+              <div style="font-size:18px;font-weight:700;color:#38bdf8;">${d.temp} / 3,240 RPM</div>
+              <small style="color:#64748b;">Sensor Fan 1–4 Normal</small>
+            </div>
+            <div style="background:#0f172a;padding:12px;border-radius:8px;">
+              <small style="color:#94a3b8;">Virtual Console</small>
+              <div style="font-size:18px;font-weight:700;color:#f59e0b;">HTML5 Active</div>
+              <small style="color:#64748b;">KVM Redirection Ready</small>
+            </div>
+          </div>
+
+          <div style="background:#0f172a;padding:12px;border-radius:8px;font-size:12.5px;">
+            <div style="color:#94a3b8;margin-bottom:6px;">พารามิเตอร์การเชื่อมต่อรีโมตคอนโทรลเลอร์:</div>
+            <div style="display:flex;gap:20px;color:#f8fafc;">
+              <div>IP: <strong style="color:#38bdf8;">10.10.150.12</strong></div>
+              <div>Username: <strong style="color:#f8fafc;">root</strong></div>
+              <div>Password: <strong style="color:#f8fafc;">Ks@042766054$</strong></div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (d.id === 'ilo-hpe') {
+      contentHtml = `
+        <div style="background:#182234;border:1px solid #334155;border-radius:10px;padding:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #334155;padding-bottom:12px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="background:#059669;color:#fff;padding:4px 8px;border-radius:6px;font-weight:700;font-size:12px;">HPE iLO 5</span>
+              <strong style="font-size:15px;color:#f8fafc;">HPE Integrated Lights-Out 5 (iLO 5) Advanced</strong>
+            </div>
+            <span class="chip" style="background:#22c55e;color:#052e16;">🟢 Overall Security: OK</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;margin-bottom:14px;">
+            <div style="background:#0f172a;padding:12px;border-radius:8px;">
+              <small style="color:#94a3b8;">Server Subsystem</small>
+              <div style="font-size:16px;font-weight:700;color:#22c55e;">HPE ProLiant DL360</div>
+              <small style="color:#64748b;">1U Dual-Socket Rack</small>
+            </div>
+            <div style="background:#0f172a;padding:12px;border-radius:8px;">
+              <small style="color:#94a3b8;">Diagnostic Status</small>
+              <div style="font-size:16px;font-weight:700;color:#38bdf8;">Sensors 3D (All OK)</div>
+              <small style="color:#64748b;">Processors, Memory, Temp</small>
+            </div>
+            <div style="background:#0f172a;padding:12px;border-radius:8px;">
+              <small style="color:#94a3b8;">Redundant Power</small>
+              <div style="font-size:16px;font-weight:700;color:#f59e0b;">Dual Flex Slot (Good)</div>
+              <small style="color:#64748b;">Platinum 500W Redundant</small>
+            </div>
+          </div>
+
+          <div style="background:#0f172a;padding:12px;border-radius:8px;font-size:12.5px;">
+            <div style="color:#94a3b8;margin-bottom:6px;">พารามิเตอร์การเชื่อมต่อ iLO คอนโทรลเลอร์:</div>
+            <div style="display:flex;gap:20px;color:#f8fafc;">
+              <div>IP: <strong style="color:#38bdf8;">10.10.150.11</strong></div>
+              <div>Username: <strong style="color:#f8fafc;">Administrator</strong></div>
+              <div>Password: <strong style="color:#f8fafc;">Q68TBKFB</strong></div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (d.id === 'fortigate') {
+      contentHtml = `
+        <div style="background:#182234;border:1px solid #334155;border-radius:10px;padding:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #334155;padding-bottom:12px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="background:#dc2626;color:#fff;padding:4px 8px;border-radius:6px;font-weight:700;font-size:12px;">FORTINET FORTIOS</span>
+              <strong style="font-size:15px;color:#f8fafc;">FortiGate Next-Generation Firewall</strong>
+            </div>
+            <span class="chip" style="background:#22c55e;color:#052e16;">🟢 Security Fabric: Active</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;margin-bottom:14px;">
+            <div style="background:#0f172a;padding:12px;border-radius:8px;">
+              <small style="color:#94a3b8;">Network Throughput</small>
+              <div style="font-size:18px;font-weight:700;color:#38bdf8;">380 Mbps</div>
+              <small style="color:#64748b;">WAN 1 Gbps Fiber Link</small>
+            </div>
+            <div style="background:#0f172a;padding:12px;border-radius:8px;">
+              <small style="color:#94a3b8;">Threat Prevention</small>
+              <div style="font-size:18px;font-weight:700;color:#22c55e;">0 Critical Alerts</div>
+              <small style="color:#64748b;">IPS, Antivirus, WebFilter</small>
+            </div>
+            <div style="background:#0f172a;padding:12px;border-radius:8px;">
+              <small style="color:#94a3b8;">SSL-VPN Tunnels</small>
+              <div style="font-size:18px;font-weight:700;color:#f59e0b;">14 Active Users</div>
+              <small style="color:#64748b;">Site-to-Site MoPH Connected</small>
+            </div>
+          </div>
+
+          <div style="background:#0f172a;padding:12px;border-radius:8px;font-size:12.5px;">
+            <div style="color:#94a3b8;margin-bottom:6px;">พารามิเตอร์การเข้าสู่ระบบ FortiGate Admin GUI:</div>
+            <div style="display:flex;gap:20px;color:#f8fafc;">
+              <div>IP: <strong style="color:#38bdf8;">147.50.107.210</strong></div>
+              <div>Username: <strong style="color:#f8fafc;">admin</strong></div>
+              <div>Password: <strong style="color:#f8fafc;">qwertyuiop</strong></div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      contentHtml = `
+        <div style="background:#182234;border:1px solid #334155;border-radius:10px;padding:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #334155;padding-bottom:12px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="background:#0284c7;color:#fff;padding:4px 8px;border-radius:6px;font-weight:700;font-size:12px;">${d.typeName.toUpperCase()}</span>
+              <strong style="font-size:15px;color:#f8fafc;">${d.name} (${d.model})</strong>
+            </div>
+            <span class="chip" style="background:#22c55e;color:#052e16;">🟢 Status: Operational</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;margin-bottom:14px;">
+            <div style="background:#0f172a;padding:12px;border-radius:8px;">
+              <small style="color:#94a3b8;">Location / จุดติดตั้ง</small>
+              <div style="font-size:16px;font-weight:700;color:#38bdf8;">${d.location}</div>
+              <small style="color:#64748b;">Central Hospital Rack</small>
+            </div>
+            <div style="background:#0f172a;padding:12px;border-radius:8px;">
+              <small style="color:#94a3b8;">System Uptime</small>
+              <div style="font-size:16px;font-weight:700;color:#22c55e;">${d.uptime}</div>
+              <small style="color:#64748b;">Ping latency ${d.ping}</small>
+            </div>
+            <div style="background:#0f172a;padding:12px;border-radius:8px;">
+              <small style="color:#94a3b8;">Power & Health</small>
+              <div style="font-size:16px;font-weight:700;color:#f59e0b;">Normal (OK)</div>
+              <small style="color:#64748b;">${d.power}</small>
+            </div>
+          </div>
+
+          <div style="background:#0f172a;padding:12px;border-radius:8px;font-size:12.5px;">
+            <div style="color:#94a3b8;margin-bottom:6px;">ข้อมูลเชื่อมต่อสำหรับเข้าสู่ระบบ:</div>
+            <div style="display:flex;gap:20px;color:#f8fafc;">
+              <div>IP / URL: <strong style="color:#38bdf8;">${d.ip}</strong></div>
+              <div>Username: <strong style="color:#f8fafc;">${d.username}</strong></div>
+              <div>Password: <strong style="color:#f8fafc;">${d.password}</strong></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    bodyEl.innerHTML = contentHtml;
+    modal.classList.remove('hidden');
+  }
+  window.showSimulatedConsole = showSimulatedConsole;
+
+  const csCloseBtn = document.getElementById('cs-close-btn');
+  if (csCloseBtn) {
+    csCloseBtn.onclick = () => {
+      const modal = document.getElementById('server-console-modal');
+      if (modal) modal.classList.add('hidden');
+    };
+  }
 
   // --- Selection & Info Card ---
   function selectBuilding(b) {
@@ -995,10 +1533,21 @@
       const labelDiv = document.createElement('div');
       labelDiv.className = l.cls || 'int-label';
       labelDiv.innerText = l.text;
-      if (l.toggleId) {
-        labelDiv.title = 'คลิกเพื่อสลับสถานะ ว่าง / ไม่ว่าง';
+      if (l.serverId) {
+        labelDiv.title = 'คลิกเพื่อตรวจสอบสถานะ & เข้าสู่ระบบ';
         labelDiv.onclick = (e) => {
           e.stopPropagation();
+          openServerModal(l.serverId);
+        };
+      } else if (l.toggleId) {
+        const isServerToggle = l.toggleId === 'open-server-dashboard' || l.toggleId === 'opd-server';
+        labelDiv.title = isServerToggle ? 'คลิกเพื่อเปิดระบบตรวจสอบสถานะเครื่องแม่ข่าย & เข้าสู่ระบบ' : 'คลิกเพื่อสลับสถานะ ว่าง / ไม่ว่าง';
+        labelDiv.onclick = (e) => {
+          e.stopPropagation();
+          if (isServerToggle) {
+            openServerModal();
+            return;
+          }
           if (K.Interiors.toggleStatus && K.Interiors.toggleStatus(l.toggleId)) {
             enterInterior(b, true);
           }
@@ -1047,8 +1596,14 @@
 
       if (toggleId) {
         li.className = 'clickable';
-        li.title = 'คลิกเพื่อสลับสถานะ ว่าง / ไม่ว่าง';
+        const isServerToggle = toggleId === 'open-server-dashboard' || toggleId === 'opd-server' || toggleId.startsWith('server-');
+        li.title = isServerToggle ? 'คลิกเพื่อเปิดระบบตรวจสอบสถานะเครื่องแม่ข่าย & เข้าสู่ระบบ' : 'คลิกเพื่อสลับสถานะ ว่าง / ไม่ว่าง';
         li.onclick = () => {
+          if (isServerToggle) {
+            const sId = toggleId.startsWith('server-') ? toggleId.replace('server-', '') : null;
+            openServerModal(sId);
+            return;
+          }
           if (K.Interiors.toggleStatus && K.Interiors.toggleStatus(toggleId)) {
             enterInterior(b, true);
           }

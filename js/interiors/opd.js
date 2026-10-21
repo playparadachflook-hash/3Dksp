@@ -325,23 +325,113 @@
       return bpg;
     }
 
-    function serverRack(x, z, rotY = 0) {
+    function serverRackDetailed(rackId, x, z, rotY = 0) {
       const rg = new THREE.Group();
       rg.position.set(x, 0, z);
       rg.rotation.y = rotY;
-      // 42U Rack cabinet
-      const cab = M.box(rg, 0.8, 2.2, 0.9, M.mat(0x0f172a, { metalness: 0.8, roughness: 0.2 }), 0, 1.1, 0);
+
+      // 42U Rack cabinet chassis
+      const cab = M.box(rg, 0.82, 2.25, 0.95, M.mat(0x0f172a, { metalness: 0.85, roughness: 0.2 }), 0, 1.125, 0);
       addEdges(cab, 0x0284c7);
-      // Front glass door
-      M.box(rg, 0.72, 2.1, 0.02, M.mat(0x38bdf8, { transparent: true, opacity: 0.35 }), 0, 1.1, 0.46);
-      // Blinking status LEDs & patch units
-      for (let y = 0.4; y < 2.0; y += 0.28) {
-        M.box(rg, 0.7, 0.12, 0.8, M.mat(0x1e293b), 0, y, 0);
-        M.box(rg, 0.08, 0.03, 0.01, M.mat(0x22c55e, { emissive: 0x22c55e, emissiveIntensity: 0.9 }), -0.22, y, 0.45);
-        M.box(rg, 0.08, 0.03, 0.01, M.mat(0x38bdf8, { emissive: 0x38bdf8, emissiveIntensity: 0.9 }), 0.22, y, 0.45);
+
+      // Top ventilation & internal rack rails
+      M.box(rg, 0.76, 0.04, 0.88, M.mat(0x1e293b), 0, 2.23, 0);
+      M.box(rg, 0.04, 2.1, 0.04, M.mat(0x64748b, { metalness: 0.9 }), -0.36, 1.1, 0.42);
+      M.box(rg, 0.04, 2.1, 0.04, M.mat(0x64748b, { metalness: 0.9 }), 0.36, 1.1, 0.42);
+
+      // Front glass door (semi-transparent)
+      const door = M.box(rg, 0.74, 2.15, 0.02, M.mat(0x38bdf8, { transparent: true, opacity: 0.28, roughness: 0.1 }), 0, 1.1, 0.47);
+      addEdges(door, 0x38bdf8);
+
+      if (rackId === 'rack-a') {
+        // --- Rack A: Dell T440, iDRAC 9, Fortigate 100F, NAS-KSP ---
+        // 1. Proxmox Server DELL T440 (Hypervisor Node 1)
+        const dellSrv = M.box(rg, 0.7, 0.28, 0.82, M.mat(0x1e293b, { metalness: 0.7 }), 0, 1.62, 0);
+        addEdges(dellSrv, 0x2563eb);
+        dellSrv.userData.serverId = 'proxmox-dell';
+        M.box(rg, 0.68, 0.26, 0.02, M.mat(0x0f172a), 0, 1.62, 0.42);
+        M.box(rg, 0.12, 0.04, 0.01, M.mat(0x0284c7), -0.22, 1.68, 0.435);
+        M.box(rg, 0.04, 0.02, 0.01, M.mat(0x22c55e, { emissive: 0x22c55e, emissiveIntensity: 0.9 }), 0.22, 1.68, 0.435);
+
+        // 2. iDRAC Remote Controller unit
+        const idrac = M.box(rg, 0.7, 0.08, 0.8, M.mat(0x0284c7), 0, 1.40, 0);
+        addEdges(idrac, 0x38bdf8);
+        idrac.userData.serverId = 'idrac-dell';
+        M.box(rg, 0.06, 0.02, 0.01, M.mat(0xf59e0b, { emissive: 0xf59e0b, emissiveIntensity: 0.9 }), 0.22, 1.40, 0.42);
+
+        // 3. Fortigate Firewall (Next-Gen UTM)
+        const fg = M.box(rg, 0.7, 0.10, 0.75, M.mat(0xf8fafc), 0, 1.18, 0);
+        addEdges(fg, 0xdc2626);
+        fg.userData.serverId = 'fortigate';
+        M.box(rg, 0.68, 0.03, 0.01, M.mat(0xdc2626, { emissive: 0xdc2626, emissiveIntensity: 0.8 }), 0, 1.20, 0.40);
+        for (let p = -0.24; p <= 0.24; p += 0.06) {
+          M.box(rg, 0.03, 0.02, 0.01, M.mat(0x22c55e, { emissive: 0x22c55e, emissiveIntensity: 0.8 }), p, 1.16, 0.40);
+        }
+
+        // 4. NAS-KSP Storage Array (8-Bay Storage)
+        const nas = M.box(rg, 0.7, 0.22, 0.82, M.mat(0x334155), 0, 0.84, 0);
+        addEdges(nas, 0x10b981);
+        nas.userData.serverId = 'nas-ksp';
+        for (let bay = -0.25; bay <= 0.25; bay += 0.072) {
+          M.box(rg, 0.055, 0.16, 0.02, M.mat(0x1e293b), bay, 0.84, 0.42);
+          M.box(rg, 0.015, 0.015, 0.005, M.mat(0x10b981, { emissive: 0x10b981, emissiveIntensity: 0.9 }), bay, 0.90, 0.435);
+        }
+
+        // Heavy Rack UPS & Battery Module
+        M.box(rg, 0.7, 0.28, 0.85, M.mat(0x0f172a), 0, 0.38, 0);
+        M.box(rg, 0.14, 0.08, 0.01, M.mat(0x38bdf8, { emissive: 0x38bdf8, emissiveIntensity: 0.7 }), 0.2, 0.38, 0.43);
+
+      } else {
+        // --- Rack B: Proxmox HPE DL360, iLO 5, Mikrotik Router, Cisco SG250, Aruba 1930 ---
+        // 1. Proxmox Server HPE DL360 (1U Enterprise Server)
+        const hpeSrv = M.box(rg, 0.7, 0.10, 0.84, M.mat(0x334155, { metalness: 0.8 }), 0, 1.70, 0);
+        addEdges(hpeSrv, 0x10b981);
+        hpeSrv.userData.serverId = 'proxmox-hpe';
+        M.box(rg, 0.68, 0.08, 0.02, M.mat(0x0f172a), 0, 1.70, 0.43);
+        M.box(rg, 0.06, 0.02, 0.01, M.mat(0x059669), -0.24, 1.70, 0.445);
+
+        // 2. HPE iLO 5 Dedicated Remote Controller
+        const ilo = M.box(rg, 0.7, 0.08, 0.8, M.mat(0x1e293b), 0, 1.54, 0);
+        addEdges(ilo, 0x10b981);
+        ilo.userData.serverId = 'ilo-hpe';
+        M.box(rg, 0.06, 0.02, 0.01, M.mat(0x10b981, { emissive: 0x10b981, emissiveIntensity: 0.9 }), 0.22, 1.54, 0.42);
+
+        // 3. Mikrotik Cloud Core Router
+        const mkt = M.box(rg, 0.7, 0.09, 0.75, M.mat(0xf1f5f9), 0, 1.34, 0);
+        addEdges(mkt, 0x0284c7);
+        mkt.userData.serverId = 'mikrotik';
+        M.box(rg, 0.12, 0.03, 0.01, M.mat(0x0f172a), -0.22, 1.34, 0.40);
+        for (let p = -0.1; p <= 0.25; p += 0.04) {
+          M.box(rg, 0.025, 0.02, 0.01, M.mat(0x22c55e, { emissive: 0x22c55e, emissiveIntensity: 0.8 }), p, 1.34, 0.40);
+        }
+
+        // 4. Cisco SG250 Core Switch
+        const cisco = M.box(rg, 0.7, 0.09, 0.75, M.mat(0x0284c7), 0, 1.14, 0);
+        addEdges(cisco, 0x38bdf8);
+        cisco.userData.serverId = 'cisco-sg250';
+        for (let p = -0.25; p <= 0.25; p += 0.035) {
+          M.box(rg, 0.02, 0.018, 0.01, M.mat(0x22c55e, { emissive: 0x22c55e, emissiveIntensity: 0.8 }), p, 1.14, 0.40);
+        }
+
+        // 5. Aruba Instant On 1930 PoE Switch
+        const aruba = M.box(rg, 0.7, 0.09, 0.75, M.mat(0xe2e8f0), 0, 0.94, 0);
+        addEdges(aruba, 0xf97316);
+        aruba.userData.serverId = 'aruba-1930';
+        for (let p = -0.25; p <= 0.25; p += 0.035) {
+          M.box(rg, 0.02, 0.018, 0.01, M.mat(0x38bdf8, { emissive: 0x38bdf8, emissiveIntensity: 0.8 }), p, 0.94, 0.40);
+        }
+
+        // Lower Cable Management & Patch Panels
+        M.box(rg, 0.7, 0.09, 0.75, M.mat(0x1e293b), 0, 0.70, 0);
+        M.box(rg, 0.7, 0.14, 0.85, M.mat(0x0f172a), 0, 0.48, 0);
       }
+
       g.add(rg);
       return rg;
+    }
+
+    function serverRack(x, z, rotY = 0) {
+      return serverRackDetailed('rack-a', x, z, rotY);
     }
 
     function confTable(opts) {
@@ -935,17 +1025,71 @@
     });
     L.push({ text: '💻 ห้องปฏิบัติการ/ธุรการแพทย์', pos: V(8.0, 2.2, 4.7), cls: 'int-label sub-tag' });
 
-    // Server Room (ห้อง Server)
-    serverRack(11.8, 3.6, 0);
-    serverRack(13.2, 3.6, 0);
+    // Server Room (ห้อง Server & Network Control Center)
+    serverRackDetailed('rack-a', 11.8, 3.6, 0);
+    serverRackDetailed('rack-b', 13.2, 3.6, 0);
     // UPS Battery bank & Wall Cooling Unit
     M.box(g, 1.6, 1.5, 0.7, M.mat(0x1e293b), 12.5, 0.75, 6.4);
     M.box(g, 1.0, 0.45, 0.3, M.mat(0xffffff), 12.5, 2.5, 2.4);
+
+    // Main Server Room Interactive Tag
     L.push({
-      text: `🖥️ ห้อง Server ${opdState.serverOnline ? '🟢 ระบบออนไลน์ 100%' : '🟡 ซ่อมบำรุง'}`,
-      pos: V(12.5, 2.2, 4.7),
-      cls: `int-label toggleable ${opdState.serverOnline ? 'free' : 'busy'}`,
-      toggleId: 'opd-server'
+      text: `🖥️ ห้องแม่ข่าย Server (คลิกตรวจสอบสถานะ & Login)`,
+      pos: V(12.5, 2.35, 4.7),
+      cls: `int-label server-main-tag clickable ${opdState.serverOnline ? 'free' : 'busy'}`,
+      toggleId: 'open-server-dashboard'
+    });
+
+    // Rack A: Dell Server, iDRAC, Fortigate, NAS
+    L.push({
+      text: '🖥️ Proxmox Dell (10.10.10.251:8006)',
+      pos: V(11.8, 1.82, 3.0),
+      cls: 'int-label server-badge clickable',
+      serverId: 'proxmox-dell'
+    });
+    L.push({
+      text: '⚡ iDRAC Dell (10.10.150.12)',
+      pos: V(11.8, 1.45, 3.0),
+      cls: 'int-label server-badge clickable',
+      serverId: 'idrac-dell'
+    });
+    L.push({
+      text: '🛡️ Fortigate (147.50.107.210)',
+      pos: V(11.8, 1.18, 3.0),
+      cls: 'int-label server-badge clickable',
+      serverId: 'fortigate'
+    });
+    L.push({
+      text: '💾 NAS-KSP (10.10.10.240)',
+      pos: V(11.8, 0.82, 3.0),
+      cls: 'int-label server-badge clickable',
+      serverId: 'nas-ksp'
+    });
+
+    // Rack B: HPE Server, iLO, Mikrotik, Cisco/Aruba
+    L.push({
+      text: '🖥️ Proxmox HPE (10.10.10.250:8006)',
+      pos: V(13.2, 1.85, 3.0),
+      cls: 'int-label server-badge clickable',
+      serverId: 'proxmox-hpe'
+    });
+    L.push({
+      text: '⚡ iLO HPE (10.10.150.11)',
+      pos: V(13.2, 1.54, 3.0),
+      cls: 'int-label server-badge clickable',
+      serverId: 'ilo-hpe'
+    });
+    L.push({
+      text: '🌐 Mikrotik (10.10.100.1)',
+      pos: V(13.2, 1.30, 3.0),
+      cls: 'int-label server-badge clickable',
+      serverId: 'mikrotik'
+    });
+    L.push({
+      text: '🔀 Cisco SG250 / Aruba 1930',
+      pos: V(13.2, 1.05, 3.0),
+      cls: 'int-label server-badge clickable',
+      serverId: 'cisco-sg250'
     });
 
     // Medical Org Meeting Room (ห้องประชุมองค์กรแพทย์)
@@ -1093,7 +1237,16 @@
       ['🚪', 'ห้องตรวจ 5 (นพ.ชยพล)', opdState.examRooms[4].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-5', opdState.examRooms[4].occupied ? 'busy' : 'free'],
       ['🚪', 'ห้องตรวจ 6 (พญ.ณัฐธิดา)', opdState.examRooms[5].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-6', opdState.examRooms[5].occupied ? 'busy' : 'free'],
       ['🫀', 'ห้องตรวจคลื่นไฟฟ้าหัวใจ (EKG)', opdState.ekgOccupied ? '🔴 กำลังบันทึก' : '🟢 ว่าง', 'opd-ekg', opdState.ekgOccupied ? 'busy' : 'free'],
-      ['🖥️', 'ห้องแม่ข่ายคอมพิวเตอร์ (Server)', opdState.serverOnline ? '🟢 ระบบออนไลน์ 100%' : '🟡 ซ่อมบำรุง', 'opd-server', opdState.serverOnline ? 'free' : 'busy'],
+      ['🖥️', 'ห้องแม่ข่ายคอมพิวเตอร์ (Server & Controllers)', '🟢 ตรวจสอบสถานะ 9/9 เครื่อง (คลิกเพื่อ Login)', 'open-server-dashboard', 'free'],
+      ['🖥️', '  • Proxmox Server DELL T440 (10.10.10.251:8006)', '🟢 Node 1 Online', 'server-proxmox-dell', 'free'],
+      ['⚡', '  • iDRAC DELL Remote Controller (10.10.150.12)', '🟢 IPMI Ready', 'server-idrac-dell', 'free'],
+      ['🖥️', '  • Proxmox Server HPE DL360 (10.10.10.250:8006)', '🟢 Node 2 Online', 'server-proxmox-hpe', 'free'],
+      ['⚡', '  • iLO HPE Remote Controller (10.10.150.11)', '🟢 IPMI Ready', 'server-ilo-hpe', 'free'],
+      ['🛡️', '  • Fortigate Firewall (147.50.107.210)', '🟢 UTM Active', 'server-fortigate', 'free'],
+      ['💾', '  • NAS-KSP Storage Array (10.10.10.240)', '🟢 Storage OK', 'server-nas-ksp', 'free'],
+      ['🌐', '  • Mikrotik Router & Gateway (10.10.100.1)', '🟢 Gateway OK', 'server-mikrotik', 'free'],
+      ['🔀', '  • Cisco SG250 Core Switch (10.10.100.2)', '🟢 Core Switch', 'server-cisco-sg250', 'free'],
+      ['🔀', '  • Aruba 1930 PoE Switch (10.10.150.3)', '🟢 PoE Switch', 'server-aruba-1930', 'free'],
       ['🩺', 'ห้องประชุมองค์กรแพทย์', opdState.confMedOccupied ? '🔴 มีการประชุม' : '🟢 ว่าง', 'opd-conf-med', opdState.confMedOccupied ? 'busy' : 'free'],
       ['⚖️', 'ห้องประชุมธรรมาภิบาล', opdState.confGovOccupied ? '🔴 มีการประชุม' : '🟢 ว่าง', 'opd-conf-gov', opdState.confGovOccupied ? 'busy' : 'free'],
       ['👑', 'ห้องผู้อำนวยการโรงพยาบาล', opdState.directorOccupied ? '🔴 ปฏิบัติราชการ' : '🟢 พร้อมต้อนรับ', 'opd-director', opdState.directorOccupied ? 'busy' : 'free']
@@ -1122,9 +1275,12 @@
       opdState.ekgOccupied = !opdState.ekgOccupied;
       return true;
     }
-    if (id === 'opd-server') {
-      opdState.serverOnline = !opdState.serverOnline;
-      return true;
+    if (id === 'open-server-dashboard' || id === 'opd-server' || id.startsWith('server-')) {
+      const sId = id.startsWith('server-') ? id.replace('server-', '') : null;
+      if (window.openServerModal) {
+        window.openServerModal(sId);
+      }
+      return false;
     }
     if (id === 'opd-conf-med') {
       opdState.confMedOccupied = !opdState.confMedOccupied;

@@ -6,7 +6,7 @@
   <title>แผนผัง 3D Isometric - โรงพยาบาลโคกศรีสุพรรณ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=20261021v">
 </head>
 <body>
   <div id="scene"></div>
@@ -28,6 +28,7 @@
     <button id="btn-rot-right" title="หมุนขวา 45°">45° ⟳</button>
     <button id="btn-auto">หมุนอัตโนมัติ</button>
     <button id="btn-pins" class="active">แสดงหมุด</button>
+    <button id="btn-server" title="ระบบตรวจสอบสถานะเครื่องแม่ข่ายและคอนโทรลเลอร์ (Server & Controller Dashboard)">🖥️ ห้อง Server</button>
   </div>
 
   <aside class="panel sidebar" id="sidebar">
@@ -87,6 +88,100 @@
     </div>
   </div>
 
+  <!-- ===== Server & Controller Monitoring Dashboard Modal ===== -->
+  <div class="panel server-modal hidden" id="server-modal">
+    <div class="server-modal-header">
+      <div class="server-title-group">
+        <div class="server-logo">🖥️</div>
+        <div>
+          <h3>ระบบตรวจสอบสถานะเครื่องแม่ข่ายและคอนโทรลเลอร์ (Server & Controller Monitoring)</h3>
+          <p>โรงพยาบาลโคกศรีสุพรรณ • Data Center & Network Infrastructure</p>
+        </div>
+      </div>
+      <div class="server-header-actions">
+        <button id="server-refresh-btn" class="server-pill-btn" title="ทดสอบเชื่อมต่อใหม่ (Ping Re-test)">🔄 ทดสอบเชื่อมต่อ</button>
+        <button id="server-modal-close" class="icon-btn" title="ปิดหน้าต่าง">✕</button>
+      </div>
+    </div>
+
+    <!-- Health Overview Summary Ribbons -->
+    <div class="server-stats-ribbon">
+      <div class="stat-card">
+        <span class="sc-icon">🟢</span>
+        <div>
+          <strong id="stat-total-online">9 / 9 เครื่อง</strong>
+          <small>ระบบออนไลน์สมบูรณ์ 100%</small>
+        </div>
+      </div>
+      <div class="stat-card">
+        <span class="sc-icon">⚡</span>
+        <div>
+          <strong>iDRAC & iLO Ready</strong>
+          <small>คอนโทรลเลอร์ควบคุมระยะไกล Active</small>
+        </div>
+      </div>
+      <div class="stat-card">
+        <span class="sc-icon">🛡️</span>
+        <div>
+          <strong>Fortigate Active</strong>
+          <small>ไฟร์วอลล์ป้องกันการบุกรุก ปกติ</small>
+        </div>
+      </div>
+      <div class="stat-card">
+        <span class="sc-icon">💾</span>
+        <div>
+          <strong>NAS Storage OK</strong>
+          <small>สำรองข้อมูล HOSxP / PACS ปกติ</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="server-toolbar">
+      <div class="server-search-box">
+        <span class="search-ico">🔍</span>
+        <input type="text" id="server-search-input" placeholder="ค้นหาตามชื่อ, IP Address (เช่น 10.10.), Location หรือบทบาท...">
+      </div>
+      <div class="server-filter-pills" id="server-filter-pills">
+        <button class="filter-btn active" data-type="all">ทั้งหมด (9)</button>
+        <button class="filter-btn" data-type="server">🖥️ แม่ข่าย Hypervisor (2)</button>
+        <button class="filter-btn" data-type="controller">⚡ คอนโทรลเลอร์ IPMI (2)</button>
+        <button class="filter-btn" data-type="firewall">🛡️ ไฟร์วอลล์ (1)</button>
+        <button class="filter-btn" data-type="network">🌐 เราเตอร์ / เกตเวย์ (1)</button>
+        <button class="filter-btn" data-type="switch">🔀 สวิตช์เครือข่าย (2)</button>
+        <button class="filter-btn" data-type="storage">💾 จัดเก็บข้อมูล NAS (1)</button>
+      </div>
+    </div>
+
+    <!-- Device Cards Grid -->
+    <div class="server-cards-grid" id="server-cards-grid">
+      <!-- Populated dynamically via JavaScript -->
+    </div>
+  </div>
+
+  <!-- ===== Simulated Console / Web GUI Preview Modal ===== -->
+  <div class="panel server-console-modal hidden" id="server-console-modal">
+    <div class="console-head">
+      <div class="console-title-group">
+        <span class="console-icon" id="cs-icon">🖥️</span>
+        <div>
+          <h3 id="cs-title">Proxmox VE Web Management Console</h3>
+          <span id="cs-subtitle" class="chip">https://10.10.10.251:8006</span>
+        </div>
+      </div>
+      <div class="console-actions">
+        <button id="cs-open-real-btn" class="primary" title="เปิดหน้าเว็บจริงในแท็บใหม่">🔗 เปิดหน้าเว็บจริง (Intranet)</button>
+        <button id="cs-close-btn" class="icon-btn">✕</button>
+      </div>
+    </div>
+    <div class="console-body" id="cs-body">
+      <!-- Simulated GUI Screen content -->
+    </div>
+  </div>
+
+  <!-- Toast Notification for clipboard / status -->
+  <div id="toast-notify" class="toast-notify hidden">✓ คัดลอกสำเร็จ</div>
+
   <!-- Libraries (Three.js r128, classic scripts -> works when opening the file directly) -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -94,30 +189,30 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <!-- App -->
-  <script src="js/data.js?v=20261021u"></script>
-  <script src="js/models.js?v=20261021u"></script>
+  <script src="js/data.js?v=20261021v"></script>
+  <script src="js/models.js?v=20261021v"></script>
   <!-- Modular Interiors -->
-  <script src="js/interiors/common.js?v=20261021u"></script>
-  <script src="js/interiors/guard.js?v=20261021u"></script>
-  <script src="js/interiors/shop.js?v=20261021u"></script>
-  <script src="js/interiors/parking.js?v=20261021u"></script>
-  <script src="js/interiors/er.js?v=20261021u"></script>
-  <script src="js/interiors/physio.js?v=20261021u"></script>
-  <script src="js/interiors/ipd.js?v=20261021u"></script>
-  <script src="js/interiors/power.js?v=20261021u"></script>
-  <script src="js/interiors/hall.js?v=20261021u"></script>
-  <script src="js/interiors/maint.js?v=20261021u"></script>
-  <script src="js/interiors/finance.js?v=20261021u"></script>
-  <script src="js/interiors/kitchen.js?v=20261021u"></script>
-  <script src="js/interiors/pharmacy.js?v=20261021u"></script>
-  <script src="js/interiors/dental.js?v=20261021u"></script>
-  <script src="js/interiors/thaimed.js?v=20261021u"></script>
-  <script src="js/interiors/rompho.js?v=20261021u"></script>
-  <script src="js/interiors/store.js?v=20261021u"></script>
-  <script src="js/interiors/supply.js?v=20261021u"></script>
-  <script src="js/interiors/opd.js?v=20261021u"></script>
-  <script src="js/interiors/psych.js?v=20261021u"></script>
-  <script src="js/interiors/drivers.js?v=20261021u"></script>
-  <script src="js/app.js?v=20261021u"></script>
+  <script src="js/interiors/common.js?v=20261021v"></script>
+  <script src="js/interiors/guard.js?v=20261021v"></script>
+  <script src="js/interiors/shop.js?v=20261021v"></script>
+  <script src="js/interiors/parking.js?v=20261021v"></script>
+  <script src="js/interiors/er.js?v=20261021v"></script>
+  <script src="js/interiors/physio.js?v=20261021v"></script>
+  <script src="js/interiors/ipd.js?v=20261021v"></script>
+  <script src="js/interiors/power.js?v=20261021v"></script>
+  <script src="js/interiors/hall.js?v=20261021v"></script>
+  <script src="js/interiors/maint.js?v=20261021v"></script>
+  <script src="js/interiors/finance.js?v=20261021v"></script>
+  <script src="js/interiors/kitchen.js?v=20261021v"></script>
+  <script src="js/interiors/pharmacy.js?v=20261021v"></script>
+  <script src="js/interiors/dental.js?v=20261021v"></script>
+  <script src="js/interiors/thaimed.js?v=20261021v"></script>
+  <script src="js/interiors/rompho.js?v=20261021v"></script>
+  <script src="js/interiors/store.js?v=20261021v"></script>
+  <script src="js/interiors/supply.js?v=20261021v"></script>
+  <script src="js/interiors/opd.js?v=20261021v"></script>
+  <script src="js/interiors/psych.js?v=20261021v"></script>
+  <script src="js/interiors/drivers.js?v=20261021v"></script>
+  <script src="js/app.js?v=20261021v"></script>
 </body>
 </html>
