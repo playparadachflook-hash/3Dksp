@@ -1659,6 +1659,86 @@
           </div>
         </div>
       `;
+    } else if (d.id === 'ksp-sw-ipd') {
+      contentHtml = `
+        <div style="background:#182234;border:1px solid #334155;border-radius:10px;padding:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #334155;padding-bottom:12px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="background:#0284c7;color:#fff;padding:4px 8px;border-radius:6px;font-weight:700;font-size:12px;">ARUBA / HPE SWITCH</span>
+              <strong style="font-size:15px;color:#f8fafc;">${d.name} (${d.ip}) — จุดติดตั้ง: ${d.location}</strong>
+            </div>
+            <span class="chip" style="background:#22c55e;color:#052e16;">🟢 24 Ports Managed Switch (Inpatient Ward)</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;margin-bottom:14px;">
+            <div style="background:#0f172a;padding:10px;border-radius:8px;">
+              <small style="color:#94a3b8;">Serial Number (S/N)</small>
+              <div style="font-size:14px;font-weight:700;color:#38bdf8;font-family:monospace;">${d.serial || 'CN32LB98D2'}</div>
+              <small style="color:#64748b;">HPE Hardware Tag</small>
+            </div>
+            <div style="background:#0f172a;padding:10px;border-radius:8px;">
+              <small style="color:#94a3b8;">System Uptime</small>
+              <div style="font-size:14px;font-weight:700;color:#22c55e;">${d.uptime}</div>
+              <small style="color:#64748b;">Ping latency ${d.ping}</small>
+            </div>
+            <div style="background:#0f172a;padding:10px;border-radius:8px;">
+              <small style="color:#94a3b8;">Active Ports</small>
+              <div style="font-size:14px;font-weight:700;color:#f59e0b;">18 / 24 Ports</div>
+              <small style="color:#64748b;">1 Gbps Full-Duplex</small>
+            </div>
+            <div style="background:#0f172a;padding:10px;border-radius:8px;">
+              <small style="color:#94a3b8;">Uplink to Core</small>
+              <div style="font-size:14px;font-weight:700;color:#a855f7;">Port 24 (Fiber SFP)</div>
+              <small style="color:#64748b;">→ Cisco SG250 Core</small>
+            </div>
+          </div>
+
+          <div style="background:#0f172a;border-radius:8px;padding:12px;margin-bottom:12px;">
+            <div style="font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:8px;">🔌 แผงพอร์ตสวิตช์ฮับตึกผู้ป่วยใน (Switch Port Matrix 1–24):</div>
+            <div style="display:grid;grid-template-columns:repeat(12, 1fr);gap:6px;font-size:10px;text-align:center;">
+              ${Array.from({length: 24}, (_, i) => {
+                const pNum = i + 1;
+                const isConnected = pNum <= 18 || pNum === 24;
+                let desc = `Port ${pNum}`;
+                if (pNum === 1) desc = 'PC โต๊ะคอม IPC 1';
+                else if (pNum === 2) desc = 'PC โต๊ะคอม IPC 2';
+                else if (pNum === 3) desc = 'PC โต๊ะคอม IPC 3';
+                else if (pNum === 4) desc = 'Nurse Call Master';
+                else if (pNum === 5) desc = 'Nurse Call Gateway';
+                else if (pNum === 6) desc = 'Smart Ward Tablet 1';
+                else if (pNum === 7) desc = 'Smart Ward Tablet 2';
+                else if (pNum === 8) desc = 'CCTV หอผู้ป่วย 1';
+                else if (pNum === 9) desc = 'CCTV หอผู้ป่วย 2';
+                else if (pNum === 10) desc = 'CCTV Nurse Station';
+                else if (pNum === 11) desc = 'AP Wi-Fi วอร์ดใน';
+                else if (pNum === 12) desc = 'AP Wi-Fi แยกโรค';
+                else if (pNum === 13) desc = 'IP Phone Nurse Station';
+                else if (pNum === 14) desc = 'IP Phone แพทย์เวร';
+                else if (pNum === 15) desc = 'Printer ใบ Admit IPD';
+                else if (pNum === 16) desc = 'Printer ฉลากยา IPD';
+                else if (pNum === 17) desc = 'ห้องแยกโรค Isolation 1';
+                else if (pNum === 18) desc = 'ห้องแยกโรค Isolation 2';
+                else if (pNum === 24) desc = 'Uplink Core SFP';
+                return `
+                  <div style="background:${isConnected ? 'rgba(34,197,94,0.15)' : 'rgba(51,65,85,0.4)'};border:1px solid ${isConnected ? '#22c55e' : '#475569'};border-radius:5px;padding:4px 2px;">
+                    <div style="color:${isConnected ? '#4ade80' : '#64748b'};font-weight:700;">#${pNum}</div>
+                    <div style="color:#94a3b8;font-size:8.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${desc}">${desc}</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <div style="background:#0f172a;padding:12px;border-radius:8px;font-size:12.5px;">
+            <div style="color:#94a3b8;margin-bottom:6px;">พารามิเตอร์การเข้าสู่ระบบ Switch Management Web GUI:</div>
+            <div style="display:flex;gap:20px;color:#f8fafc;">
+              <div>IP: <strong style="color:#38bdf8;">10.10.100.11</strong></div>
+              <div>Username: <strong style="color:#f8fafc;">admin</strong></div>
+              <div>Password: <strong style="color:#f8fafc;">ksp@12345</strong></div>
+            </div>
+          </div>
+        </div>
+      `;
     } else {
       contentHtml = `
         <div style="background:#182234;border:1px solid #334155;border-radius:10px;padding:16px;">
