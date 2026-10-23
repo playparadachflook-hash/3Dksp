@@ -1969,6 +1969,79 @@
           </div>
         </div>
       `;
+    } else if (d.id === 'ksp-sw-kitchen') {
+      contentHtml = `
+        <div style="background:#182234;border:1px solid #334155;border-radius:10px;padding:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #334155;padding-bottom:12px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="background:#0284c7;color:#fff;padding:4px 8px;border-radius:6px;font-weight:700;font-size:12px;">ARUBA / HPE SWITCH</span>
+              <strong style="font-size:15px;color:#f8fafc;">${d.name} (${d.ip}) — จุดติดตั้ง: ${d.location}</strong>
+            </div>
+            <span class="chip" style="background:#22c55e;color:#052e16;">🟢 24 Ports Managed Switch (Nutrition & Kitchen)</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;margin-bottom:14px;">
+            <div style="background:#0f172a;padding:10px;border-radius:8px;">
+              <small style="color:#94a3b8;">Serial Number (S/N)</small>
+              <div style="font-size:14px;font-weight:700;color:#38bdf8;font-family:monospace;">${d.serial || 'CN32LB99K7'}</div>
+              <small style="color:#64748b;">HPE Hardware Tag</small>
+            </div>
+            <div style="background:#0f172a;padding:10px;border-radius:8px;">
+              <small style="color:#94a3b8;">System Uptime</small>
+              <div style="font-size:14px;font-weight:700;color:#22c55e;">${d.uptime}</div>
+              <small style="color:#64748b;">Ping latency ${d.ping}</small>
+            </div>
+            <div style="background:#0f172a;padding:10px;border-radius:8px;">
+              <small style="color:#94a3b8;">Active Ports</small>
+              <div style="font-size:14px;font-weight:700;color:#f59e0b;">12 / 24 Ports</div>
+              <small style="color:#64748b;">1 Gbps Full-Duplex</small>
+            </div>
+            <div style="background:#0f172a;padding:10px;border-radius:8px;">
+              <small style="color:#94a3b8;">Uplink to Core</small>
+              <div style="font-size:14px;font-weight:700;color:#a855f7;">Port 24 (Fiber SFP)</div>
+              <small style="color:#64748b;">→ Cisco SG250 Core</small>
+            </div>
+          </div>
+
+          <div style="background:#0f172a;border-radius:8px;padding:12px;margin-bottom:12px;">
+            <div style="font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:8px;">🔌 แผงพอร์ตสวิตช์ฮับโรงครัวและโภชนาการ (Switch Port Matrix 1–24):</div>
+            <div style="display:grid;grid-template-columns:repeat(12, 1fr);gap:6px;font-size:10px;text-align:center;">
+              ${Array.from({length: 24}, (_, i) => {
+                const pNum = i + 1;
+                const isConnected = pNum <= 11 || pNum === 24;
+                let desc = `Port ${pNum}`;
+                if (pNum === 1) desc = 'PC หัวหน้าโรงครัว (PC-KIT-02)';
+                else if (pNum === 2) desc = 'PC เจ้าหน้าที่โรงครัว (PC-KIT-01)';
+                else if (pNum === 3) desc = 'Printer ใบสั่งอาหารผู้ป่วย';
+                else if (pNum === 4) desc = 'Printer ฉลากอาหารเฉพาะโรค';
+                else if (pNum === 5) desc = 'ระบบตู้แช่วัตถุดิบ IoT Temp';
+                else if (pNum === 6) desc = 'เครื่องชั่งดิจิทัลโภชนาการ';
+                else if (pNum === 7) desc = 'AP Wi-Fi อาคารโรงครัว';
+                else if (pNum === 8) desc = 'IP Phone ห้องหัวหน้าโรงครัว';
+                else if (pNum === 9) desc = 'IP Phone โถงประกอบอาหาร';
+                else if (pNum === 10) desc = 'CCTV พื้นที่ทำอาหารกลาง';
+                else if (pNum === 11) desc = 'CCTV คลังวัตถุดิบ/ของแห้ง';
+                else if (pNum === 24) desc = 'Uplink Core SFP';
+                return `
+                  <div style="background:${isConnected ? 'rgba(34,197,94,0.15)' : 'rgba(51,65,85,0.4)'};border:1px solid ${isConnected ? '#22c55e' : '#475569'};border-radius:5px;padding:4px 2px;">
+                    <div style="color:${isConnected ? '#4ade80' : '#64748b'};font-weight:700;">#${pNum}</div>
+                    <div style="color:#94a3b8;font-size:8.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${desc}">${desc}</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <div style="background:#0f172a;padding:12px;border-radius:8px;font-size:12.5px;">
+            <div style="color:#94a3b8;margin-bottom:6px;">พารามิเตอร์การเข้าสู่ระบบ Switch Management Web GUI:</div>
+            <div style="display:flex;gap:20px;color:#f8fafc;">
+              <div>IP: <strong style="color:#38bdf8;">10.10.100.15</strong></div>
+              <div>Username: <strong style="color:#f8fafc;">admin</strong></div>
+              <div>Password: <strong style="color:#f8fafc;">ksp@12345</strong></div>
+            </div>
+          </div>
+        </div>
+      `;
     } else {
       contentHtml = `
         <div style="background:#182234;border:1px solid #334155;border-radius:10px;padding:16px;">

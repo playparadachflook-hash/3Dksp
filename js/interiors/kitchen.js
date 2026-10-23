@@ -210,6 +210,151 @@
       )
     );
 
+    // =========================================================================
+    // 🔀 ตู้แร็คแขวนผนัง Switch Hub KSP-SW-KITCHEN (ตำแหน่งมาร์คสีส้ม หน้าห้องหัวหน้าโรงครัว)
+    // =========================================================================
+    function makeKitchenSwitchRack(x, y, z) {
+      const swg = new THREE.Group();
+      swg.position.set(x, y, z);
+      swg.rotation.y = Math.PI; // หมุน 180 องศา ให้แผ่นหลังชิดผนังหน้าห้อง (Z = 0.29) และประตูกระจกหันหน้าออก (+Z)
+
+      function rackBox(w, h, d, color, metalness = 0.4, roughness = 0.5) {
+        return new THREE.Mesh(
+          new THREE.BoxGeometry(w, h, d),
+          new THREE.MeshStandardMaterial({ color, metalness, roughness })
+        );
+      }
+
+      // 1. Metal Wall Mounting Bracket / Backplate (touches wall at local +Z)
+      const bracket = rackBox(0.74, 0.58, 0.04, 0x0f172a);
+      bracket.position.set(0, 0, 0.20);
+      swg.add(bracket);
+
+      // 2. 6U Wallmount Cabinet Frame (Black / Dark Slate with cyan edge highlight)
+      const cab = rackBox(0.72, 0.54, 0.42, 0x1e293b);
+      cab.position.set(0, 0, 0);
+      addEdges(cab, 0x0284c7);
+      cab.userData.serverId = 'ksp-sw-kitchen';
+      swg.add(cab);
+
+      // 3. Side Ventilation Louvers
+      [-0.365, 0.365].forEach((sx) => {
+        const vent = rackBox(0.01, 0.28, 0.24, 0x0f172a);
+        vent.position.set(sx, 0, 0);
+        swg.add(vent);
+      });
+
+      // 4. Front Tempered Glass Door (Smoked translucent glass with frame)
+      const glassMat = new THREE.MeshStandardMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: 0.35,
+        roughness: 0.1,
+        metalness: 0.2
+      });
+      const doorGlass = new THREE.Mesh(new THREE.BoxGeometry(0.64, 0.46, 0.02), glassMat);
+      doorGlass.position.set(0, 0, -0.215);
+      doorGlass.userData.serverId = 'ksp-sw-kitchen';
+      swg.add(doorGlass);
+
+      const doorBorder = rackBox(0.68, 0.50, 0.02, 0x0f172a);
+      doorBorder.position.set(0, 0, -0.21);
+      addEdges(doorBorder, 0x38bdf8);
+      swg.add(doorBorder);
+
+      const keyLock = rackBox(0.03, 0.05, 0.02, 0x94a3b8);
+      keyLock.position.set(0.29, 0, -0.22);
+      swg.add(keyLock);
+
+      // 5. Internal Rack Units:
+      // Unit A: 1U Patch Panel (y = +0.13)
+      const patchPanel = rackBox(0.62, 0.07, 0.30, 0x0f172a);
+      patchPanel.position.set(0, 0.13, -0.04);
+      addEdges(patchPanel, 0x475569);
+      swg.add(patchPanel);
+      for (let px = -0.25; px <= 0.25; px += 0.022) {
+        const jack = rackBox(0.014, 0.018, 0.01, 0x475569);
+        jack.position.set(px, 0.13, -0.192);
+        swg.add(jack);
+      }
+
+      // Unit B: 1U Managed Switch Hub (KSP-SW-KITCHEN, y = 0.0)
+      const swUnit = rackBox(0.62, 0.08, 0.34, 0x0284c7);
+      swUnit.position.set(0, 0.0, -0.04);
+      addEdges(swUnit, 0x38bdf8);
+      swUnit.userData.serverId = 'ksp-sw-kitchen';
+      swg.add(swUnit);
+
+      // Switch Faceplate (Dark Metallic)
+      const faceplate = rackBox(0.60, 0.07, 0.015, 0x0f172a);
+      faceplate.position.set(0, 0.0, -0.205);
+      faceplate.userData.serverId = 'ksp-sw-kitchen';
+      swg.add(faceplate);
+
+      // Aruba/HPE Brand Cyan Bar
+      const brandBar = rackBox(0.12, 0.02, 0.005, 0x38bdf8);
+      brandBar.position.set(-0.21, 0.02, -0.214);
+      swg.add(brandBar);
+
+      // Power Status LED (Green)
+      const pwrLed = rackBox(0.01, 0.01, 0.005, 0x22c55e);
+      pwrLed.material = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+      pwrLed.position.set(-0.25, 0.02, -0.214);
+      swg.add(pwrLed);
+
+      // 24 RJ-45 Gigabit Ports with Activity LEDs
+      for (let px = -0.12; px <= 0.25; px += 0.016) {
+        const port = rackBox(0.011, 0.018, 0.008, 0x334155);
+        port.position.set(px, -0.01, -0.212);
+        port.userData.serverId = 'ksp-sw-kitchen';
+        swg.add(port);
+
+        const led = rackBox(0.006, 0.006, 0.004, 0x22c55e);
+        led.material = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+        led.position.set(px, 0.015, -0.213);
+        swg.add(led);
+      }
+
+      // Short looped patch cables between Patch Panel and Switch Ports
+      for (let px = -0.10; px <= 0.23; px += 0.033) {
+        const cable = rackBox(0.008, 0.10, 0.012, 0x38bdf8);
+        cable.position.set(px, 0.065, -0.20);
+        swg.add(cable);
+      }
+
+      // Unit C: 1U Horizontal Cable Manager (y = -0.11)
+      const cableMgr = rackBox(0.62, 0.06, 0.26, 0x1e293b);
+      cableMgr.position.set(0, -0.11, -0.04);
+      swg.add(cableMgr);
+
+      // Unit D: Power Distribution Strip (PDU) at the bottom (y = -0.20)
+      const pdu = rackBox(0.60, 0.05, 0.15, 0x0f172a);
+      pdu.position.set(0, -0.20, 0.02);
+      swg.add(pdu);
+      const pduLight = rackBox(0.012, 0.012, 0.006, 0xef4444);
+      pduLight.material = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+      pduLight.position.set(-0.24, -0.20, -0.06);
+      swg.add(pduLight);
+
+      // 6. PVC Cable Trunking Conduit going up to ceiling
+      const conduit = rackBox(0.08, 0.55, 0.05, 0xf1f5f9);
+      conduit.position.set(0, 0.54, 0.18);
+      addEdges(conduit, 0x94a3b8);
+      swg.add(conduit);
+
+      g.add(swg);
+      return swg;
+    }
+
+    // ติดตั้งตู้แร็ค Switch Hub ที่ผนังหน้าห้องหัวหน้าโรงครัว (ตำแหน่งมาร์คสีส้ม: x = -8.5, y = 1.35, z = 0.49)
+    makeKitchenSwitchRack(-8.5, 1.35, 0.49);
+    L.push({
+      text: '🔀 KSP-SW-KITCHEN (10.10.100.15)',
+      pos: V(-8.5, 2.05, 0.75),
+      cls: 'int-label server-badge clickable',
+      serverId: 'ksp-sw-kitchen'
+    });
+
     // 5. โถงครัวหลัก: "ครัวทำอาหารเตรียมวัตถุดิบ"
     const cookX = 2.6;
     const cookZ = -3.1;
@@ -373,7 +518,8 @@
       ['🔪', 'โต๊ะทำครัว (ฝั่งซ้าย & กลางโถง)', '2 จุด'],
       ['🧂', 'ชั้นเก็บเครื่องปรุง (ด้านบน & ด้านขวาล่าง)', '2 จุด'],
       ['🪑', 'โต๊ะปฏิบัติงานในห้องเครื่องปรุง', '2 ตัว'],
-      ['🚪', 'ประตูทางเข้า-ออกและเชื่อมโซน', '3 บาน']
+      ['🚪', 'ประตูทางเข้า-ออกและเชื่อมโซน', '3 บาน'],
+      ['🔀', 'KSP-SW-KITCHEN: สวิตช์ฮับโรงครัว (10.10.100.15)', '🟢 ออนไลน์ (หน้าห้องหัวหน้าโรงครัว)', 'server-ksp-sw-kitchen', 'free']
     ];
 
     return {
@@ -389,6 +535,11 @@
   }
 
   function toggleKitchenStatus(id) {
+    if (id.startsWith('server-')) {
+      const sId = id.replace('server-', '');
+      if (window.openServerModal) window.openServerModal(sId);
+      return false;
+    }
     if (id === 'kitchen-cook') {
       kitchenState.cookingActive = !kitchenState.cookingActive;
       return true;
