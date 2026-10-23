@@ -1,4 +1,4 @@
-﻿/* มุมมองภายในอาคาร: ป้อมยาม, ร้านค้าสวัสดิการ, โรงจอดรถ, และ ตึกอุบัติเหตุฉุกเฉิน (PCU & ER) */
+/* มุมมองภายในอาคาร: ป้อมยาม, ร้านค้าสวัสดิการ, โรงจอดรถ, และ ตึกอุบัติเหตุฉุกเฉิน (PCU & ER) */
 (function () {
   const K = window.KSS, M = K.M;
   const V = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -9090,7 +9090,7 @@ function buildOpdInterior(b) {
       ram: '16 GB DDR4-3200',
       storage: '512 GB M.2 NVMe SSD',
       monitor: '23.8" IPS Full HD (1920x1080)',
-      ip: `192.168.10.${ipSuffix}`,
+      ip: String(ipSuffix).includes('.') ? ipSuffix : `192.168.10.${ipSuffix}`,
       software: sw,
       peripherals: 'เครื่องอ่านบัตรสมาร์ทการ์ด, Barcode Scanner, UPS 850VA',
       status: '🟢 ออนไลน์ปกติ'
@@ -9658,7 +9658,21 @@ function buildOpdInterior(b) {
       d: 0.65,
       rotY: Math.PI / 2,
       label: '🖳 คอม IT 2 (Network)',
-      pcInfo: pcSpec('PC-IT-02', 'คอม IT 2', 'บริหารระบบเครือข่าย Firewall และความมั่นคงปลอดภัยไซเบอร์', 'นักวิชาการคอมพิวเตอร์', '22', 'Cisco / Mikrotik / PRTG Monitor')
+      pcInfo: {
+        code: 'PC-IT-02',
+        name: 'คอม IT 2 (Network & Cyber Security)',
+        role: 'บริหารระบบเครือข่าย Firewall และความมั่นคงปลอดภัยไซเบอร์',
+        user: 'นักวิชาการคอมพิวเตอร์ (Network Admin)',
+        os: 'Windows 11 Pro 64-bit / Linux Network Tools',
+        cpu: 'Intel Core i7-12700 (12C/20T, 4.9GHz)',
+        ram: '32 GB DDR4-3200',
+        storage: '1 TB M.2 NVMe SSD',
+        monitor: 'Dual 24" IPS Full HD (1920x1080)',
+        ip: '10.10.100.22 (VLAN 100 - Network Management)',
+        software: 'Cisco CLI / MikroTik WinBox / FortiClient / PRTG Network Monitor / Wireshark',
+        peripherals: 'Console Cable (RJ45-to-USB), Optical Fiber Power Meter, UPS 1000VA True Online',
+        status: '🟢 ออนไลน์ปกติ (Link 1Gbps Duplex)'
+      }
     });
     workDesk({
       x: 6.4,
@@ -9667,7 +9681,21 @@ function buildOpdInterior(b) {
       d: 0.65,
       rotY: Math.PI / 2,
       label: '🖳 คอม IT 3 (Database)',
-      pcInfo: pcSpec('PC-IT-03', 'คอม IT 3', 'ผู้ดูแลระบบฐานข้อมูลโรงพยาบาล HOSxP และคลังข้อมูล HDC', 'ผู้ดูแลระบบสารสนเทศ', '23', 'MySQL Workbench / Navicat / Linux Shell')
+      pcInfo: {
+        code: 'PC-IT-03',
+        name: 'คอม IT 3 (Database Admin)',
+        role: 'ผู้ดูแลระบบฐานข้อมูลโรงพยาบาล HOSxP และคลังข้อมูล HDC',
+        user: 'ผู้ดูแลระบบสารสนเทศ (Database Admin)',
+        os: 'Windows 11 Pro 64-bit / Ubuntu Server CLI',
+        cpu: 'Intel Core i7-12700 (12C/20T, 4.9GHz)',
+        ram: '32 GB DDR4-3200',
+        storage: '1 TB M.2 NVMe SSD',
+        monitor: 'Dual 24" IPS Full HD (1920x1080)',
+        ip: '10.10.10.23 (VLAN 10 - Database & Server Network)',
+        software: 'MySQL Workbench / Navicat Premium / Proxmox VE Web Console / HeidiSQL',
+        peripherals: 'External Backup SSD 2TB, Smart Card Reader, UPS 1000VA True Online',
+        status: '🟢 ออนไลน์ปกติ'
+      }
     });
     workDesk({
       x: 10.6,
@@ -9676,7 +9704,21 @@ function buildOpdInterior(b) {
       d: 0.65,
       rotY: -Math.PI / 2,
       label: '🖳 คอม IT 1 (Helpdesk)',
-      pcInfo: pcSpec('PC-IT-01', 'คอม IT 1', 'รับแจ้งซ่อมคอมพิวเตอร์ จัดการสิทธิ์ผู้ใช้งาน และสนับสนุนเทคนิค', 'เจ้าหน้าที่คอมพิวเตอร์', '21', 'Helpdesk Ticketing / Remote Support')
+      pcInfo: {
+        code: 'PC-IT-01',
+        name: 'คอม IT 1 (Helpdesk & Support)',
+        role: 'รับแจ้งซ่อมคอมพิวเตอร์ จัดการสิทธิ์ผู้ใช้งาน และสนับสนุนเทคนิค',
+        user: 'เจ้าหน้าที่คอมพิวเตอร์ (Helpdesk Support)',
+        os: 'Windows 11 Pro 64-bit',
+        cpu: 'Intel Core i5-12400 (6C/12T, 4.4GHz)',
+        ram: '16 GB DDR4-3200',
+        storage: '512 GB M.2 NVMe SSD',
+        monitor: '23.8" IPS Full HD (1920x1080)',
+        ip: '10.10.100.21 (VLAN 100 - IT Management)',
+        software: 'Helpdesk Ticketing / Remote Support (AnyDesk/RustDesk) / HOSxP Admin Tools',
+        peripherals: 'Headset Call Center, Thermal Label Printer, UPS 850VA',
+        status: '🟢 ออนไลน์ปกติ'
+      }
     });
     // Hardware diagnostic bench
     M.box(g, 2.2, 0.8, 0.75, mSteel, 8.5, 0.4, 12.2);
