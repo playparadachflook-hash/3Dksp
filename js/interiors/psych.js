@@ -330,6 +330,151 @@
       toggleId: 'psych-room-3'
     });
 
+    // =========================================================================
+    // 🔀 ตู้แร็คแขวนผนัง Switch Hub KSP-SW-PSYCH (ตำแหน่งมาร์คสีแดง ผนังห้องที่ 3)
+    // =========================================================================
+    function makePsychSwitchRack(x, y, z) {
+      const swg = new THREE.Group();
+      swg.position.set(x, y, z);
+      swg.rotation.y = Math.PI; // หมุน 180 องศา ให้แผ่นหลังชิดผนังเหนือ (Z = -3.91) และประตูกระจกหันหน้าเข้าห้อง (+Z)
+
+      function maintBox(w, h, d, color, metalness = 0.4, roughness = 0.5) {
+        return new THREE.Mesh(
+          new THREE.BoxGeometry(w, h, d),
+          new THREE.MeshStandardMaterial({ color, metalness, roughness })
+        );
+      }
+
+      // 1. Metal Wall Mounting Bracket / Backplate (touches wall at local +Z)
+      const bracket = maintBox(0.74, 0.58, 0.04, 0x0f172a);
+      bracket.position.set(0, 0, 0.20);
+      swg.add(bracket);
+
+      // 2. 6U Wallmount Cabinet Frame (Black / Dark Slate with cyan edge highlight)
+      const cab = maintBox(0.72, 0.54, 0.42, 0x1e293b);
+      cab.position.set(0, 0, 0);
+      addEdges(cab, 0x0284c7);
+      cab.userData.serverId = 'ksp-sw-psych';
+      swg.add(cab);
+
+      // 3. Side Ventilation Louvers
+      [-0.365, 0.365].forEach((sx) => {
+        const vent = maintBox(0.01, 0.28, 0.24, 0x0f172a);
+        vent.position.set(sx, 0, 0);
+        swg.add(vent);
+      });
+
+      // 4. Front Tempered Glass Door (Smoked translucent glass with frame)
+      const glassMat = new THREE.MeshStandardMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: 0.35,
+        roughness: 0.1,
+        metalness: 0.2
+      });
+      const doorGlass = new THREE.Mesh(new THREE.BoxGeometry(0.64, 0.46, 0.02), glassMat);
+      doorGlass.position.set(0, 0, -0.215);
+      doorGlass.userData.serverId = 'ksp-sw-psych';
+      swg.add(doorGlass);
+
+      const doorBorder = maintBox(0.68, 0.50, 0.02, 0x0f172a);
+      doorBorder.position.set(0, 0, -0.21);
+      addEdges(doorBorder, 0x38bdf8);
+      swg.add(doorBorder);
+
+      const keyLock = maintBox(0.03, 0.05, 0.02, 0x94a3b8);
+      keyLock.position.set(0.29, 0, -0.22);
+      swg.add(keyLock);
+
+      // 5. Internal Rack Units:
+      // Unit A: 1U Patch Panel (y = +0.13)
+      const patchPanel = maintBox(0.62, 0.07, 0.30, 0x0f172a);
+      patchPanel.position.set(0, 0.13, -0.04);
+      addEdges(patchPanel, 0x475569);
+      swg.add(patchPanel);
+      for (let px = -0.25; px <= 0.25; px += 0.022) {
+        const jack = maintBox(0.014, 0.018, 0.01, 0x475569);
+        jack.position.set(px, 0.13, -0.192);
+        swg.add(jack);
+      }
+
+      // Unit B: 1U Managed Switch Hub (KSP-SW-PSYCH, y = 0.0)
+      const swUnit = maintBox(0.62, 0.08, 0.34, 0x0284c7);
+      swUnit.position.set(0, 0.0, -0.04);
+      addEdges(swUnit, 0x38bdf8);
+      swUnit.userData.serverId = 'ksp-sw-psych';
+      swg.add(swUnit);
+
+      // Switch Faceplate (Dark Metallic)
+      const faceplate = maintBox(0.60, 0.07, 0.015, 0x0f172a);
+      faceplate.position.set(0, 0.0, -0.205);
+      faceplate.userData.serverId = 'ksp-sw-psych';
+      swg.add(faceplate);
+
+      // Aruba/HPE Brand Cyan Bar
+      const brandBar = maintBox(0.12, 0.02, 0.005, 0x38bdf8);
+      brandBar.position.set(-0.21, 0.02, -0.214);
+      swg.add(brandBar);
+
+      // Power Status LED (Green)
+      const pwrLed = maintBox(0.01, 0.01, 0.005, 0x22c55e);
+      pwrLed.material = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+      pwrLed.position.set(-0.25, 0.02, -0.214);
+      swg.add(pwrLed);
+
+      // 24 RJ-45 Gigabit Ports with Activity LEDs
+      for (let px = -0.12; px <= 0.25; px += 0.016) {
+        const port = maintBox(0.011, 0.018, 0.008, 0x334155);
+        port.position.set(px, -0.01, -0.212);
+        port.userData.serverId = 'ksp-sw-psych';
+        swg.add(port);
+
+        const led = maintBox(0.006, 0.006, 0.004, 0x22c55e);
+        led.material = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+        led.position.set(px, 0.015, -0.213);
+        swg.add(led);
+      }
+
+      // Short looped patch cables between Patch Panel and Switch Ports
+      for (let px = -0.10; px <= 0.23; px += 0.033) {
+        const cable = maintBox(0.008, 0.10, 0.012, 0x38bdf8);
+        cable.position.set(px, 0.065, -0.20);
+        swg.add(cable);
+      }
+
+      // Unit C: 1U Horizontal Cable Manager (y = -0.11)
+      const cableMgr = maintBox(0.62, 0.06, 0.26, 0x1e293b);
+      cableMgr.position.set(0, -0.11, -0.04);
+      swg.add(cableMgr);
+
+      // Unit D: Power Distribution Strip (PDU) at the bottom (y = -0.20)
+      const pdu = maintBox(0.60, 0.05, 0.15, 0x0f172a);
+      pdu.position.set(0, -0.20, 0.02);
+      swg.add(pdu);
+      const pduLight = maintBox(0.012, 0.012, 0.006, 0xef4444);
+      pduLight.material = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+      pduLight.position.set(-0.24, -0.20, -0.06);
+      swg.add(pduLight);
+
+      // 6. PVC Cable Trunking Conduit going up to ceiling
+      const conduit = maintBox(0.08, 0.90, 0.05, 0xf1f5f9);
+      conduit.position.set(0, 0.72, 0.18);
+      addEdges(conduit, 0x94a3b8);
+      swg.add(conduit);
+
+      g.add(swg);
+      return swg;
+    }
+
+    // ติดตั้งตู้แร็ค Switch Hub ที่ผนังห้องที่ 3 (ตำแหน่งมาร์คสีแดง: x = -3.85, y = 2.05, z = -3.71)
+    makePsychSwitchRack(-3.85, 2.05, -3.71);
+    L.push({
+      text: '🔀 KSP-SW-PSYCH (10.10.100.12)',
+      pos: V(-3.85, 2.70, -3.45),
+      cls: 'int-label server-badge clickable',
+      serverId: 'ksp-sw-psych'
+    });
+
     // -------------------------------------------------------------------------
     // ห้องที่ 4: ว่าง (X: 0.0 ถึง 5.0)
     // ผัง: "ห้องที่ 4 ว่าง" จัดเป็นห้องสงบอารมณ์และสังเกตอาการ (Calming Room)
@@ -399,7 +544,8 @@
       ['🧘', 'ห้องที่ 3 ห้องว่าง (ให้คำปรึกษาและบำบัดกลุ่ม)', psychState.room3Occupied ? '🔴 กำลังใช้งาน' : '🟢 ว่าง', 'psych-room-3', psychState.room3Occupied ? 'busy' : 'free'],
       ['🛋️', 'ห้องที่ 4 ห้องว่าง (ห้องพักฟื้นและสงบอารมณ์)', psychState.room4Occupied ? '🔴 มีผู้ป่วยพักฟื้น' : '🟢 ว่าง', 'psych-room-4', psychState.room4Occupied ? 'busy' : 'free'],
       ['📋', 'ห้องที่ 5 ห้องว่าง (จุดประเมินสุขภาพจิต โต๊ะคอมชิดซ้าย)', psychState.room5Occupied ? '🔴 กำลังประเมิน' : '🟢 ว่าง', 'psych-room-5', psychState.room5Occupied ? 'busy' : 'free'],
-      ['🎨', 'ห้องที่ 6 ห้องว่าง (ห้องกิจกรรมบำบัด/อเนกประสงค์)', psychState.room6Occupied ? '🔴 กำลังใช้งาน' : '🟢 ว่าง', 'psych-room-6', psychState.room6Occupied ? 'busy' : 'free']
+      ['🎨', 'ห้องที่ 6 ห้องว่าง (ห้องกิจกรรมบำบัด/อเนกประสงค์)', psychState.room6Occupied ? '🔴 กำลังใช้งาน' : '🟢 ว่าง', 'psych-room-6', psychState.room6Occupied ? 'busy' : 'free'],
+      ['🔀', 'KSP-SW-PSYCH: สวิตช์ฮับตึกจิตเวชฯ (10.10.100.12)', '🟢 ออนไลน์ (ห้องที่ 3)', 'server-ksp-sw-psych', 'free']
     ];
 
     return {
