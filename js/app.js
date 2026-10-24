@@ -856,25 +856,121 @@
   });
 
   // --- Computer Specification Modal ---
+  let currentPcIp = '';
+
+  function parseIpInfo(ipStr) {
+    if (!ipStr) return { cleanIp: '-', extra: '', gateway: '-' };
+    const match = String(ipStr).match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/);
+    const cleanIp = match ? match[1] : String(ipStr).trim();
+
+    let extra = '';
+    const parenMatch = String(ipStr).match(/\(([^)]+)\)/);
+    if (parenMatch) {
+      extra = parenMatch[1].replace(/🟢|🔴|🟡|ออนไลน์ปกติ|ออนไลน์/g, '').trim();
+    }
+
+    let gateway = '-';
+    if (cleanIp.startsWith('10.10.100.')) {
+      gateway = '10.10.100.1 (MikroTik Core)';
+      if (!extra) extra = 'VLAN 100 - Network Management';
+    } else if (cleanIp.startsWith('10.10.10.')) {
+      gateway = '10.10.10.1 (Core Gateway)';
+      if (!extra) extra = 'VLAN 10 - Server Subnet';
+    } else if (cleanIp.startsWith('10.10.150.')) {
+      gateway = '10.10.150.1 (Management Gateway)';
+      if (!extra) extra = 'VLAN 150 - IPMI / Hardware Out-of-band';
+    } else if (cleanIp.startsWith('192.168.10.')) {
+      gateway = '192.168.10.1 (OPD Gateway)';
+      if (!extra) extra = 'VLAN 10 - OPD & Clinic Network';
+    } else if (cleanIp.startsWith('192.168.12.')) {
+      gateway = '192.168.12.1 (Finance/Psych Gateway)';
+      if (!extra) extra = 'VLAN 12 - Finance & Admin';
+    } else if (cleanIp.startsWith('192.168.14.')) {
+      gateway = '192.168.14.1 (Pharmacy Gateway)';
+      if (!extra) extra = 'VLAN 14 - Pharmacy Network';
+    } else if (cleanIp.startsWith('192.168.15.')) {
+      gateway = '192.168.15.1 (Dental Gateway)';
+      if (!extra) extra = 'VLAN 15 - Dental Network';
+    } else if (cleanIp.startsWith('192.168.16.')) {
+      gateway = '192.168.16.1 (ThaiMed/Maint Gateway)';
+      if (!extra) extra = 'VLAN 16 - Thai Medicine';
+    } else if (cleanIp.startsWith('192.168.18.')) {
+      gateway = '192.168.18.1 (Kitchen Gateway)';
+      if (!extra) extra = 'VLAN 18 - Kitchen & Nutrition';
+    } else if (cleanIp.startsWith('192.168.30.')) {
+      gateway = '192.168.30.1 (Physio Gateway)';
+      if (!extra) extra = 'VLAN 30 - Physical Therapy';
+    } else if (cleanIp.startsWith('192.168.40.')) {
+      gateway = '192.168.40.1 (IPD Gateway)';
+      if (!extra) extra = 'VLAN 40 - Inpatient Ward';
+    } else if (cleanIp.startsWith('192.168.50.')) {
+      gateway = '192.168.50.1 (Meeting Hall Gateway)';
+      if (!extra) extra = 'VLAN 50 - Conference & Hall';
+    } else if (cleanIp.startsWith('192.168.90.')) {
+      gateway = '192.168.90.1 (Power/SCADA Gateway)';
+      if (!extra) extra = 'VLAN 90 - SCADA & Power Monitoring';
+    } else {
+      gateway = '192.168.1.1';
+      if (!extra) extra = 'VLAN เครือข่ายโรงพยาบาล';
+    }
+
+    return { cleanIp, extra, gateway };
+  }
+
   function showPcModal(pc) {
     if (!pc) return;
     const modal = document.getElementById('pc-modal');
     if (!modal) return;
+
+    // 1. General & Header Info
     document.getElementById('pc-name').innerText = pc.name || 'โต๊ะคอมพิวเตอร์';
     document.getElementById('pc-code').innerText = `รหัสครุภัณฑ์: ${pc.code || '-'}`;
     document.getElementById('pc-role').innerText = pc.role || '-';
+
+    // 2. Dedicated IP & Remote Connection Box
+    const netInfo = parseIpInfo(pc.ip);
+    currentPcIp = netInfo.cleanIp;
+
+    const ipTextEl = document.getElementById('pc-ip-text');
+    if (ipTextEl) ipTextEl.innerText = netInfo.cleanIp;
+
+    const gwEl = document.getElementById('pc-gateway-text');
+    if (gwEl) gwEl.innerText = netInfo.gateway;
+
+    const vlanEl = document.getElementById('pc-vlan-text');
+    if (vlanEl) vlanEl.innerText = netInfo.extra || 'VLAN มาตรฐานโรงพยาบาล';
+
+    const rdpSpan = document.getElementById('pc-rdp-cmd');
+    if (rdpSpan) rdpSpan.innerText = `mstsc /v:${netInfo.cleanIp}`;
+
+    const pingSpan = document.getElementById('pc-ping-cmd');
+    if (pingSpan) pingSpan.innerText = `ping -t ${netInfo.cleanIp}`;
+
+    const remoteStatusEl = document.getElementById('pc-remote-status');
+    if (remoteStatusEl) {
+      remoteStatusEl.innerText = (pc.status && pc.status.includes('ออนไลน์')) ? '🟢 พร้อมรับรีโมท' : (pc.status || '🟢 พร้อมรับรีโมท');
+    }
+
+    const copyBtnText = document.getElementById('pc-copy-btn-text');
+    if (copyBtnText) copyBtnText.innerText = 'คัดลอก IP';
+    const copyBtn = document.getElementById('pc-copy-ip-btn');
+    if (copyBtn) copyBtn.classList.remove('copied');
+
+    // 3. Hardware Specifications Grid
     document.getElementById('pc-specs').innerHTML = `
       <div><small>CPU / ประมวลผล</small><strong>${pc.cpu || '-'}</strong></div>
       <div><small>RAM / หน่วยความจำ</small><strong>${pc.ram || '-'}</strong></div>
       <div><small>Storage / ความจุ</small><strong>${pc.storage || '-'}</strong></div>
       <div><small>จอภาพ (Monitor)</small><strong>${pc.monitor || '-'}</strong></div>
       <div><small>ระบบปฏิบัติการ (OS)</small><strong>${pc.os || '-'}</strong></div>
-      <div><small>เครือข่าย / IP</small><strong>${pc.ip || '-'} (${pc.status || 'Online'})</strong></div>
+      <div><small>ผู้รับผิดชอบ / ใช้งาน</small><strong>${pc.user || '-'}</strong></div>
     `;
+
+    // 4. Clinical Systems, Software & Peripherals
     document.getElementById('pc-software').innerHTML = `
       <small>ซอฟต์แวร์ระบบโรงพยาบาล & อุปกรณ์ต่อพ่วง</small>
       <strong>💿 ${pc.software || '-'}</strong>
-      <div style="font-size:11px;color:#475569;margin-top:3px;">🔌 อุปกรณ์ต่อพ่วง: ${pc.peripherals || '-'} | 👩‍⚕️ ผู้รับผิดชอบ: ${pc.user || '-'}</div>
+      <div style="font-size:11px;color:#475569;margin-top:3px;">🔌 อุปกรณ์ต่อพ่วง: ${pc.peripherals || '-'}</div>
     `;
     modal.classList.remove('hidden');
   }
@@ -886,6 +982,52 @@
 
   const pcCloseBtn = document.getElementById('pc-close');
   if (pcCloseBtn) pcCloseBtn.onclick = closePcModal;
+
+  // Remote IP Copy Event Handlers
+  const pcCopyIpBtn = document.getElementById('pc-copy-ip-btn');
+  if (pcCopyIpBtn) {
+    pcCopyIpBtn.onclick = () => {
+      if (!currentPcIp || currentPcIp === '-') return;
+      navigator.clipboard.writeText(currentPcIp).then(() => {
+        const copyBtnText = document.getElementById('pc-copy-btn-text');
+        if (copyBtnText) copyBtnText.innerText = 'คัดลอกแล้ว!';
+        pcCopyIpBtn.classList.add('copied');
+        showToast(`📋 คัดลอก IP: ${currentPcIp} เรียบร้อยแล้ว (พร้อมวางในโปรแกรมรีโมท)`);
+        setTimeout(() => {
+          if (copyBtnText) copyBtnText.innerText = 'คัดลอก IP';
+          pcCopyIpBtn.classList.remove('copied');
+        }, 2200);
+      }).catch(() => {
+        showToast(`IP: ${currentPcIp}`);
+      });
+    };
+  }
+
+  const pcCopyRdpBtn = document.getElementById('pc-copy-rdp-btn');
+  if (pcCopyRdpBtn) {
+    pcCopyRdpBtn.onclick = () => {
+      if (!currentPcIp || currentPcIp === '-') return;
+      const cmd = `mstsc /v:${currentPcIp}`;
+      navigator.clipboard.writeText(cmd).then(() => {
+        showToast(`🖥️ คัดลอกคำสั่ง Remote Desktop: ${cmd}`);
+      }).catch(() => {
+        showToast(cmd);
+      });
+    };
+  }
+
+  const pcCopyPingBtn = document.getElementById('pc-copy-ping-btn');
+  if (pcCopyPingBtn) {
+    pcCopyPingBtn.onclick = () => {
+      if (!currentPcIp || currentPcIp === '-') return;
+      const cmd = `ping -t ${currentPcIp}`;
+      navigator.clipboard.writeText(cmd).then(() => {
+        showToast(`⚡ คัดลอกคำสั่ง Ping: ${cmd}`);
+      }).catch(() => {
+        showToast(cmd);
+      });
+    };
+  }
 
   // --- Toast Notification ---
   function showToast(msg) {

@@ -6,7 +6,7 @@
   <title>แผนผัง 3D Isometric - โรงพยาบาลโคกศรีสุพรรณ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261021v">
+  <link rel="stylesheet" href="css/style.css?v=20261024a">
 </head>
 <body>
   <div id="scene"></div>
@@ -81,7 +81,52 @@
       <button id="pc-close" class="icon-btn">✕</button>
     </div>
     <p id="pc-role" style="font-size:12.5px;color:#334155;margin:10px 0 8px;"></p>
+
+    <!-- ช่องรายละเอียด IP สำหรับรีโมทควบคุมระยะไกล (Remote Access Box) -->
+    <div class="pc-remote-card" id="pc-remote-card">
+      <div class="pc-remote-head">
+        <div class="pc-remote-label">
+          <span class="pc-remote-icon">🌐</span>
+          <div>
+            <strong>ข้อมูลเครือข่าย & สำหรับรีโมท (Remote Access)</strong>
+            <small>Remote Desktop / Support Connection</small>
+          </div>
+        </div>
+        <span id="pc-remote-status" class="pc-remote-badge">🟢 พร้อมรับรีโมท</span>
+      </div>
+
+      <div class="pc-ip-display-row">
+        <div class="pc-ip-main">
+          <small>IP ADDRESS (IPv4 สำหรับเชื่อมต่อ)</small>
+          <div class="pc-ip-val" id="pc-ip-text">10.10.100.22</div>
+        </div>
+        <button class="pc-copy-btn" id="pc-copy-ip-btn" type="button" title="คลิกเพื่อคัดลอก IP ไปยังคลิปบอร์ด">
+          <span class="copy-icon">📋</span> <span id="pc-copy-btn-text">คัดลอก IP</span>
+        </button>
+      </div>
+
+      <div class="pc-net-subinfo">
+        <div><small>Subnet Mask:</small> <span>255.255.255.0</span></div>
+        <div><small>Default Gateway:</small> <span id="pc-gateway-text">10.10.100.1</span></div>
+        <div style="grid-column: span 2;"><small>วงเครือข่าย / VLAN:</small> <span id="pc-vlan-text">VLAN 100 - Network Management</span></div>
+      </div>
+
+      <div class="pc-remote-actions">
+        <button class="pc-action-chip" id="pc-copy-rdp-btn" type="button" title="คัดลอกคำสั่งรัน Windows Remote Desktop">
+          🖥️ <span id="pc-rdp-cmd">mstsc /v:10.10.100.22</span>
+        </button>
+        <button class="pc-action-chip" id="pc-copy-ping-btn" type="button" title="คัดลอกคำสั่งทดสอบ Ping">
+          ⚡ <span id="pc-ping-cmd">ping -t 10.10.100.22</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- สเปกฮาร์ดแวร์ประจำเครื่อง -->
+    <div style="font-size:11px;font-weight:700;color:#64748b;margin:10px 0 6px;text-transform:uppercase;letter-spacing:0.5px;">
+      ⚙️ สเปกฮาร์ดแวร์ประจำเครื่อง (Hardware Specs)
+    </div>
     <div id="pc-specs" class="meta"></div>
+
     <div class="pc-soft-box">
       <small>ซอฟต์แวร์และระบบที่เปิดใช้งาน</small>
       <div id="pc-software"></div>
@@ -189,30 +234,30 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <!-- App -->
-  <script src="js/data.js?v=20261023i"></script>
-  <script src="js/models.js?v=20261023i"></script>
+  <script src="js/data.js?v=20261024a"></script>
+  <script src="js/models.js?v=20261024a"></script>
   <!-- Modular Interiors -->
-  <script src="js/interiors/common.js?v=20261023i"></script>
-  <script src="js/interiors/guard.js?v=20261023i"></script>
-  <script src="js/interiors/shop.js?v=20261023i"></script>
-  <script src="js/interiors/parking.js?v=20261023i"></script>
-  <script src="js/interiors/er.js?v=20261023i"></script>
-  <script src="js/interiors/physio.js?v=20261023i"></script>
-  <script src="js/interiors/ipd.js?v=20261023i"></script>
-  <script src="js/interiors/power.js?v=20261023i"></script>
-  <script src="js/interiors/hall.js?v=20261023i"></script>
-  <script src="js/interiors/maint.js?v=20261023i"></script>
-  <script src="js/interiors/finance.js?v=20261023i"></script>
-  <script src="js/interiors/kitchen.js?v=20261023i"></script>
-  <script src="js/interiors/pharmacy.js?v=20261023i"></script>
-  <script src="js/interiors/dental.js?v=20261023i"></script>
-  <script src="js/interiors/thaimed.js?v=20261023i"></script>
-  <script src="js/interiors/rompho.js?v=20261023i"></script>
-  <script src="js/interiors/store.js?v=20261023i"></script>
-  <script src="js/interiors/supply.js?v=20261023i"></script>
-  <script src="js/interiors/opd.js?v=20261023i"></script>
-  <script src="js/interiors/psych.js?v=20261023i"></script>
-  <script src="js/interiors/drivers.js?v=20261023i"></script>
-  <script src="js/app.js?v=20261023i"></script>
+  <script src="js/interiors/common.js?v=20261024a"></script>
+  <script src="js/interiors/guard.js?v=20261024a"></script>
+  <script src="js/interiors/shop.js?v=20261024a"></script>
+  <script src="js/interiors/parking.js?v=20261024a"></script>
+  <script src="js/interiors/er.js?v=20261024a"></script>
+  <script src="js/interiors/physio.js?v=20261024a"></script>
+  <script src="js/interiors/ipd.js?v=20261024a"></script>
+  <script src="js/interiors/power.js?v=20261024a"></script>
+  <script src="js/interiors/hall.js?v=20261024a"></script>
+  <script src="js/interiors/maint.js?v=20261024a"></script>
+  <script src="js/interiors/finance.js?v=20261024a"></script>
+  <script src="js/interiors/kitchen.js?v=20261024a"></script>
+  <script src="js/interiors/pharmacy.js?v=20261024a"></script>
+  <script src="js/interiors/dental.js?v=20261024a"></script>
+  <script src="js/interiors/thaimed.js?v=20261024a"></script>
+  <script src="js/interiors/rompho.js?v=20261024a"></script>
+  <script src="js/interiors/store.js?v=20261024a"></script>
+  <script src="js/interiors/supply.js?v=20261024a"></script>
+  <script src="js/interiors/opd.js?v=20261024a"></script>
+  <script src="js/interiors/psych.js?v=20261024a"></script>
+  <script src="js/interiors/drivers.js?v=20261024a"></script>
+  <script src="js/app.js?v=20261024a"></script>
 </body>
 </html>
