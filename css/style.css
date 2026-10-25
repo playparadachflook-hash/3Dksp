@@ -1,3 +1,29 @@
+/* =========================================================================
+ * MODULAR BUILDING STYLES (นำเข้าไฟล์ CSS แต่ละอาคารที่บรรทัดแรกสุดตามมาตรฐาน CSS)
+ * ========================================================================= */
+@import url('buildings/opd.css');
+@import url('buildings/server.css');
+@import url('buildings/er.css');
+@import url('buildings/pcu.css');
+@import url('buildings/ipd.css');
+@import url('buildings/psych.css');
+@import url('buildings/drivers.css');
+@import url('buildings/kitchen.css');
+@import url('buildings/rompho.css');
+@import url('buildings/maint.css');
+@import url('buildings/power.css');
+@import url('buildings/dental.css');
+@import url('buildings/thaimed.css');
+@import url('buildings/finance.css');
+@import url('buildings/physio.css');
+@import url('buildings/store.css');
+@import url('buildings/supply.css');
+@import url('buildings/hall.css');
+@import url('buildings/guard-shop.css');
+
+/* =========================================================================
+ * BASE APP & 3D UI STYLES
+ * ========================================================================= */
 * { box-sizing: border-box; }
 html, body {
   margin: 0; height: 100%; overflow: hidden;
@@ -140,29 +166,6 @@ body.mode-interior #info { display: none !important; }
   box-shadow: 0 4px 12px rgba(37, 99, 235, .35);
 }
 .int-label.sub-tag { background: rgba(255, 255, 255, .92); color: #334155; border-color: #cbd5e1; font-size: 10px; padding: 1px 6px; }
-
-/* =========================================================================
- * MODULAR BUILDING STYLES (แยกไฟล์ตามแต่ละอาคารในโฟลเดอร์ css/buildings/)
- * ========================================================================= */
-@import url('buildings/opd.css');
-@import url('buildings/server.css');
-@import url('buildings/er.css');
-@import url('buildings/pcu.css');
-@import url('buildings/ipd.css');
-@import url('buildings/psych.css');
-@import url('buildings/drivers.css');
-@import url('buildings/kitchen.css');
-@import url('buildings/rompho.css');
-@import url('buildings/maint.css');
-@import url('buildings/power.css');
-@import url('buildings/dental.css');
-@import url('buildings/thaimed.css');
-@import url('buildings/finance.css');
-@import url('buildings/physio.css');
-@import url('buildings/store.css');
-@import url('buildings/supply.css');
-@import url('buildings/hall.css');
-@import url('buildings/guard-shop.css');
 
 /* Toast Notification */
 .toast-notify {
