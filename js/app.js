@@ -47,9 +47,10 @@
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.6));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate = true;
   renderer.outputEncoding = THREE.sRGBEncoding;
   container.appendChild(renderer.domElement);
 
@@ -66,7 +67,7 @@
   // Controls
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
-  controls.dampingFactor = 0.06;
+  controls.dampingFactor = 0.08;
   controls.maxPolarAngle = Math.PI / 2 - 0.06; // Prevent going underground
   controls.minDistance = 10;
   controls.maxDistance = 250;
@@ -82,8 +83,8 @@
   const sunLight = new THREE.DirectionalLight(0xfffcf5, 1.48);
   sunLight.position.set(65, 125, 75);
   sunLight.castShadow = true;
-  sunLight.shadow.mapSize.width = 4096;
-  sunLight.shadow.mapSize.height = 4096;
+  sunLight.shadow.mapSize.width = 2048;
+  sunLight.shadow.mapSize.height = 2048;
   sunLight.shadow.camera.near = 10;
   sunLight.shadow.camera.far = 300;
   const shadowRange = 82;
@@ -2338,6 +2339,9 @@
 
     document.body.classList.add('mode-interior');
 
+    // Performance: Disable sun shadow pass while inside interior rooms for smooth 60fps
+    sunLight.castShadow = false;
+
     // Switch Visibility
     exteriorGroup.visible = false;
     pinObjects.forEach(p => { p.obj.visible = false; if (p.obj.element) p.obj.element.style.display = 'none'; });
@@ -2484,6 +2488,9 @@
     state.mode = 'exterior';
     document.body.classList.remove('mode-interior');
     closePcModal();
+
+    // Restore sun shadow in exterior mode
+    sunLight.castShadow = true;
 
     interiorGroup.visible = false;
     clearInteriorScene();
@@ -2637,8 +2644,8 @@
 
     controls.update();
 
-    // Thai flag waving animation
-    if (flagAnimationObj && flagAnimationObj.userData.base) {
+    // Thai flag waving animation (only in exterior mode to maximize frame rate)
+    if (state.mode === 'exterior' && flagAnimationObj && flagAnimationObj.userData.base) {
       const posAttr = flagAnimationObj.geometry.attributes.position;
       const base = flagAnimationObj.userData.base;
       for (let i = 0; i < posAttr.count; i++) {

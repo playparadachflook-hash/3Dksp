@@ -1,0 +1,49 @@
+/* =========================================================================
+ * ER BUILDING (ตึกอุบัติเหตุและฉุกเฉิน - EMERGENCY ROOM & X-RAY)
+ * ========================================================================= */
+
+.int-label.zone-er {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #991b1b;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.int-label.er-sign {
+  background: #b91c1c;
+  color: #ffffff;
+  border: 2px solid #fef08a;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 4px 11px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(185, 28, 28, 0.4);
+}
+
+.int-label.er-triage {
+  background: #ea580c;
+  color: #fff;
+  border: 1px solid #c2410c;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.int-label.er-trauma {
+  background: #b91c1c;
+  color: #fff;
+  border: 1.5px solid #ef4444;
+  font-weight: 700;
+  font-size: 11.5px;
+}
+
+.int-label.xray-tag {
+  background: #475569;
+  color: #f1f5f9;
+  border: 1.5px solid #94a3b8;
+  font-weight: 600;
+  font-size: 11px;
+}

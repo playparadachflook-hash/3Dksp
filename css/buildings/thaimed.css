@@ -1,0 +1,29 @@
+/* =========================================================================
+ * TRADITIONAL THAI MEDICINE (กลุ่มงานการแพทย์แผนไทยและการแพทย์ทางเลือก)
+ * ========================================================================= */
+
+.int-label.thaimed-title-tag {
+  background: #15803d;
+  color: #f0fdf4;
+  border-color: #4ade80;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.int-label.thaimed-bed {
+  background: #16a34a;
+  color: #fff;
+  border-color: #86efac;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.int-label.thaimed-sauna {
+  background: #b45309;
+  color: #fffbeb;
+  border-color: #fde68a;
+  font-weight: 600;
+  font-size: 11px;
+}

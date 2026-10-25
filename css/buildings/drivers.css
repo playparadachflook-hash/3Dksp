@@ -1,0 +1,30 @@
+/* =========================================================================
+ * DRIVERS & VEHICLES (ตึกกลุ่มงานยานพาหนะ พขร. & ศูนย์สั่งการ 1669)
+ * ========================================================================= */
+
+.int-label.drivers-ems-tag {
+  background: #b91c1c;
+  color: #ffffff;
+  border: 1.5px solid #f87171;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  box-shadow: 0 3px 10px rgba(185, 28, 28, 0.4);
+}
+
+.int-label.drivers-dispatch {
+  background: #1e3a8a;
+  color: #dbeafe;
+  border-color: #3b82f6;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.int-label.drivers-garage-bay {
+  background: #334155;
+  color: #f1f5f9;
+  border-color: #64748b;
+  font-weight: 600;
+  font-size: 10.5px;
+}

@@ -1,0 +1,29 @@
+/* =========================================================================
+ * PHYSICAL THERAPY (กลุ่มงานกายภาพบำบัดและเวชศาสตร์ฟื้นฟู)
+ * ========================================================================= */
+
+.int-label.physio-title-tag {
+  background: #0284c7;
+  color: #f0f9ff;
+  border-color: #38bdf8;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.int-label.physio-bed {
+  background: #0369a1;
+  color: #fff;
+  border-color: #7dd3fc;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.int-label.physio-bars {
+  background: #475569;
+  color: #f8fafc;
+  border-color: #94a3b8;
+  font-weight: 600;
+  font-size: 10.5px;
+}

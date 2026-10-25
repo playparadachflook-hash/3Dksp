@@ -1,0 +1,21 @@
+/* =========================================================================
+ * FINANCE & ADMINISTRATION (อาคารการเงิน บัญชี และพัสดุ)
+ * ========================================================================= */
+
+.int-label.finance-title-tag {
+  background: #0d9488;
+  color: #f0fdfa;
+  border-color: #2dd4bf;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.int-label.finance-cashier {
+  background: #059669;
+  color: #fff;
+  border-color: #6ee7b7;
+  font-weight: 600;
+  font-size: 11px;
+}

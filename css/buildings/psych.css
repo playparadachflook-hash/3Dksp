@@ -1,0 +1,38 @@
+/* =========================================================================
+ * PSYCHIATRIC BUILDING (ตึกกลุ่มงานจิตเวชและยาเสพติด)
+ * ========================================================================= */
+
+.int-label.psych-title-tag {
+  background: #7c2d12;
+  color: #fff7ed;
+  border-color: #ea580c;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  box-shadow: 0 3px 10px rgba(124, 45, 18, 0.35);
+}
+
+.int-label.psych-counsel {
+  background: #c2410c;
+  color: #fff;
+  border-color: #f97316;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.int-label.psych-calm-room {
+  background: #334155;
+  color: #f8fafc;
+  border: 1.5px solid #64748b;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.int-label.psych-matrix {
+  background: #854d0e;
+  color: #fefce8;
+  border-color: #eab308;
+  font-weight: 600;
+  font-size: 11px;
+}

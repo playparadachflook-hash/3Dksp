@@ -267,29 +267,129 @@
     return t;
   };
 
+  // ป้ายชื่อโรงพยาบาลโคกศรีสุพรรณ (ตรงตามรูปภาพจริง: แผ่นหินแกรนิตดำ ตัวอักษรสีทองอร่าม)
   M.signTexture = () =>
-    M.canvasTexture(1536, 333, (g, w, h) => {
+    M.canvasTexture(1800, 480, (g, w, h) => {
+      // 1. Deep polished black granite slab
       const grd = g.createLinearGradient(0, 0, 0, h);
-      grd.addColorStop(0, '#ffffff');
-      grd.addColorStop(1, '#eaf6ee');
+      grd.addColorStop(0, '#111827');
+      grd.addColorStop(0.5, '#030712');
+      grd.addColorStop(1, '#111827');
       g.fillStyle = grd;
       g.fillRect(0, 0, w, h);
-      g.strokeStyle = '#15803d';
-      g.lineWidth = 18;
-      g.strokeRect(9, 9, w - 18, h - 18);
-      // โลโก้กากบาท
-      g.fillStyle = '#16a34a';
-      g.beginPath();
-      g.arc(170, h / 2, 110, 0, Math.PI * 2);
-      g.fill();
-      g.fillStyle = '#ffffff';
-      g.fillRect(148, h / 2 - 75, 44, 150);
-      g.fillRect(95, h / 2 - 22, 150, 44);
+
+      // Subtle polished stone diagonal sheen
+      const sheen = g.createLinearGradient(0, 0, w, h);
+      sheen.addColorStop(0, 'rgba(255, 255, 255, 0.04)');
+      sheen.addColorStop(0.3, 'rgba(255, 255, 255, 0.12)');
+      sheen.addColorStop(0.35, 'rgba(255, 255, 255, 0.02)');
+      sheen.addColorStop(1, 'rgba(255, 255, 255, 0.05)');
+      g.fillStyle = sheen;
+      g.fillRect(0, 0, w, h);
+
+      // 2. Double Golden Framing Borders
+      g.strokeStyle = '#d97706';
+      g.lineWidth = 14;
+      g.strokeRect(12, 12, w - 24, h - 24);
+
+      g.strokeStyle = '#fef08a';
+      g.lineWidth = 4;
+      g.strokeRect(24, 24, w - 48, h - 48);
+
+      // 3. Thai Text: "โรงพยาบาลโคกศรีสุพรรณ"
+      g.textAlign = 'center';
       g.textBaseline = 'middle';
-      g.fillStyle = '#14532d';
-      M.fitText(g, 'โรงพยาบาลโคกศรีสุพรรณ', 320, h / 2 - 36, w - 370, 120);
-      g.fillStyle = '#15803d';
-      M.fitText(g, 'KHOK SI SUPHAN HOSPITAL', 324, h / 2 + 82, w - 370, 56, 600);
+
+      const goldGrd = g.createLinearGradient(0, h * 0.15, 0, h * 0.65);
+      goldGrd.addColorStop(0, '#fef08a');
+      goldGrd.addColorStop(0.3, '#facc15');
+      goldGrd.addColorStop(0.7, '#eab308');
+      goldGrd.addColorStop(1, '#ca8a04');
+
+      // Shadow
+      g.font = 'bold 128px "Prompt", sans-serif';
+      g.fillStyle = 'rgba(0, 0, 0, 0.85)';
+      g.fillText('โรงพยาบาลโคกศรีสุพรรณ', w / 2 + 4, h * 0.38 + 4);
+
+      // Main Golden Thai Text
+      g.fillStyle = goldGrd;
+      g.fillText('โรงพยาบาลโคกศรีสุพรรณ', w / 2, h * 0.38);
+
+      // 4. English Text: "KHOKSRISUPAN HOSPITAL" (ตรงตามป้ายจริงในภาพ)
+      const engGold = g.createLinearGradient(0, h * 0.65, 0, h * 0.90);
+      engGold.addColorStop(0, '#fef9c3');
+      engGold.addColorStop(0.4, '#fde047');
+      engGold.addColorStop(1, '#ca8a04');
+
+      g.font = 'bold 64px "Prompt", sans-serif';
+      g.fillStyle = 'rgba(0, 0, 0, 0.8)';
+      g.fillText('KHOKSRISUPAN HOSPITAL', w / 2 + 3, h * 0.74 + 3);
+
+      g.fillStyle = engGold;
+      g.fillText('KHOKSRISUPAN HOSPITAL', w / 2, h * 0.74);
+    });
+
+  // ซุ้มจั่วหน้าบันป้ายโรงพยาบาล (ตราสัญลักษณ์กระทรวงสาธารณสุขสีทองบนพื้นสีดำ)
+  M.pedimentTexture = () =>
+    M.canvasTexture(1000, 360, (g, w, h) => {
+      // Dark granite background
+      g.fillStyle = '#0a0a0f';
+      g.fillRect(0, 0, w, h);
+
+      // Golden decorative border
+      g.strokeStyle = '#d97706';
+      g.lineWidth = 10;
+      g.strokeRect(8, 8, w - 16, h - 16);
+
+      // Ministry of Public Health Emblem (ตรากระทรวงสาธารณสุขสีทอง)
+      const cx = w / 2;
+      const cy = h / 2;
+      const r = 110;
+
+      // Outer gold circle & background
+      g.fillStyle = '#ca8a04';
+      g.beginPath();
+      g.arc(cx, cy, r + 8, 0, Math.PI * 2);
+      g.fill();
+
+      g.fillStyle = '#0f172a';
+      g.beginPath();
+      g.arc(cx, cy, r, 0, Math.PI * 2);
+      g.fill();
+
+      // Golden Emblem
+      const gold = '#ffd700';
+      g.fillStyle = gold;
+      g.strokeStyle = gold;
+      g.lineWidth = 6;
+
+      g.beginPath();
+      g.arc(cx, cy, r - 12, 0, Math.PI * 2);
+      g.stroke();
+
+      // Center staff & serpent
+      g.beginPath();
+      g.arc(cx, cy - 20, 24, 0, Math.PI * 2);
+      g.fill();
+
+      // Wings
+      g.beginPath();
+      g.ellipse(cx - 38, cy, 34, 18, -Math.PI / 6, 0, Math.PI * 2);
+      g.ellipse(cx + 38, cy, 34, 18, Math.PI / 6, 0, Math.PI * 2);
+      g.fill();
+
+      // Flame top / Unalome
+      g.beginPath();
+      g.moveTo(cx, cy - 68);
+      g.lineTo(cx - 16, cy - 36);
+      g.lineTo(cx + 16, cy - 36);
+      g.closePath();
+      g.fill();
+
+      // Lotus base
+      g.beginPath();
+      g.ellipse(cx, cy + 46, 52, 20, 0, 0, Math.PI * 2);
+      g.fill();
     });
 
   M.shopSignTexture = () =>
@@ -346,23 +446,129 @@
     return g;
   };
 
-  // ---------- Hospital sign ----------
+  // ---------- Hospital Entrance Sign (โมเดลป้ายหน้าโรงพยาบาลโคกศรีสุพรรณ ตรงตามภาพถ่ายจริง 100%) ----------
   M.buildSign = () => {
     const g = new THREE.Group();
-    M.box(g, 13, 0.6, 2.2, 0x9ca3af, 0, 0.3, 0);
-    M.box(g, 12.6, 0.1, 1.8, 0x6b4f2a, 0, 0.62, 0);
-    for (let i = 0; i < 9; i++) {
-      const bush = new THREE.Mesh(new THREE.IcosahedronGeometry(0.55, 0), SH.leaves[i % 4]);
-      bush.position.set(-6 + i * 1.5, 0.95, 0.35);
-      bush.castShadow = true;
-      g.add(bush);
+
+    const mWhite = M.mat(0xf8fafc, { roughness: 0.35 });
+    const mTerracotta = M.mat(0x993d2c, { roughness: 0.65 });
+    const mBlackGranite = M.mat(0x0a0a0f, { roughness: 0.2, metalness: 0.15 });
+    const mSignBoard = new THREE.MeshStandardMaterial({ map: M.signTexture(), roughness: 0.25, metalness: 0.1 });
+    const mPedimentEmblem = new THREE.MeshStandardMaterial({ map: M.pedimentTexture(), roughness: 0.3, metalness: 0.1 });
+    const mGold = M.mat(0xf59e0b, { roughness: 0.3, metalness: 0.6 });
+    const mGreenLawn = M.mat(0x4d7c0f, { roughness: 0.85 });
+    const mTrimBush = M.mat(0x15803d, { roughness: 0.75 });
+    const mSwan = M.mat(0xffffff, { roughness: 0.3 });
+    const mBeak = M.mat(0xf97316, { roughness: 0.4 });
+    const mSteel = M.mat(0x64748b, { metalness: 0.5, roughness: 0.4 });
+    const mLampLight = new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xfef08a, emissiveIntensity: 0.6 });
+
+    // 1. เนินหญ้าสีเขียวด้านหน้าป้าย (Sloping Landscaped Grass Mound)
+    M.box(g, 18.0, 0.25, 5.0, mGreenLawn, 0, 0.125, 0.4);
+    // ขอบทางปูนคอนกรีตด้านหน้า
+    M.box(g, 18.2, 0.12, 0.25, 0xe2e8f0, 0, 0.06, 2.9);
+
+    // 2. กระถางปูนปั้นด้านหน้าป้ายสีน้ำตาลแดง (Terracotta Front Planter Wall)
+    M.box(g, 11.6, 0.60, 1.0, mTerracotta, 0, 0.45, 0.85);
+    // บัวขอบปูนสีขาวด้านบนกระถาง
+    M.box(g, 11.8, 0.08, 1.15, mWhite, 0, 0.77, 0.85);
+    // พุ่มไม้ดอกไม้ประดับในกระถาง
+    M.box(g, 11.2, 0.14, 0.85, 0x166534, 0, 0.84, 0.85);
+    for (let f = 0; f < 14; f++) {
+      const flwColor = (f % 2 === 0) ? 0xfef08a : 0xec4899;
+      M.box(g, 0.35, 0.08, 0.35, flwColor, -5.0 + f * 0.78, 0.93, 0.85);
     }
-    M.box(g, 0.4, 3.2, 0.4, 0x6b7280, -5.5, 2.2, -0.3);
-    M.box(g, 0.4, 3.2, 0.4, 0x6b7280, 5.5, 2.2, -0.3);
-    const side = M.mat(0x15803d);
-    const front = new THREE.MeshStandardMaterial({ map: M.signTexture(), roughness: 0.5 });
-    M.box(g, 12, 2.6, 0.35, [side, side, side, side, front, side], 0, 3.3, -0.3);
-    M.box(g, 12.3, 0.2, 0.5, 0x15803d, 0, 4.7, -0.3);
+
+    // 3. รูปปั้นหงส์คู่สีขาวตรงกลางหน้าป้าย (The Pair of White Swans)
+    [-0.32, 0.32].forEach((sx) => {
+      const sz = 1.28;
+      // ลำตัวหงส์สีขาว
+      M.box(g, 0.26, 0.28, 0.42, mSwan, sx, 0.88, sz);
+      // คอหงส์เรียวยาวโค้งสง่างาม
+      const neck = M.cyl(g, 0.045, 0.065, 0.42, mSwan, sx, 1.16, sz + 0.15, 8);
+      neck.rotation.x = -0.22;
+      // หัวหงส์
+      M.box(g, 0.11, 0.11, 0.15, mSwan, sx, 1.38, sz + 0.18);
+      // ปากหงส์สีส้ม
+      const beak = M.cyl(g, 0.015, 0.038, 0.11, mBeak, sx, 1.34, sz + 0.26, 6);
+      beak.rotation.x = Math.PI / 2;
+    });
+
+    // 4. ผนังและกรอบป้ายหลัก (Central Monument Wall & Signboard)
+    // โครงผนังหลักสีน้ำตาลแดง
+    M.box(g, 10.6, 2.7, 0.35, mTerracotta, 0, 2.25, -0.1);
+    // ฐานล่างสีขาวรองรับป้าย
+    M.box(g, 10.8, 0.38, 0.50, mWhite, 0, 0.98, -0.05);
+    // กรอบปูนปั้นสีขาวล้อมรอบแผ่นป้าย
+    M.box(g, 10.2, 2.30, 0.40, mWhite, 0, 2.25, -0.08);
+
+    // แผ่นป้ายหินแกรนิตสีดำตัวอักษรทอง (Black Granite with Golden Textures)
+    const signBox = M.box(g, 9.75, 2.05, 0.08, [mBlackGranite, mBlackGranite, mBlackGranite, mBlackGranite, mSignBoard, mBlackGranite], 0, 2.25, 0.14);
+
+    // 5. ซุ้มจั่วหน้าบันด้านบนตรงกลาง (Ornate Gabled Pediment on Top)
+    // คานบัวบ่าป้ายสีขาว
+    M.box(g, 10.8, 0.18, 0.52, mWhite, 0, 3.50, -0.08);
+    // ฐานหน้าบันสามเหลี่ยม
+    M.box(g, 5.8, 0.14, 0.46, mWhite, 0, 3.65, -0.08);
+    // ผนังจั่วหน้าบันตรงกลาง
+    M.box(g, 4.6, 1.05, 0.32, mTerracotta, 0, 4.18, -0.08);
+    // ปีกจั่วปูนปั้นสีขาวเอียงสองข้าง
+    const leftGable = M.box(g, 2.6, 0.16, 0.40, mWhite, -1.35, 4.35, -0.08);
+    leftGable.rotation.z = 0.44;
+    const rightGable = M.box(g, 2.6, 0.16, 0.40, mWhite, 1.35, 4.35, -0.08);
+    rightGable.rotation.z = -0.44;
+    // ยอดจั่วตรงกลาง
+    M.box(g, 0.45, 0.25, 0.42, mWhite, 0, 4.88, -0.08);
+
+    // แผ่นตรากระทรวงสาธารณสุขสีทองในจั่ว
+    M.box(g, 3.2, 0.88, 0.06, [mBlackGranite, mBlackGranite, mBlackGranite, mBlackGranite, mPedimentEmblem, mBlackGranite], 0, 4.18, 0.10);
+
+    // 6. เสาหลักและหัวเสาบัวตูมสีขาว (Columns with White Lotus Finials)
+    const makePillar = (cx, cz, h, wCol = 0.65) => {
+      // ฐานเสา
+      M.box(g, wCol + 0.14, 0.45, wCol + 0.14, mWhite, cx, 0.225, cz);
+      // ตัวเสา
+      M.box(g, wCol, h, wCol, mWhite, cx, h / 2 + 0.45, cz);
+      // บัวหัวเสา
+      M.box(g, wCol + 0.16, 0.20, wCol + 0.16, mWhite, cx, h + 0.55, cz);
+      // หัวเสาบัวตูม (Lotus Bud Finial)
+      M.cyl(g, 0.05, 0.20, 0.38, mWhite, cx, h + 0.82, cz, 8);
+      M.cyl(g, 0.02, 0.07, 0.14, mWhite, cx, h + 1.04, cz, 6);
+    };
+
+    // เสาหลัก 2 ต้นขนาบข้างป้ายตรงกลาง
+    makePillar(-5.4, -0.08, 3.4, 0.65);
+    makePillar(5.4, -0.08, 3.4, 0.65);
+
+    // กำแพงปีกซ้าย-ขวา สีน้ำตาลแดง (Terracotta Wing Walls)
+    M.box(g, 2.2, 2.1, 0.28, mTerracotta, -6.8, 1.50, -0.16);
+    M.box(g, 2.3, 0.12, 0.38, mWhite, -6.8, 2.60, -0.16); // บัวขอบกำแพง
+
+    M.box(g, 2.2, 2.1, 0.28, mTerracotta, 6.8, 1.50, -0.16);
+    M.box(g, 2.3, 0.12, 0.38, mWhite, 6.8, 2.60, -0.16); // บัวขอบกำแพง
+
+    // เสาปลายปีกซ้าย-ขวาสุด
+    makePillar(-8.0, -0.16, 2.3, 0.55);
+    makePillar(8.0, -0.16, 2.3, 0.55);
+
+    // 7. พุ่มไม้ทรงกรวยตัดแต่งซ้าย-ขวา ตามภาพจริง (Conical Trimmed Topiaries)
+    [-6.8, 6.8].forEach((bx) => {
+      // ฐานพุ่มไม้ทรงกรวย
+      const c1 = M.cyl(g, 0.40, 0.85, 1.3, mTrimBush, bx, 0.90, 0.95, 10);
+      const c2 = M.cyl(g, 0.10, 0.50, 1.1, mTrimBush, bx, 1.95, 0.95, 10);
+      // ขอบกระถางพุ่มไม้
+      M.cyl(g, 0.92, 0.96, 0.20, 0x334155, bx, 0.15, 0.95, 12);
+    });
+
+    // 8. สปอตไลท์ส่องป้ายหน้าโรงพยาบาล (Ground Spotlights Illuminating Sign)
+    [-3.2, 3.2].forEach((lx) => {
+      M.box(g, 0.20, 0.25, 0.20, mSteel, lx, 0.35, 1.85);
+      const head = M.cyl(g, 0.12, 0.08, 0.22, mSteel, lx, 0.55, 1.82, 8);
+      head.rotation.x = -0.45;
+      const lens = M.cyl(g, 0.10, 0.10, 0.02, mLampLight, lx, 0.62, 1.74, 8);
+      lens.rotation.x = -0.45;
+    });
+
     return g;
   };
 

@@ -1,0 +1,29 @@
+/* =========================================================================
+ * POWER HOUSE & SUBSTATION (อาคารโรงไฟฟ้าย่อย, หม้อแปลง และระบบ SCADA)
+ * ========================================================================= */
+
+.int-label.power-title-tag {
+  background: #ca8a04;
+  color: #fefce8;
+  border-color: #facc15;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.int-label.power-high-volt {
+  background: #b91c1c;
+  color: #fef2f2;
+  border: 1.5px solid #ef4444;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.int-label.power-generator {
+  background: #1e3a8a;
+  color: #eff6ff;
+  border-color: #3b82f6;
+  font-weight: 600;
+  font-size: 11px;
+}

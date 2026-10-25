@@ -1,0 +1,29 @@
+/* =========================================================================
+ * CSSD SUPPLY (อาคารจ่ายกลาง - CENTRAL STERILE SUPPLY DEPARTMENT)
+ * ========================================================================= */
+
+.int-label.supply-title-tag {
+  background: #0f766e;
+  color: #f0fdfa;
+  border-color: #14b8a6;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.int-label.supply-autoclave {
+  background: #115e59;
+  color: #ccfbf1;
+  border-color: #2dd4bf;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.int-label.supply-sterile-zone {
+  background: #0284c7;
+  color: #fff;
+  border-color: #38bdf8;
+  font-weight: 600;
+  font-size: 10.5px;
+}

@@ -1,0 +1,21 @@
+/* =========================================================================
+ * AUDITORIUM & HALL (อาคารหอประชุมและศูนย์กิจกรรม)
+ * ========================================================================= */
+
+.int-label.hall-title-tag {
+  background: #475569;
+  color: #f8fafc;
+  border-color: #94a3b8;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.int-label.hall-stage {
+  background: #7c3aed;
+  color: #fff;
+  border-color: #a78bfa;
+  font-weight: 600;
+  font-size: 11px;
+}

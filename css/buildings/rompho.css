@@ -1,0 +1,38 @@
+/* =========================================================================
+ * ROMPHO 3 BUILDING (ตึกร่มโพธิ์ 3 ชั้น 1-2 - สูติกรรม, พัฒนาการเด็ก, ระบาดวิทยา)
+ * ========================================================================= */
+
+.int-label.rompho-title-tag {
+  background: #db2777;
+  color: #fdf2f8;
+  border-color: #f472b6;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  box-shadow: 0 3px 10px rgba(219, 39, 119, 0.35);
+}
+
+.int-label.rompho-labor {
+  background: #be185d;
+  color: #fff;
+  border-color: #f43f5e;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.int-label.rompho-dev {
+  background: #9333ea;
+  color: #faf5ff;
+  border-color: #c084fc;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.int-label.rompho-epi {
+  background: #0284c7;
+  color: #f0f9ff;
+  border-color: #38bdf8;
+  font-weight: 600;
+  font-size: 11px;
+}
