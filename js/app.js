@@ -877,7 +877,10 @@
       if (!extra) extra = 'VLAN 100 - Network Management';
     } else if (cleanIp.startsWith('10.10.20.')) {
       gateway = '10.10.20.1 (Core Gateway)';
-      if (!extra) extra = 'VLAN 20 - ประกันสุขภาพและสารสนเทศยุทธศาสตร์';
+      if (!extra) extra = 'VLAN 20 - บริการคลินิกเฉพาะทางและสุขภาพจิต';
+    } else if (cleanIp.startsWith('10.10.40.')) {
+      gateway = '10.10.40.1 (IPD & Maternity Gateway)';
+      if (!extra) extra = 'VLAN 40 - แผนกผู้ป่วยใน สูติกรรม และห้องคลอด (LR)';
     } else if (cleanIp.startsWith('10.10.10.')) {
       gateway = '10.10.10.1 (Core Gateway)';
       if (!extra) extra = 'VLAN 10 - Server Subnet';
@@ -2515,14 +2518,41 @@
             </div>
           </div>
 
+          <!-- Labor & Delivery Room (VLAN 40) Switch Port Table -->
+          <div style="background:#022c22;border:1.5px solid #22c55e;border-radius:8px;padding:12px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="background:#22c55e;color:#052e16;padding:2px 8px;border-radius:6px;font-weight:800;font-size:11px;">VLAN 40 • ACTIVE PORTS</span>
+                <strong style="color:#86efac;font-size:13px;">กลุ่มคอมพิวเตอร์แผนกห้องคลอดและสูติกรรม (ตึกร่มโพธิ์ ชั้น 1)</strong>
+              </div>
+              <span style="font-size:11px;color:#a7f3d0;font-weight:600;">⚡ 1000 Mbps Full Duplex (Links Up 🟢)</span>
+            </div>
+            
+            <div style="display:grid;grid-template-columns:1fr;gap:8px;font-size:11px;">
+              <div style="background:rgba(0,0,0,0.35);padding:8px 10px;border-radius:6px;border:1px solid #166534;">
+                <div style="display:flex;justify-content:space-between;color:#86efac;font-weight:700;margin-bottom:3px;">
+                  <span>🔌 Port 1: โต๊ะคอมห้องคลอด 1 (เคาน์เตอร์สูติกรรม)</span>
+                  <span style="color:#fef08a;">LR-PC</span>
+                </div>
+                <div style="color:#cbd5e1;display:flex;flex-wrap:wrap;gap:14px;">
+                  <div>IP: <strong style="color:#38bdf8;">10.10.40.30</strong></div>
+                  <div>MAC: <strong style="color:#fbbf24;font-family:monospace;">3C:52:82:7D:6E:19</strong></div>
+                  <div>เต้ารับ: <strong style="color:#f8fafc;">ROM1-LR-01</strong></div>
+                  <div>ระบบ: <strong style="color:#a7f3d0;">HOSxP Delivery Module, แจ้งเกิด e-Birth</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div style="background:#0f172a;border-radius:8px;padding:12px;margin-bottom:12px;">
             <div style="font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:8px;">🔌 แผงพอร์ตสวิตช์ฮับตึกร่มโพธิ์ ชั้น 1 (Switch Port Matrix 1–24):</div>
             <div style="display:grid;grid-template-columns:repeat(12, 1fr);gap:6px;font-size:10px;text-align:center;">
               ${Array.from({length: 24}, (_, i) => {
                 const pNum = i + 1;
+                const isRomphoMapped = (pNum === 1);
                 const isConnected = pNum <= 16 || pNum === 24;
                 let desc = `Port ${pNum}`;
-                if (pNum === 1) desc = 'PC ห้องคลอด 1 (PC-ROM-01)';
+                if (pNum === 1) desc = 'LR-PC (ห้องคลอด)';
                 else if (pNum === 2) desc = 'PC พัฒนาการเด็ก (PC-DEV-01)';
                 else if (pNum === 3) desc = 'PC ระบาดวิทยา (PC-EPI-01)';
                 else if (pNum === 4) desc = 'จอ GIS Dashboard 506';
@@ -2539,10 +2569,13 @@
                 else if (pNum === 15) desc = 'CCTV ทางเดินหน้าห้องคลอด';
                 else if (pNum === 16) desc = 'CCTV ประตูเข้า-ออกอาคาร';
                 else if (pNum === 24) desc = 'Uplink Core SFP';
+
+                const borderCol = isRomphoMapped ? '#4ade80' : (isConnected ? '#22c55e' : '#475569');
+                const bgCol = isRomphoMapped ? 'rgba(34,197,94,0.35)' : (isConnected ? 'rgba(34,197,94,0.15)' : 'rgba(51,65,85,0.4)');
                 return `
-                  <div style="background:${isConnected ? 'rgba(34,197,94,0.15)' : 'rgba(51,65,85,0.4)'};border:1px solid ${isConnected ? '#22c55e' : '#475569'};border-radius:5px;padding:4px 2px;">
-                    <div style="color:${isConnected ? '#4ade80' : '#64748b'};font-weight:700;">#${pNum}</div>
-                    <div style="color:#94a3b8;font-size:8.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${desc}">${desc}</div>
+                  <div style="background:${bgCol};border:1.5px solid ${borderCol};border-radius:5px;padding:4px 2px;${isRomphoMapped ? 'box-shadow:0 0 10px rgba(74,222,128,0.5);' : ''}">
+                    <div style="color:${isRomphoMapped ? '#86efac' : (isConnected ? '#4ade80' : '#64748b')};font-weight:700;">#${pNum}</div>
+                    <div style="color:${isRomphoMapped ? '#fef08a' : '#94a3b8'};font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${desc}">${desc}</div>
                   </div>
                 `;
               }).join('')}

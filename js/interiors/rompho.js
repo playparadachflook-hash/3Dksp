@@ -8,10 +8,28 @@
   const K = window.KSS, M = K.M, C = K.InteriorsCommon;
   const { V, floor, addEdges, walkwayStrip, makePerson } = C;
 
-  const ROMPHO_PC_SPECS = {
-    name: 'โต๊ะคอมห้องคลอด 1 (เคาน์เตอร์สูติกรรม)',
+  const ROMPHO_PC_SPECS = (K.ROMPHO_SPECS && K.ROMPHO_SPECS['3C:52:82:7D:6E:19']) || {
+    name: 'โต๊ะคอมห้องคลอด 1',
     code: 'PC-ROM-01',
+    hostname: 'LR-PC',
+    ip: '10.10.40.30',
+    mac: '3C:52:82:7D:6E:19',
+    switchId: 'ksp-sw-rompho1',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - ห้องพักแพทย์)',
+    switchIp: '10.10.100.14',
+    switchPort: 'Port 1 (VLAN 40)',
+    wallOutlet: 'ROM1-LR-01 (เต้ารับ LAN ผนังเคาน์เตอร์สูติกรรมห้องคลอด)',
+    vlan: 'VLAN 40 - แผนกผู้ป่วยใน สูติกรรม และห้องคลอด (LR)',
     role: 'เครื่องบันทึกข้อมูลการคลอด ทะเบียนทารกแรกเกิด และระบบเวชระเบียนสูติ-นรีเวชกรรม',
+    user: 'พยาบาลวิชาชีพประจำห้องคลอด',
+    os: 'Windows 11 Pro 64-bit',
+    cpu: 'Intel Core i5-12400 (6 Cores / 12 Threads, up to 4.40 GHz)',
+    ram: '16 GB DDR4 3200MHz',
+    storage: '512 GB M.2 NVMe PCIe SSD (High Speed)',
+    monitor: 'Dell 24" Full HD IPS (Anti-Glare, ComfortView Plus)',
+    software: 'HOSxP / HIS Delivery & Maternity Module, ระบบสูติบัตรและแจ้งเกิดออนไลน์, EHR, Neonatal Monitor Link',
+    peripherals: 'เครื่องอ่านบัตรสมาร์ทการ์ด, Barcode Scanner, เครื่องพิมพ์สูติบัตร, UPS 1000VA',
+    status: '🟢 ออนไลน์ปกติ',
     specs: [
       ['CPU', 'Intel Core i5-12400 (6 Cores / 12 Threads, up to 4.40 GHz)'],
       ['RAM', '16 GB DDR4 3200MHz'],
@@ -19,13 +37,6 @@
       ['Monitor', 'Dell 24" Full HD IPS (Anti-Glare, ComfortView Plus)'],
       ['OS', 'Windows 11 Pro 64-bit'],
       ['Network', 'LAN Gigabit + Secure Hospital VLAN (Maternity Suite)']
-    ],
-    software: [
-      'HOSxP / HIS Delivery & Maternity Module',
-      'ระบบสูติบัตรและแจ้งเกิดออนไลน์ (e-Birth Registration)',
-      'EHR Electronic Health Record',
-      'ระบบบันทึกสัญญาณชีพทารกแรกเกิด (Fetal & Neonatal Monitor)',
-      'Microsoft Edge / Hospital Intranet'
     ]
   };
 
@@ -1233,6 +1244,10 @@
         dg.add(staff);
       }
 
+      if (spec) {
+        dg.traverse((ch) => { if (ch.isMesh) ch.userData.pcInfo = spec; });
+      }
+
       g.add(dg);
 
       if (labelText) {
@@ -1628,7 +1643,7 @@
       makeRomphoBed(0.6, bz, idx + 17, romphoState.beds[idx + 16].id, romphoState.beds[idx + 16].occupied, Math.PI / 2);
     });
 
-    createRomphoPcDesk(-0.7, 3.4, Math.PI / 2, ROMPHO_PC_SPECS, '🖥️ โต๊ะคอมห้องคลอด 1', { role: 'nurse', pose: 'sit', rotY: Math.PI / 2 });
+    createRomphoPcDesk(-0.7, 3.4, Math.PI / 2, ROMPHO_PC_SPECS, '🖥️ โต๊ะคอมห้องคลอด 1 (LR-PC)', { role: 'nurse', pose: 'sit', rotY: Math.PI / 2 });
 
     L.push({ text: 'โต๊ะ', pos: V(5.0, 1.55, 1.8), cls: 'int-label sub-tag' });
     const tableTop = maintBox(2.0, 0.74, 0.9, 0xd97706);
@@ -1786,7 +1801,7 @@
       ['🏥', 'ห้องผ่าคลอด 1 (OR Delivery)', '1 ห้อง (เตียงผ่าคลอด, โคมไฟคู่, เครื่องดมยา, ตู้อุ่นทารก)', 'rompho-or-1', romphoState.or1Occupied ? 'busy' : 'free'],
       ['🛌', 'เตียงพักคลอด หอผู้ป่วยคลอด', '16 เตียง (คลิกเตียงเพื่อสลับ ว่าง/ไม่ว่าง)'],
       ['🛏️', 'เตียงเตรียมคลอด / สังเกตอาการ', '3 เตียง (คลิกเตียงเพื่อสลับ ว่าง/ไม่ว่าง)'],
-      ['🖥️', 'PC-ROM-01: โต๊ะคอมห้องคลอด 1', 'ดูสเปก', null, 'free', ROMPHO_PC_SPECS],
+      ['🖥️', 'PC-ROM-01: โต๊ะคอมห้องคลอด 1 (LR-PC: 10.10.40.30)', 'ดูสเปก', null, 'free', ROMPHO_PC_SPECS],
       ['📦', 'ห้องว่าง (รอจัดสรรแผนก)', '1 ห้อง (ปีกขวาเดิม กว้าง 12m x 18.5m)'],
       ['🧸', 'ช่อง 1: งานพัฒนาการเด็ก (Child Development)', '1 ห้อง (DSPM, เบาะฝึกพัฒนาการ, โต๊ะตรวจประเมิน)', 'rompho-child-dev', romphoState.childDevOccupied ? 'busy' : 'free'],
       ['🖥️', 'PC-DEV-01: โต๊ะคอมพัฒนาการเด็ก', 'ดูสเปก', null, 'free', CHILD_DEV_PC_SPECS],

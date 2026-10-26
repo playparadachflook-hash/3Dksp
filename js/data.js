@@ -514,7 +514,7 @@ KSS.SERVER_DEVICES = [
     location: 'ตึกร่มโพธิ์ 3 ชั้น 1 (ห้องพักแพทย์/ห้องคลอด)',
     username: 'admin',
     password: 'ksp@12345',
-    role: 'สวิตช์ฮับเครือข่ายตึกร่มโพธิ์ 3 ชั้น 1 (แผนกห้องคลอดและสูติกรรม) ติดตั้งในตู้แร็คแขวนผนังห้องพักแพทย์ เชื่อมต่อโต๊ะคอมห้องคลอด (PC-ROM-01), คอมพิวเตอร์งานพัฒนาการเด็ก (PC-DEV-01), คอมพิวเตอร์งานระบาดวิทยา (PC-EPI-01), ระบบจอแดชบอร์ดระบาดวิทยา GIS 506, ระบบเรียกพยาบาลห้องคลอด, กล้องวงจรปิด และ Uplink Fiber SFP ไปยังศูนย์คอมพิวเตอร์',
+    role: 'สวิตช์ฮับเครือข่ายตึกร่มโพธิ์ 3 ชั้น 1 (แผนกห้องคลอดและสูติกรรม) ติดตั้งในตู้แร็คแขวนผนังห้องพักแพทย์ เชื่อมต่อโต๊ะคอมห้องคลอด 1 (LR-PC: 10.10.40.30 / Port 1), คอมพิวเตอร์งานพัฒนาการเด็ก (PC-DEV-01), คอมพิวเตอร์งานระบาดวิทยา (PC-EPI-01), ระบบจอแดชบอร์ดระบาดวิทยา GIS 506, ระบบเรียกพยาบาลห้องคลอด, กล้องวงจรปิด และ Uplink Fiber SFP ไปยังศูนย์คอมพิวเตอร์',
     status: 'online',
     ping: '0.6ms',
     uptime: '175 วัน 14 ชม.',
@@ -992,6 +992,53 @@ KSS.MAC_REGISTRY = {
     leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
     lastRenew: '26/10/2026 11:58:12',
     status: 'online'
+  },
+
+  /* แผนกห้องคลอดและสูติกรรม ตึกร่มโพธิ์ 3 ชั้น 1 (Labor & Delivery Room) */
+  '3C:52:82:7D:6E:19': {
+    mac: '3C:52:82:7D:6E:19',
+    hostname: 'LR-PC',
+    pcCode: 'PC-ROM-01',
+    name: 'โต๊ะคอมห้องคลอด 1',
+    currentIp: '10.10.40.30',
+    switchId: 'ksp-sw-rompho1',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - ห้องพักแพทย์)',
+    switchIp: '10.10.100.14',
+    switchPort: 'Port 1 (10/100/1000Base-T / VLAN 40 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: ROM1-LR-01 (เต้ารับ LAN ผนังเคาน์เตอร์สูติกรรมห้องคลอด)',
+    vlan: 'VLAN 40 - แผนกผู้ป่วยใน สูติกรรม และห้องคลอด (LR)',
+    gateway: '10.10.40.1 (IPD & Maternity Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '26/10/2026 12:30:00',
+    status: 'online'
+  }
+};
+
+/* Specifications Registry สำหรับคอมพิวเตอร์ตึกร่มโพธิ์ 3 (ห้องคลอด, ไตเทียม, VIP) */
+KSS.ROMPHO_SPECS = {
+  '3C:52:82:7D:6E:19': {
+    code: 'PC-ROM-01',
+    name: 'โต๊ะคอมห้องคลอด 1',
+    hostname: 'LR-PC',
+    ip: '10.10.40.30',
+    mac: '3C:52:82:7D:6E:19',
+    switchId: 'ksp-sw-rompho1',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - ห้องพักแพทย์)',
+    switchPort: 'Port 1 (VLAN 40)',
+    wallOutlet: 'ROM1-LR-01 (เต้ารับ LAN ผนังเคาน์เตอร์สูติกรรมห้องคลอด)',
+    vlan: 'VLAN 40 - แผนกผู้ป่วยใน สูติกรรม และห้องคลอด (LR)',
+    role: 'เครื่องบันทึกข้อมูลการคลอด ทะเบียนทารกแรกเกิด และระบบเวชระเบียนสูติ-นรีเวชกรรม',
+    user: 'พยาบาลวิชาชีพประจำห้องคลอด',
+    os: 'Windows 11 Pro 64-bit',
+    cpu: 'Intel Core i5-12400 (6 Cores / 12 Threads, up to 4.40 GHz)',
+    ram: '16 GB DDR4 3200MHz',
+    storage: '512 GB M.2 NVMe PCIe SSD (High Speed)',
+    monitor: 'Dell 24" Full HD IPS (Anti-Glare, ComfortView Plus)',
+    software: 'HOSxP / HIS Delivery & Maternity Module, ระบบสูติบัตรและแจ้งเกิดออนไลน์ (e-Birth), EHR, Neonatal Monitor Link',
+    peripherals: 'เครื่องอ่านบัตรสมาร์ทการ์ด, Barcode Scanner, เครื่องพิมพ์สูติบัตร, UPS 1000VA',
+    status: '🟢 ออนไลน์ปกติ'
   }
 };
 
@@ -1098,6 +1145,9 @@ KSS.updatePcIpByMac = function(mac, newIp) {
   }
   if (KSS.PSYCH_SPECS && KSS.PSYCH_SPECS[cleanMac]) {
     KSS.PSYCH_SPECS[cleanMac].ip = cleanIp;
+  }
+  if (KSS.ROMPHO_SPECS && KSS.ROMPHO_SPECS[cleanMac]) {
+    KSS.ROMPHO_SPECS[cleanMac].ip = cleanIp;
   }
   if (KSS.TONOLI_PC_SPEC && (KSS.TONOLI_PC_SPEC.mac === cleanMac || cleanMac === 'D8:5E:D3:4A:2C:9B')) {
     KSS.TONOLI_PC_SPEC.ip = cleanIp;
