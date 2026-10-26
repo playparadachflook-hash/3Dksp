@@ -157,12 +157,11 @@
 
 .pc-copy-btn:hover {
   background: linear-gradient(135deg, #0369a1, #1d4ed8);
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(2, 132, 199, 0.6);
 }
 
 .pc-copy-btn:active {
-  transform: translateY(0);
+  background: #0284c7;
 }
 
 .pc-copy-btn.copied {
@@ -379,7 +378,6 @@
 }
 .pc-btn-kill:hover {
   background: linear-gradient(135deg, #991b1b, #b91c1c);
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.6);
 }
 .pc-btn-kill code {
@@ -407,7 +405,6 @@
 }
 .pc-btn-resolve:hover {
   background: linear-gradient(135deg, #166534, #15803d);
-  transform: translateY(-1px);
 }
 
 .pc-remote-badge.status-deadlock {
@@ -595,7 +592,6 @@
 }
 .pc-switch-link-btn:hover {
   background: #0369a1;
-  transform: translateY(-1px);
 }
 .pc-switch-details {
   display: grid;

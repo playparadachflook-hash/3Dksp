@@ -34,7 +34,6 @@
 .int-label.server-badge:hover {
   background: #0284c7;
   color: #fff;
-  transform: scale(1.1);
   box-shadow: 0 4px 12px rgba(2, 132, 199, 0.6);
 }
 
@@ -522,7 +521,6 @@
 }
 .sdb-btn:hover {
   background: #fef2f2;
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 

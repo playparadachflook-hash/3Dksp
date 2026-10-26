@@ -1020,7 +1020,8 @@
     if (toggleLanBtn) {
       toggleLanBtn.innerText = isLan ? '🔌 ถอดสาย LAN (Link Down)' : '🔌 เสียบสาย LAN (Link Up)';
       toggleLanBtn.className = isLan ? 'pc-lan-toggle-btn btn-lan-unplug' : 'pc-lan-toggle-btn btn-lan-plug';
-      toggleLanBtn.onclick = () => {
+      toggleLanBtn.onclick = (e) => {
+        if (e) { e.preventDefault(); e.stopPropagation(); }
         if (K.toggleLanConnection) {
           const newState = K.toggleLanConnection(pc);
           showToast((newState ? '🔌 เสียบสาย LAN สำเร็จ (Link Up 🟢) ' : '🔌 ถอดสาย LAN ออกแล้ว (Link Down 🔴) ') + (pc.name || pc.code));
@@ -1048,7 +1049,8 @@
     if (togglePowerBtn) {
       togglePowerBtn.innerText = isOnline ? '🔴 ปิดเครื่องนี้ (Set Offline)' : '🟢 เปิดเครื่องนี้ (Set Online)';
       togglePowerBtn.className = isOnline ? 'pc-power-toggle-btn pc-btn-toggle-off' : 'pc-power-toggle-btn pc-btn-toggle-on';
-      togglePowerBtn.onclick = () => {
+      togglePowerBtn.onclick = (e) => {
+        if (e) { e.preventDefault(); e.stopPropagation(); }
         if (K.togglePcPower) {
           const newState = K.togglePcPower(pc);
           showToast((newState ? '🟢 เปิดเครื่อง ' : '🔴 ปิดเครื่อง ') + (pc.name || pc.code) + ' สำเร็จ');
@@ -1216,7 +1218,8 @@
 
   const pcToggleDlBtn = document.getElementById('pc-toggle-deadlock-btn');
   if (pcToggleDlBtn) {
-    pcToggleDlBtn.onclick = () => {
+    pcToggleDlBtn.onclick = (e) => {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
       if (!currentPcIp || currentPcIp === '-') return;
       if (K.toggleDeadlock) {
         const isNowDl = K.toggleDeadlock(currentPcIp, {
@@ -1312,10 +1315,112 @@
   }
 
   // --- Deadlock Status & Navigation Helpers ---
-  function refreshCurrentInteriorIfActive() {
-    if (state.mode === 'interior' && state.currentBuilding) {
-      enterInterior(state.currentBuilding, true);
+  function updateInteriorPcStatusInPlace() {
+    if (state.mode !== 'interior') return;
+
+    // 1. Update 3D screen meshes in-place
+    interiorGroup.traverse(function(obj) {
+      if (obj.isMesh && obj.userData && obj.userData.pcInfo) {
+        const pc = obj.userData.pcInfo;
+        const isOnline = K.isPcOnline ? K.isPcOnline(pc) : true;
+        const isDl = (K.getDeadlock ? (K.getDeadlock(pc.ip) || K.getDeadlock(pc.code)) : null);
+
+        if (obj.material) {
+          if (!obj.userData._baseMat) {
+            obj.userData._baseMat = obj.material;
+            obj.material = obj.material.clone();
+          }
+          if (isDl) {
+            if (obj.material.emissive) {
+              obj.material.emissive.setHex(0xdc2626);
+              obj.material.emissiveIntensity = 0.85;
+            }
+            if (obj.material.color && obj.material.color.getHex() !== 0x0f172a && obj.material.color.getHex() !== 0x1e293b && obj.material.color.getHex() !== 0x334155) {
+              obj.material.color.setHex(0xb91c1c);
+            }
+          } else if (!isOnline) {
+            if (obj.material.emissive) {
+              obj.material.emissive.setHex(0xef4444);
+              obj.material.emissiveIntensity = 0.35;
+            }
+            if (obj.material.color && obj.material.color.getHex() !== 0x0f172a && obj.material.color.getHex() !== 0x1e293b && obj.material.color.getHex() !== 0x334155) {
+              obj.material.color.setHex(0x991b1b);
+            }
+          } else {
+            if (obj.material.emissive) {
+              obj.material.emissive.setHex(0x22c55e);
+              obj.material.emissiveIntensity = 0.55;
+            }
+            if (obj.material.color && obj.material.color.getHex() !== 0x0f172a && obj.material.color.getHex() !== 0x1e293b && obj.material.color.getHex() !== 0x334155) {
+              obj.material.color.setHex(0x16a34a);
+            }
+          }
+        }
+      }
+    });
+
+    // 2. Update CSS2D label tags in-place without removing DOM nodes
+    interiorGroup.traverse(function(child) {
+      if (child.isCSS2DObject && child.element && child.element._pcInfo) {
+        const pcInfo = child.element._pcInfo;
+        const dl = (pcInfo && K.getDeadlock) ? (K.getDeadlock(pcInfo.ip) || K.getDeadlock(pcInfo.code)) : null;
+        const isLan = K.isLanConnected ? K.isLanConnected(pcInfo) : true;
+        const isOnline = K.isPcOnline ? K.isPcOnline(pcInfo) : true;
+        const cleanName = child.element._baseText || '';
+
+        if (dl) {
+          child.element.className = 'int-label pc-tag deadlock';
+          child.element.innerHTML = `⚠️ <strong>DEADLOCK</strong> • ${cleanName}`;
+          child.element.title = `⚠️ เครื่องนี้ติด Database Deadlock (${dl.table})! คลิกเพื่อดูรายละเอียดและสั่ง Kill Thread`;
+        } else if (isOnline) {
+          child.element.className = 'int-label pc-tag pc-online';
+          child.element.innerHTML = `🟢 🖥️ ${cleanName}`;
+          child.element.title = `🟢 เปิดใช้งานและต่อสาย LAN เรียบร้อย (Online / Link Up) - คลิกเพื่อดูรายละเอียดสเปก`;
+        } else if (!isLan) {
+          child.element.className = 'int-label pc-tag pc-offline pc-lan-down';
+          child.element.innerHTML = `🔴 🖥️ ${cleanName} <span class="pc-off-badge">ไม่ได้ต่อ LAN</span>`;
+          child.element.title = `🔴 ไม่ได้เชื่อมต่อสาย LAN (Link Down) - คลิกเพื่อดูพอร์ตสวิตช์และสเปก`;
+        } else {
+          child.element.className = 'int-label pc-tag pc-offline';
+          child.element.innerHTML = `🔴 🖥️ ${cleanName} <span class="pc-off-badge">ปิดใช้งาน</span>`;
+          child.element.title = `🔴 ไม่ได้เปิดใช้งาน (Offline) - คลิกเพื่อดูรายละเอียดสเปก`;
+        }
+      }
+    });
+
+    // 3. Update sidebar items in-place without clearing list
+    const listEl = document.getElementById('int-list');
+    if (listEl) {
+      const lis = listEl.querySelectorAll('li');
+      lis.forEach(li => {
+        if (li._pcInfo) {
+          const pcInfo = li._pcInfo;
+          const dl = (pcInfo && K.getDeadlock) ? (K.getDeadlock(pcInfo.ip) || K.getDeadlock(pcInfo.code)) : null;
+          const isLan = K.isLanConnected ? K.isLanConnected(pcInfo) : true;
+          const isOnline = K.isPcOnline ? K.isPcOnline(pcInfo) : true;
+          const qEl = li.querySelector('.q');
+          if (qEl) {
+            if (dl) {
+              qEl.className = 'q deadlock';
+              qEl.innerText = `⚠️ Deadlock (${dl.table || 'DB Lock'})`;
+            } else if (isOnline) {
+              qEl.className = 'q online';
+              qEl.innerText = '🟢 เปิดใช้งาน';
+            } else if (!isLan) {
+              qEl.className = 'q offline';
+              qEl.innerText = '🔴 ไม่ได้ต่อ LAN';
+            } else {
+              qEl.className = 'q offline';
+              qEl.innerText = '🔴 ไม่ได้เปิดใช้งาน';
+            }
+          }
+        }
+      });
     }
+  }
+
+  function refreshCurrentInteriorIfActive() {
+    updateInteriorPcStatusInPlace();
   }
 
   function updateDeadlockStatusEverywhere() {
@@ -2969,9 +3074,11 @@
           showPcModal(l.pcInfo);
         };
       } else if (l.pcInfo) {
+        labelDiv._pcInfo = l.pcInfo;
+        const cleanName = l.text.replace(/^[🖥️🖳🏧⚡\s]+/, '');
+        labelDiv._baseText = cleanName;
         const isLan = K.isLanConnected ? K.isLanConnected(l.pcInfo) : true;
         const isOnline = K.isPcOnline ? K.isPcOnline(l.pcInfo) : true;
-        const cleanName = l.text.replace(/^[🖥️🖳🏧⚡\s]+/, '');
         if (isOnline) {
           labelDiv.className += ' pc-online';
           labelDiv.innerHTML = `🟢 🖥️ ${cleanName}`;
@@ -3079,6 +3186,7 @@
           }
         };
       } else if (pcInfo) {
+        li._pcInfo = pcInfo;
         li.className = 'clickable';
         li.title = 'คลิกเพื่อดูรายละเอียดสเปกคอมพิวเตอร์';
         li.onclick = () => {
