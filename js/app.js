@@ -995,19 +995,47 @@
       if (switchBox) switchBox.style.display = 'none';
     }
 
-    // 2.1 Database Deadlock Status Check
+    // 2.1 Database Deadlock, Power & LAN Connection Status Check
     const deadlock = (K.getDeadlock ? K.getDeadlock(netInfo.cleanIp) || K.getDeadlock(pc.code) : null);
+    const isLan = K.isLanConnected ? K.isLanConnected(pc) : true;
     const isOnline = K.isPcOnline ? K.isPcOnline(pc) : true;
     const dlBanner = document.getElementById('pc-deadlock-banner');
     const remoteStatusEl = document.getElementById('pc-remote-status');
     const toggleDlBtn = document.getElementById('pc-toggle-deadlock-btn');
     const powerChip = document.getElementById('pc-power-chip');
     const togglePowerBtn = document.getElementById('pc-toggle-power-btn');
+    const lanLinkBadge = document.getElementById('pc-lan-link-badge');
+    const toggleLanBtn = document.getElementById('pc-toggle-lan-btn');
+
+    if (lanLinkBadge) {
+      if (isLan) {
+        lanLinkBadge.className = 'lan-link-pill online';
+        lanLinkBadge.innerText = '🟢 Link Up (1 Gbps)';
+      } else {
+        lanLinkBadge.className = 'lan-link-pill offline';
+        lanLinkBadge.innerText = '🔴 Link Down (ไม่ได้ต่อ LAN)';
+      }
+    }
+
+    if (toggleLanBtn) {
+      toggleLanBtn.innerText = isLan ? '🔌 ถอดสาย LAN (Link Down)' : '🔌 เสียบสาย LAN (Link Up)';
+      toggleLanBtn.className = isLan ? 'pc-lan-toggle-btn btn-lan-unplug' : 'pc-lan-toggle-btn btn-lan-plug';
+      toggleLanBtn.onclick = () => {
+        if (K.toggleLanConnection) {
+          const newState = K.toggleLanConnection(pc);
+          showToast((newState ? '🔌 เสียบสาย LAN สำเร็จ (Link Up 🟢) ' : '🔌 ถอดสาย LAN ออกแล้ว (Link Down 🔴) ') + (pc.name || pc.code));
+          showPcModal(pc);
+        }
+      };
+    }
 
     if (powerChip) {
       if (deadlock) {
         powerChip.className = 'chip status-deadlock';
         powerChip.innerText = '⚠️ ติดล็อค DB';
+      } else if (!isLan) {
+        powerChip.className = 'chip status-offline';
+        powerChip.innerText = '🔴 ไม่ได้ต่อ LAN';
       } else if (isOnline) {
         powerChip.className = 'chip status-online';
         powerChip.innerText = '🟢 เปิดใช้งาน';
@@ -1057,7 +1085,10 @@
     } else {
       if (dlBanner) dlBanner.classList.add('hidden');
       if (remoteStatusEl) {
-        if (isOnline) {
+        if (!isLan) {
+          remoteStatusEl.className = 'pc-remote-badge status-offline';
+          remoteStatusEl.innerText = '🔴 สัญญาณขาดหาย (ไม่ได้เชื่อมต่อสาย LAN)';
+        } else if (isOnline) {
           remoteStatusEl.className = 'pc-remote-badge status-online';
           remoteStatusEl.innerText = '🟢 เปิดใช้งาน (พร้อมรับรีโมท)';
         } else {
@@ -2938,12 +2969,17 @@
           showPcModal(l.pcInfo);
         };
       } else if (l.pcInfo) {
+        const isLan = K.isLanConnected ? K.isLanConnected(l.pcInfo) : true;
         const isOnline = K.isPcOnline ? K.isPcOnline(l.pcInfo) : true;
         const cleanName = l.text.replace(/^[🖥️🖳🏧⚡\s]+/, '');
         if (isOnline) {
           labelDiv.className += ' pc-online';
           labelDiv.innerHTML = `🟢 🖥️ ${cleanName}`;
-          labelDiv.title = `🟢 เปิดใช้งาน (Online) - คลิกเพื่อดูรายละเอียดสเปก`;
+          labelDiv.title = `🟢 เปิดใช้งานและต่อสาย LAN เรียบร้อย (Online / Link Up) - คลิกเพื่อดูรายละเอียดสเปก`;
+        } else if (!isLan) {
+          labelDiv.className += ' pc-offline pc-lan-down';
+          labelDiv.innerHTML = `🔴 🖥️ ${cleanName} <span class="pc-off-badge">ไม่ได้ต่อ LAN</span>`;
+          labelDiv.title = `🔴 ไม่ได้เชื่อมต่อสาย LAN (Link Down) - คลิกเพื่อดูพอร์ตสวิตช์และสเปก`;
         } else {
           labelDiv.className += ' pc-offline';
           labelDiv.innerHTML = `🔴 🖥️ ${cleanName} <span class="pc-off-badge">ปิดใช้งาน</span>`;
@@ -3008,16 +3044,20 @@
         pcInfo = it.pcInfo || null;
       }
 
-      // Deadlock & PC Power Status in Interior Item List
+      // Deadlock & PC Power & LAN Status in Interior Item List
       const dl = (pcInfo && K.getDeadlock) ? (K.getDeadlock(pcInfo.ip) || K.getDeadlock(pcInfo.code)) : null;
       if (dl) {
         badgeCls = 'deadlock';
         status = `⚠️ Deadlock (${dl.table || 'DB Lock'})`;
       } else if (pcInfo) {
+        const isLan = K.isLanConnected ? K.isLanConnected(pcInfo) : true;
         const isOnline = K.isPcOnline ? K.isPcOnline(pcInfo) : true;
         if (isOnline) {
           badgeCls = 'online';
           status = '🟢 เปิดใช้งาน';
+        } else if (!isLan) {
+          badgeCls = 'offline';
+          status = '🔴 ไม่ได้ต่อ LAN';
         } else {
           badgeCls = 'offline';
           status = '🔴 ไม่ได้เปิดใช้งาน';
@@ -3257,22 +3297,28 @@
     };
   }
 
-  // PC Status Toolbar Button
+  // PC & LAN Link Status Toolbar Button
   const btnPcStatus = document.getElementById('btn-pc-status');
   if (btnPcStatus) {
     btnPcStatus.onclick = () => {
       const offEntries = K.OFFLINE_PCS || {};
+      const lanOffEntries = K.LAN_DISCONNECTED_PCS || {};
       const offNames = [];
       for (const k in offEntries) {
-        if (!K.isPcOnline(k)) {
-          offNames.push(k);
-        }
+        if (!K.isPcOnline(k)) offNames.push(k);
       }
-      showToast(`🖥️ ตรวจสอบสถานะ: คอมพิวเตอร์เปิดใช้งาน 🟢 ออนไลน์ปกติ (พบเครื่องปิดใช้งาน 🔴 ${offNames.length} เครื่อง: ${offNames.slice(0, 4).join(', ')}...)`);
+      for (const k in lanOffEntries) {
+        if (!K.isPcOnline(k) && !offNames.includes(k)) offNames.push(k);
+      }
+      showToast(`🔌 ตรวจสอบสถานะ LAN & Power: เครื่องเปิดและต่อ LAN 🟢 ออนไลน์ (พบเครื่องไม่ได้เชื่อมต่อ LAN/ปิดเครื่อง 🔴 ${offNames.length} เครื่อง: ${offNames.slice(0, 4).join(', ')}...)`);
     };
   }
 
   window.addEventListener('kss-pc-power-change', () => {
+    refreshCurrentInteriorIfActive();
+  });
+
+  window.addEventListener('kss-lan-change', () => {
     refreshCurrentInteriorIfActive();
   });
 

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
@@ -6,27 +6,27 @@
   <title>แผนผัง 3D Isometric - โรงพยาบาลโคกศรีสุพรรณ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261026f">
+  <link rel="stylesheet" href="css/style.css?v=20261026n">
   <!-- Modular Building Stylesheets (เชื่อมต่อไฟล์ CSS แยกตามแต่ละอาคาร) -->
-  <link rel="stylesheet" href="css/buildings/opd.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/server.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/er.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/pcu.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/ipd.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/psych.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/drivers.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/kitchen.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/rompho.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/maint.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/power.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/dental.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/thaimed.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/finance.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/physio.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/store.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/supply.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/hall.css?v=20261026f">
-  <link rel="stylesheet" href="css/buildings/guard-shop.css?v=20261026f">
+  <link rel="stylesheet" href="css/buildings/opd.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/server.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/er.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/pcu.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/ipd.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/psych.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/drivers.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/kitchen.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/rompho.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/maint.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/power.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/dental.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/thaimed.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/finance.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/physio.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/store.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/supply.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/hall.css?v=20261026n">
+  <link rel="stylesheet" href="css/buildings/guard-shop.css?v=20261026n">
 </head>
 <body>
   <div id="scene"></div>
@@ -48,7 +48,8 @@
     <button id="btn-rot-right" title="หมุนขวา 45°">45° ⟳</button>
     <button id="btn-auto">หมุนอัตโนมัติ</button>
     <button id="btn-pins" class="active">แสดงหมุด</button>
-    <button id="btn-server" title="ระบบตรวจสอบสถานะเครื่องแม่ข่ายและคอนโทรลเลอร์ (Server & Controller Dashboard)">🖥️ ห้อง Server</button>`r`n    <button id="btn-pc-status" title="ตรวจสอบสถานะการเปิด/ปิดใช้งานของคอมพิวเตอร์ทั้งโรงพยาบาล">🖥️ สถานะคอม</button>
+    <button id="btn-server" title="ระบบตรวจสอบสถานะเครื่องแม่ข่ายและคอนโทรลเลอร์ (Server & Controller Dashboard)">🖥️ ห้อง Server</button>
+    <button id="btn-pc-status" title="ตรวจสอบสถานะการเชื่อมต่อ LAN และการเปิด/ปิดคอมพิวเตอร์ทั้งโรงพยาบาล">🔌 สถานะ LAN/คอม</button>
     <button id="btn-deadlock-alert" class="deadlock-alert-btn hidden" title="ตรวจพบเครื่องลูกข่ายติด Database Deadlock ใน HOSxP">⚠️ Deadlock (<span id="deadlock-count">0</span>)</button>
   </div>
 
@@ -98,7 +99,8 @@
       <div class="info-title">
         <h3 id="pc-name">โต๊ะคอมพิวเตอร์</h3>
         <span id="pc-code" class="chip" style="background:#2563eb">PC-ER-01</span>
-        <span id="pc-hostname" class="chip" style="background:#0284c7;display:none;">TONOLI-PC</span>`r`n        <span id="pc-power-chip" class="chip status-online">🟢 เปิดใช้งาน</span>
+        <span id="pc-hostname" class="chip" style="background:#0284c7;display:none;">TONOLI-PC</span>
+        <span id="pc-power-chip" class="chip status-online">🟢 เปิดใช้งาน</span>
       </div>
       <button id="pc-close" class="icon-btn">✕</button>
     </div>
@@ -189,6 +191,7 @@
           <div class="pc-switch-title">
             <span>🔌</span>
             <strong>ช่องเชื่อมต่อสวิตช์ฮับ (Switch Port Mapping)</strong>
+            <span id="pc-lan-link-badge" class="lan-link-pill online">🟢 Link Up (1 Gbps)</span>
           </div>
           <button id="pc-switch-view-btn" class="pc-switch-link-btn" type="button" title="ดูข้อมูลสวิตช์ใน Server Dashboard">🌐 ดูสวิตช์</button>
         </div>
@@ -219,8 +222,14 @@
       </div>
     </div>
 
-    <!-- ปุ่มจำลอง/สลับสถานะ Deadlock สำหรับเจ้าหน้าที่ IT ทดสอบ -->
+    <!-- ปุ่มจำลอง/สลับสถานะ LAN, Power, Deadlock สำหรับเจ้าหน้าที่ IT ทดสอบ -->
     <div class="pc-modal-footer">
+      <button id="pc-toggle-lan-btn" class="pc-lan-toggle-btn" type="button" title="คลิกเพื่อจำลองเสียบสายหรือถอดสาย LAN">
+        🔌 สลับ ถอด/เสียบสาย LAN
+      </button>
+      <button id="pc-toggle-power-btn" class="pc-power-toggle-btn" type="button" title="คลิกเพื่อจำลองเปิด/ปิดเครื่องคอมพิวเตอร์">
+        ⚡ จำลอง เปิด/ปิดเครื่อง
+      </button>
       <button id="pc-toggle-deadlock-btn" class="pc-test-toggle-btn" type="button" title="คลิกเพื่อจำลองสลับสถานะ Deadlock กับเครื่องนี้">
         ⚠️ สลับทดสอบ Deadlock เครื่องนี้
       </button>
@@ -340,31 +349,31 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <!-- App -->
-  <script src="js/data.js?v=20261026m"></script>
-  <script src="js/models.js?v=20261026m"></script>
+  <script src="js/data.js?v=20261026n"></script>
+  <script src="js/models.js?v=20261026n"></script>
   <!-- Modular Interiors -->
-  <script src="js/interiors/common.js?v=20261026m"></script>
-  <script src="js/interiors/guard.js?v=20261026m"></script>
-  <script src="js/interiors/shop.js?v=20261026m"></script>
-  <script src="js/interiors/parking.js?v=20261026m"></script>
-  <script src="js/interiors/er.js?v=20261026m"></script>
-  <script src="js/interiors/physio.js?v=20261026m"></script>
-  <script src="js/interiors/ipd.js?v=20261026m"></script>
-  <script src="js/interiors/power.js?v=20261026m"></script>
-  <script src="js/interiors/hall.js?v=20261026m"></script>
-  <script src="js/interiors/maint.js?v=20261026m"></script>
-  <script src="js/interiors/finance.js?v=20261026m"></script>
-  <script src="js/interiors/kitchen.js?v=20261026m"></script>
-  <script src="js/interiors/pharmacy.js?v=20261026m"></script>
-  <script src="js/interiors/dental.js?v=20261026m"></script>
-  <script src="js/interiors/thaimed.js?v=20261026m"></script>
-  <script src="js/interiors/rompho.js?v=20261026m"></script>
-  <script src="js/interiors/store.js?v=20261026m"></script>
-  <script src="js/interiors/supply.js?v=20261026m"></script>
-  <script src="js/interiors/opd.js?v=20261026m"></script>
-  <script src="js/interiors/psych.js?v=20261026m"></script>
-  <script src="js/interiors/drivers.js?v=20261026m"></script>
-  <script src="js/app.js?v=20261026m"></script>
+  <script src="js/interiors/common.js?v=20261026n"></script>
+  <script src="js/interiors/guard.js?v=20261026n"></script>
+  <script src="js/interiors/shop.js?v=20261026n"></script>
+  <script src="js/interiors/parking.js?v=20261026n"></script>
+  <script src="js/interiors/er.js?v=20261026n"></script>
+  <script src="js/interiors/physio.js?v=20261026n"></script>
+  <script src="js/interiors/ipd.js?v=20261026n"></script>
+  <script src="js/interiors/power.js?v=20261026n"></script>
+  <script src="js/interiors/hall.js?v=20261026n"></script>
+  <script src="js/interiors/maint.js?v=20261026n"></script>
+  <script src="js/interiors/finance.js?v=20261026n"></script>
+  <script src="js/interiors/kitchen.js?v=20261026n"></script>
+  <script src="js/interiors/pharmacy.js?v=20261026n"></script>
+  <script src="js/interiors/dental.js?v=20261026n"></script>
+  <script src="js/interiors/thaimed.js?v=20261026n"></script>
+  <script src="js/interiors/rompho.js?v=20261026n"></script>
+  <script src="js/interiors/store.js?v=20261026n"></script>
+  <script src="js/interiors/supply.js?v=20261026n"></script>
+  <script src="js/interiors/opd.js?v=20261026n"></script>
+  <script src="js/interiors/psych.js?v=20261026n"></script>
+  <script src="js/interiors/drivers.js?v=20261026n"></script>
+  <script src="js/app.js?v=20261026n"></script>
 </body>
 </html>
 

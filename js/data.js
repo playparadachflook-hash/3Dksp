@@ -852,10 +852,82 @@ KSS.toggleDeadlock = function(ipOrCode, customData = {}) {
 };
 
 /* =========================================================================
+ * LAN NETWORK CABLE CONNECTION REGISTRY (ตรวจจับสถานะเชื่อมต่อสาย LAN)
+ * =========================================================================
+ * เครื่องที่เชื่อมต่อสาย LAN สำเร็จ (Link Up 🟢) -> แสดงผลสีเขียว
+ * เครื่องที่ไม่ได้เชื่อมต่อสาย LAN หรือสายหลุด (Link Down 🔴) -> แสดงผลสีแดง
+ */
+KSS.LAN_DISCONNECTED_PCS = {
+  'PC-EXAM-02': { reason: 'สาย LAN ไม่ได้เสียบเข้าเต้ารับผนัง (No Cable / Link Down)' },
+  'PC-EXAM-06': { reason: 'สาย LAN ไม่ได้เชื่อมต่อเข้าพอร์ตสวิตช์ (Unpatched Port)' },
+  'PC-CARD-03A': { reason: 'เครื่องสำรองห้องบัตร ไม่ได้ต่อสาย LAN (Cable Disconnected)' },
+  'PC-CARD-03B': { reason: 'เครื่องสำรองห้องบัตร ไม่ได้ต่อสาย LAN (Cable Disconnected)' },
+  'PC-STORE-04': { reason: 'เต้ารับ LAN ไม่มีสัญญาณ (No Carrier Link)' },
+  'PC-STORE-05': { reason: 'เต้ารับ LAN ไม่มีสัญญาณ (No Carrier Link)' },
+  'PC-STORE-06': { reason: 'ไม่ได้ต่อสาย LAN (No Cable Connected)' },
+  'NB-PT-01': { reason: 'โน้ตบุ๊กไม่ได้เสียบสาย LAN (No Cable Connected)' },
+  'PC-HALL-01': { reason: 'ถอดสาย LAN ออกหลังเลิกประชุม (Cable Disconnected)' },
+  'PC-MAINT-01': { reason: 'ถอดสาย LAN พักเครื่องช่างซ่อมบำรุง' }
+};
+
+KSS.LAN_STATE = {};
+
+// Helper: ตรวจสอบสถานะการเชื่อมต่อสาย LAN (true = เชื่อมต่อ/เขียว, false = ไม่เชื่อมต่อ/แดง)
+KSS.isLanConnected = function(pcOrCode) {
+  if (!pcOrCode) return true;
+  var code = (typeof pcOrCode === 'string' ? pcOrCode : (pcOrCode.code || '')).trim().toUpperCase();
+  var ip = typeof pcOrCode === 'object' ? (KSS.cleanIp ? KSS.cleanIp(pcOrCode.ip || '') : pcOrCode.ip) : (String(pcOrCode).indexOf('.') !== -1 ? pcOrCode : '');
+
+  // 1. ตรวจสอบสถานะไดนามิกที่สลับโดยผู้ใช้ (User Override)
+  if (code && typeof KSS.LAN_STATE[code] === 'boolean') {
+    return KSS.LAN_STATE[code];
+  }
+  if (ip && typeof KSS.LAN_STATE[ip] === 'boolean') {
+    return KSS.LAN_STATE[ip];
+  }
+
+  // 2. ตรวจสอบในรายการเครื่องที่ไม่ได้เชื่อม LAN
+  if (code && KSS.LAN_DISCONNECTED_PCS[code]) {
+    return false;
+  }
+
+  // 3. ตรวจสอบใน object / MAC_REGISTRY
+  if (typeof pcOrCode === 'object') {
+    if (pcOrCode.lanStatus === 'disconnected' || pcOrCode.linkStatus === 'down') {
+      return false;
+    }
+    var rec = (pcOrCode.mac && KSS.getPcByMac ? KSS.getPcByMac(pcOrCode.mac) : null) || 
+              (ip && KSS.getPcByIp ? KSS.getPcByIp(ip) : null);
+    if (rec && (rec.lanStatus === 'disconnected' || rec.portSpeed === 'Link Down')) {
+      return false;
+    }
+  }
+
+  return true; // เชื่อมต่อสาย LAN ปกติ (Link Up)
+};
+
+// Helper: สลับสถานะสาย LAN (จำลองเสียบสาย / ถอดสาย LAN)
+KSS.toggleLanConnection = function(pcOrCode) {
+  var code = (typeof pcOrCode === 'string' ? pcOrCode : (pcOrCode.code || '')).trim().toUpperCase();
+  var current = KSS.isLanConnected(pcOrCode);
+  var newState = !current;
+  if (code) KSS.LAN_STATE[code] = newState;
+  if (typeof pcOrCode === 'object' && pcOrCode.ip) {
+    var clean = KSS.cleanIp ? KSS.cleanIp(pcOrCode.ip) : pcOrCode.ip;
+    if (clean) KSS.LAN_STATE[clean] = newState;
+  }
+  if (typeof window !== 'undefined' && window.dispatchEvent) {
+    window.dispatchEvent(new CustomEvent('kss-lan-change', { detail: { code: code, connected: newState } }));
+    window.dispatchEvent(new CustomEvent('kss-pc-power-change', { detail: { code: code, online: newState } }));
+  }
+  return newState;
+};
+
+/* =========================================================================
  * COMPUTER POWER & OPERATIONAL STATUS REGISTRY (เปิดใช้งาน / ไม่ได้เปิดใช้งาน)
  * =========================================================================
  * จัดการสถานะเปิดใช้งาน (Online - สีเขียว) และ ไม่ได้เปิดใช้งาน (Offline / Standby - สีแดง)
- * รองรับการตรวจสอบแบบไดนามิกและการสลับสถานะ (Toggle) เพื่อทดสอบแบบ Real-time
+ * เครื่องที่ไม่ได้เชื่อมต่อ LAN จะเป็นสีแดงทันทีตามข้อกำหนด
  */
 KSS.OFFLINE_PCS = {
   'PC-EXAM-02': { reason: 'ห้องตรวจ 2 ยังไม่เปิดให้บริการ / แพทย์ไม่ได้ลงตรวจ' },
@@ -872,11 +944,16 @@ KSS.OFFLINE_PCS = {
 
 KSS.PC_POWER_STATE = {};
 
-// Helper: ตรวจสอบว่าเครื่องคอมพิวเตอร์เปิดใช้งานอยู่หรือไม่ (true = เปิด/เขียว, false = ปิด/แดง)
+// Helper: ตรวจสอบว่าเครื่องคอมพิวเตอร์เปิดใช้งานอยู่หรือไม่ (true = เปิดและต่อLAN/เขียว, false = ปิดหรือไม่ต่อLAN/แดง)
 KSS.isPcOnline = function(pcOrCode) {
   if (!pcOrCode) return true;
   var code = (typeof pcOrCode === 'string' ? pcOrCode : (pcOrCode.code || '')).trim().toUpperCase();
   var ip = typeof pcOrCode === 'object' ? (KSS.cleanIp ? KSS.cleanIp(pcOrCode.ip || '') : pcOrCode.ip) : (String(pcOrCode).indexOf('.') !== -1 ? pcOrCode : '');
+
+  // 0. ตรวจสอบการเชื่อมต่อสาย LAN: ถ้าไม่ได้เชื่อมต่อสาย LAN ให้เป็นสีแดง (false) ทันที
+  if (!KSS.isLanConnected(pcOrCode)) {
+    return false;
+  }
 
   // 1. ตรวจสอบสถานะไดนามิกที่สลับโดยผู้ใช้ (User Override)
   if (code && typeof KSS.PC_POWER_STATE[code] === 'boolean') {
@@ -916,7 +993,7 @@ KSS.isPcOnline = function(pcOrCode) {
     }
   }
 
-  return true; // เครื่องที่เปิดใช้งานปกติ
+  return true; // เครื่องที่เปิดใช้งานและเชื่อมต่อสาย LAN สำเร็จ
 };
 
 // Helper: สลับสถานะเปิด/ปิดเครื่องคอมพิวเตอร์
