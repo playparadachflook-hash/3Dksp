@@ -6,27 +6,27 @@
   <title>แผนผัง 3D Isometric - โรงพยาบาลโคกศรีสุพรรณ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261026b">
+  <link rel="stylesheet" href="css/style.css?v=20261026c">
   <!-- Modular Building Stylesheets (เชื่อมต่อไฟล์ CSS แยกตามแต่ละอาคาร) -->
-  <link rel="stylesheet" href="css/buildings/opd.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/server.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/er.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/pcu.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/ipd.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/psych.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/drivers.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/kitchen.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/rompho.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/maint.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/power.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/dental.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/thaimed.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/finance.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/physio.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/store.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/supply.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/hall.css?v=20261026b">
-  <link rel="stylesheet" href="css/buildings/guard-shop.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/opd.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/server.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/er.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/pcu.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/ipd.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/psych.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/drivers.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/kitchen.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/rompho.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/maint.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/power.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/dental.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/thaimed.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/finance.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/physio.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/store.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/supply.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/hall.css?v=20261026c">
+  <link rel="stylesheet" href="css/buildings/guard-shop.css?v=20261026c">
 </head>
 <body>
   <div id="scene"></div>
@@ -199,18 +199,14 @@
         </div>
       </div>
 
-      <!-- ระบบติดตาม IP ตาม MAC Address (Dynamic IP Tracking) -->
-      <div class="pc-dhcp-box" id="pc-dhcp-box">
-        <div class="pc-dhcp-head">
-          <span class="dhcp-status-dot">🟢</span>
-          <div>
-            <strong>ระบบติดตามเครื่องตาม MAC Address (Dynamic IP Tracking)</strong>
-            <small>ระบบบันทึก MAC ไว้ เมื่อเครื่องเปิดใหม่และได้ IP ใหม่จะอัปเดตอัตโนมัติ</small>
-          </div>
+      <!-- สเปกฮาร์ดแวร์และซอฟต์แวร์ประจำเครื่อง (Hardware Specifications) -->
+      <div class="pc-hw-spec-box" id="pc-hw-spec-box">
+        <div class="pc-hw-head">
+          <span>⚙️</span>
+          <strong>สเปกเครื่องคอมพิวเตอร์ (Hardware Specifications)</strong>
         </div>
-        <button id="pc-dhcp-renew-btn" class="pc-dhcp-btn" type="button" title="จำลองการเปิดเครื่องใหม่และขอ IP ใหม่จาก DHCP">
-          🔄 จำลองเปิดเครื่องใหม่ (DHCP Renew IP)
-        </button>
+        <div id="pc-specs" class="pc-hw-grid"></div>
+        <div id="pc-software" class="pc-hw-soft"></div>
       </div>
 
       <div class="pc-remote-actions">
@@ -221,17 +217,6 @@
           ⚡ <span id="pc-ping-cmd">ping -t 10.10.100.22</span>
         </button>
       </div>
-    </div>
-
-    <!-- สเปกฮาร์ดแวร์ประจำเครื่อง -->
-    <div style="font-size:11px;font-weight:700;color:#64748b;margin:10px 0 6px;text-transform:uppercase;letter-spacing:0.5px;">
-      ⚙️ สเปกฮาร์ดแวร์ประจำเครื่อง (Hardware Specs)
-    </div>
-    <div id="pc-specs" class="meta"></div>
-
-    <div class="pc-soft-box">
-      <small>ซอฟต์แวร์และระบบที่เปิดใช้งาน</small>
-      <div id="pc-software"></div>
     </div>
 
     <!-- ปุ่มจำลอง/สลับสถานะ Deadlock สำหรับเจ้าหน้าที่ IT ทดสอบ -->
@@ -355,30 +340,30 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <!-- App -->
-  <script src="js/data.js?v=20261026b"></script>
-  <script src="js/models.js?v=20261026b"></script>
+  <script src="js/data.js?v=20261026c"></script>
+  <script src="js/models.js?v=20261026c"></script>
   <!-- Modular Interiors -->
-  <script src="js/interiors/common.js?v=20261026b"></script>
-  <script src="js/interiors/guard.js?v=20261026b"></script>
-  <script src="js/interiors/shop.js?v=20261026b"></script>
-  <script src="js/interiors/parking.js?v=20261026b"></script>
-  <script src="js/interiors/er.js?v=20261026b"></script>
-  <script src="js/interiors/physio.js?v=20261026b"></script>
-  <script src="js/interiors/ipd.js?v=20261026b"></script>
-  <script src="js/interiors/power.js?v=20261026b"></script>
-  <script src="js/interiors/hall.js?v=20261026b"></script>
-  <script src="js/interiors/maint.js?v=20261026b"></script>
-  <script src="js/interiors/finance.js?v=20261026b"></script>
-  <script src="js/interiors/kitchen.js?v=20261026b"></script>
-  <script src="js/interiors/pharmacy.js?v=20261026b"></script>
-  <script src="js/interiors/dental.js?v=20261026b"></script>
-  <script src="js/interiors/thaimed.js?v=20261026b"></script>
-  <script src="js/interiors/rompho.js?v=20261026b"></script>
-  <script src="js/interiors/store.js?v=20261026b"></script>
-  <script src="js/interiors/supply.js?v=20261026b"></script>
-  <script src="js/interiors/opd.js?v=20261026b"></script>
-  <script src="js/interiors/psych.js?v=20261026b"></script>
-  <script src="js/interiors/drivers.js?v=20261026b"></script>
-  <script src="js/app.js?v=20261026b"></script>
+  <script src="js/interiors/common.js?v=20261026c"></script>
+  <script src="js/interiors/guard.js?v=20261026c"></script>
+  <script src="js/interiors/shop.js?v=20261026c"></script>
+  <script src="js/interiors/parking.js?v=20261026c"></script>
+  <script src="js/interiors/er.js?v=20261026c"></script>
+  <script src="js/interiors/physio.js?v=20261026c"></script>
+  <script src="js/interiors/ipd.js?v=20261026c"></script>
+  <script src="js/interiors/power.js?v=20261026c"></script>
+  <script src="js/interiors/hall.js?v=20261026c"></script>
+  <script src="js/interiors/maint.js?v=20261026c"></script>
+  <script src="js/interiors/finance.js?v=20261026c"></script>
+  <script src="js/interiors/kitchen.js?v=20261026c"></script>
+  <script src="js/interiors/pharmacy.js?v=20261026c"></script>
+  <script src="js/interiors/dental.js?v=20261026c"></script>
+  <script src="js/interiors/thaimed.js?v=20261026c"></script>
+  <script src="js/interiors/rompho.js?v=20261026c"></script>
+  <script src="js/interiors/store.js?v=20261026c"></script>
+  <script src="js/interiors/supply.js?v=20261026c"></script>
+  <script src="js/interiors/opd.js?v=20261026c"></script>
+  <script src="js/interiors/psych.js?v=20261026c"></script>
+  <script src="js/interiors/drivers.js?v=20261026c"></script>
+  <script src="js/app.js?v=20261026c"></script>
 </body>
 </html>

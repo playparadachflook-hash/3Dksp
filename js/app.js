@@ -966,7 +966,6 @@
     const macRow = document.getElementById('pc-mac-row');
     const macTextEl = document.getElementById('pc-mac-text');
     const switchBox = document.getElementById('pc-switch-box');
-    const dhcpBox = document.getElementById('pc-dhcp-box');
 
     const macRecord = (pc.mac && K.getPcByMac ? K.getPcByMac(pc.mac) : null);
     const macVal = pc.mac || macRecord?.mac || '';
@@ -985,13 +984,9 @@
         const sOutletEl = document.getElementById('pc-switch-outlet');
         if (sOutletEl) sOutletEl.innerText = pc.wallOutlet || macRecord?.wallOutlet || 'OPD-ADM-02 (ห้องงานประกันสุขภาพ)';
       }
-      if (dhcpBox) {
-        dhcpBox.style.display = 'flex';
-      }
     } else {
       if (macRow) macRow.style.display = 'none';
       if (switchBox) switchBox.style.display = 'none';
-      if (dhcpBox) dhcpBox.style.display = 'none';
     }
 
     // 2.1 Database Deadlock Status Check
@@ -1043,19 +1038,19 @@
 
     // 3. Hardware Specifications Grid
     document.getElementById('pc-specs').innerHTML = `
-      <div><small>CPU / ประมวลผล</small><strong>${pc.cpu || '-'}</strong></div>
-      <div><small>RAM / หน่วยความจำ</small><strong>${pc.ram || '-'}</strong></div>
-      <div><small>Storage / ความจุ</small><strong>${pc.storage || '-'}</strong></div>
-      <div><small>จอภาพ (Monitor)</small><strong>${pc.monitor || '-'}</strong></div>
-      <div><small>ระบบปฏิบัติการ (OS)</small><strong>${pc.os || '-'}</strong></div>
-      <div><small>ผู้รับผิดชอบ / ใช้งาน</small><strong>${pc.user || '-'}</strong></div>
+      <div><small>CPU / ประมวลผล</small><strong>${pc.cpu || 'Intel Core i5-12400 (6C/12T)'}</strong></div>
+      <div><small>RAM / หน่วยความจำ</small><strong>${pc.ram || '16 GB DDR4 3200MHz'}</strong></div>
+      <div><small>Storage / ความจุ</small><strong>${pc.storage || '512 GB NVMe M.2 SSD'}</strong></div>
+      <div><small>จอภาพ (Monitor)</small><strong>${pc.monitor || '23.8" IPS Full HD'}</strong></div>
+      <div><small>ระบบปฏิบัติการ (OS)</small><strong>${pc.os || 'Windows 11 Pro 64-bit'}</strong></div>
+      <div><small>ผู้รับผิดชอบ / ใช้งาน</small><strong>${pc.user || 'เจ้าหน้าที่ประจำจุดบริการ'}</strong></div>
     `;
 
     // 4. Clinical Systems, Software & Peripherals
     document.getElementById('pc-software').innerHTML = `
       <small>ซอฟต์แวร์ระบบโรงพยาบาล & อุปกรณ์ต่อพ่วง</small>
-      <strong>💿 ${pc.software || '-'}</strong>
-      <div style="font-size:11px;color:#475569;margin-top:3px;">🔌 อุปกรณ์ต่อพ่วง: ${pc.peripherals || '-'}</div>
+      <strong>💿 ${pc.software || 'HOSxP XE, Smart Card Agent, MOPH Claim'}</strong>
+      <div style="font-size:11px;color:#cbd5e1;margin-top:3px;">🔌 อุปกรณ์ต่อพ่วง: ${pc.peripherals || 'เครื่องอ่านบัตร Smart Card, UPS 1000VA'}</div>
     `;
     modal.classList.remove('hidden');
   }
@@ -1196,28 +1191,6 @@
       setTimeout(() => {
         showSimulatedConsole(sId);
       }, 350);
-    };
-  }
-
-  // DHCP Renew / Dynamic IP Tracking Handler
-  const pcDhcpRenewBtn = document.getElementById('pc-dhcp-renew-btn');
-  if (pcDhcpRenewBtn) {
-    pcDhcpRenewBtn.onclick = () => {
-      const macVal = currentPcObject?.mac || 'D8:5E:D3:4A:2C:9B';
-      const currIp = currentPcIp || '10.10.20.147';
-      const lastNum = parseInt(currIp.split('.').pop(), 10) || 147;
-      const nextNum = lastNum === 147 ? 148 : (lastNum === 148 ? 149 : 147);
-      const newIp = `10.10.20.${nextNum}`;
-
-      if (K.updatePcIpByMac) {
-        K.updatePcIpByMac(macVal, newIp);
-        if (currentPcObject) {
-          currentPcObject.ip = newIp;
-          showPcModal(currentPcObject);
-        }
-        showToast(`🔄 เครื่อง ${currentPcObject?.hostname || 'TONOLI-PC'} รีบูต/เปิดเครื่องใหม่\nได้รับ IP ใหม่จาก DHCP: ${newIp} (ระบบอัปเดตตาม MAC ทันที)`);
-        refreshCurrentInteriorIfActive();
-      }
     };
   }
 
