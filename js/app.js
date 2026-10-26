@@ -875,6 +875,9 @@
     if (cleanIp.startsWith('10.10.100.')) {
       gateway = '10.10.100.1 (MikroTik Core)';
       if (!extra) extra = 'VLAN 100 - Network Management';
+    } else if (cleanIp.startsWith('10.10.20.')) {
+      gateway = '10.10.20.1 (Core Gateway)';
+      if (!extra) extra = 'VLAN 20 - ประกันสุขภาพและสารสนเทศยุทธศาสตร์';
     } else if (cleanIp.startsWith('10.10.10.')) {
       gateway = '10.10.10.1 (Core Gateway)';
       if (!extra) extra = 'VLAN 10 - Server Subnet';
@@ -930,6 +933,16 @@
     document.getElementById('pc-code').innerText = `รหัสครุภัณฑ์: ${pc.code || '-'}`;
     document.getElementById('pc-role').innerText = pc.role || '-';
 
+    const hostEl = document.getElementById('pc-hostname');
+    if (hostEl) {
+      if (pc.hostname) {
+        hostEl.innerText = pc.hostname;
+        hostEl.style.display = 'inline-block';
+      } else {
+        hostEl.style.display = 'none';
+      }
+    }
+
     // 2. Dedicated IP & Remote Connection Box
     const netInfo = parseIpInfo(pc.ip);
     currentPcIp = netInfo.cleanIp;
@@ -948,6 +961,38 @@
 
     const pingSpan = document.getElementById('pc-ping-cmd');
     if (pingSpan) pingSpan.innerText = `ping -t ${netInfo.cleanIp}`;
+
+    // 2.0 MAC Address & Switch Port Mapping Info
+    const macRow = document.getElementById('pc-mac-row');
+    const macTextEl = document.getElementById('pc-mac-text');
+    const switchBox = document.getElementById('pc-switch-box');
+    const dhcpBox = document.getElementById('pc-dhcp-box');
+
+    const macRecord = (pc.mac && K.getPcByMac ? K.getPcByMac(pc.mac) : null);
+    const macVal = pc.mac || macRecord?.mac || '';
+
+    if (macVal) {
+      if (macRow) {
+        macRow.style.display = 'flex';
+        if (macTextEl) macTextEl.innerText = macVal;
+      }
+      if (switchBox) {
+        switchBox.style.display = 'block';
+        const sNameEl = document.getElementById('pc-switch-name');
+        if (sNameEl) sNameEl.innerText = pc.switchName || macRecord?.switchName || 'Cisco SG250-26 (10.10.100.2)';
+        const sPortEl = document.getElementById('pc-switch-port');
+        if (sPortEl) sPortEl.innerText = pc.switchPort || macRecord?.switchPort || 'Port GE8 (VLAN 20)';
+        const sOutletEl = document.getElementById('pc-switch-outlet');
+        if (sOutletEl) sOutletEl.innerText = pc.wallOutlet || macRecord?.wallOutlet || 'OPD-ADM-02 (ห้องงานประกันสุขภาพ)';
+      }
+      if (dhcpBox) {
+        dhcpBox.style.display = 'flex';
+      }
+    } else {
+      if (macRow) macRow.style.display = 'none';
+      if (switchBox) switchBox.style.display = 'none';
+      if (dhcpBox) dhcpBox.style.display = 'none';
+    }
 
     // 2.1 Database Deadlock Status Check
     const deadlock = (K.getDeadlock ? K.getDeadlock(netInfo.cleanIp) || K.getDeadlock(pc.code) : null);
@@ -1121,6 +1166,68 @@
       }
     };
   }
+
+  // MAC Address Copy Handler
+  const pcCopyMacBtn = document.getElementById('pc-copy-mac-btn');
+  if (pcCopyMacBtn) {
+    pcCopyMacBtn.onclick = () => {
+      const macVal = document.getElementById('pc-mac-text')?.innerText;
+      if (!macVal || macVal === '-') return;
+      navigator.clipboard.writeText(macVal).then(() => {
+        const copyBtnText = document.getElementById('pc-copy-mac-btn-text');
+        if (copyBtnText) copyBtnText.innerText = 'คัดลอกแล้ว!';
+        pcCopyMacBtn.classList.add('copied');
+        showToast(`📋 คัดลอก MAC Address: ${macVal} เรียบร้อยแล้ว`);
+        setTimeout(() => {
+          if (copyBtnText) copyBtnText.innerText = 'คัดลอก MAC';
+          pcCopyMacBtn.classList.remove('copied');
+        }, 2200);
+      });
+    };
+  }
+
+  // Switch View Link Handler
+  const pcSwitchViewBtn = document.getElementById('pc-switch-view-btn');
+  if (pcSwitchViewBtn) {
+    pcSwitchViewBtn.onclick = () => {
+      const sId = currentPcObject?.switchId || 'cisco-sg250';
+      closePcModal();
+      openServerModal(sId);
+      setTimeout(() => {
+        showSimulatedConsole(sId);
+      }, 350);
+    };
+  }
+
+  // DHCP Renew / Dynamic IP Tracking Handler
+  const pcDhcpRenewBtn = document.getElementById('pc-dhcp-renew-btn');
+  if (pcDhcpRenewBtn) {
+    pcDhcpRenewBtn.onclick = () => {
+      const macVal = currentPcObject?.mac || 'D8:5E:D3:4A:2C:9B';
+      const currIp = currentPcIp || '10.10.20.147';
+      const lastNum = parseInt(currIp.split('.').pop(), 10) || 147;
+      const nextNum = lastNum === 147 ? 148 : (lastNum === 148 ? 149 : 147);
+      const newIp = `10.10.20.${nextNum}`;
+
+      if (K.updatePcIpByMac) {
+        K.updatePcIpByMac(macVal, newIp);
+        if (currentPcObject) {
+          currentPcObject.ip = newIp;
+          showPcModal(currentPcObject);
+        }
+        showToast(`🔄 เครื่อง ${currentPcObject?.hostname || 'TONOLI-PC'} รีบูต/เปิดเครื่องใหม่\nได้รับ IP ใหม่จาก DHCP: ${newIp} (ระบบอัปเดตตาม MAC ทันที)`);
+        refreshCurrentInteriorIfActive();
+      }
+    };
+  }
+
+  // Listen for MAC IP dynamic tracking updates
+  window.addEventListener('kss-mac-ip-updated', (e) => {
+    if (currentPcObject && currentPcObject.mac === e.detail.mac) {
+      currentPcObject.ip = e.detail.ip;
+      showPcModal(currentPcObject);
+    }
+  });
 
   // --- Toast Notification ---
   function showToast(msg) {
@@ -1680,6 +1787,102 @@
               <div>IP: <strong style="color:#38bdf8;">147.50.107.210</strong></div>
               <div>Username: <strong style="color:#f8fafc;">admin</strong></div>
               <div>Password: <strong style="color:#f8fafc;">qwertyuiop</strong></div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (d.id === 'cisco-sg250') {
+      const tonoliRecord = K.getPcByMac ? K.getPcByMac('D8:5E:D3:4A:2C:9B') : null;
+      const tonoliIp = tonoliRecord?.currentIp || '10.10.20.147';
+      contentHtml = `
+        <div style="background:#182234;border:1px solid #334155;border-radius:10px;padding:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #334155;padding-bottom:12px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="background:#0284c7;color:#fff;padding:4px 8px;border-radius:6px;font-weight:700;font-size:12px;">CISCO SMART SWITCH</span>
+              <strong style="font-size:15px;color:#f8fafc;">${d.name} (${d.ip}) — จุดติดตั้ง: ${d.location} (ตู้ Rack A)</strong>
+            </div>
+            <span class="chip" style="background:#22c55e;color:#052e16;">🟢 26-Port Gigabit Core Switch (VLAN Manager)</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;margin-bottom:14px;">
+            <div style="background:#0f172a;padding:10px;border-radius:8px;">
+              <small style="color:#94a3b8;">Firmware & OS</small>
+              <div style="font-size:14px;font-weight:700;color:#38bdf8;font-family:monospace;">v2.5.9.15</div>
+              <small style="color:#64748b;">Cisco SG250-26</small>
+            </div>
+            <div style="background:#0f172a;padding:10px;border-radius:8px;">
+              <small style="color:#94a3b8;">System Uptime</small>
+              <div style="font-size:14px;font-weight:700;color:#22c55e;">${d.uptime}</div>
+              <small style="color:#64748b;">Ping latency ${d.ping}</small>
+            </div>
+            <div style="background:#0f172a;padding:10px;border-radius:8px;">
+              <small style="color:#94a3b8;">Active Ports</small>
+              <div style="font-size:14px;font-weight:700;color:#f59e0b;">22 / 26 Ports</div>
+              <small style="color:#64748b;">1 Gbps Full-Duplex</small>
+            </div>
+            <div style="background:#0f172a;padding:10px;border-radius:8px;">
+              <small style="color:#94a3b8;">VLANs Configured</small>
+              <div style="font-size:14px;font-weight:700;color:#a855f7;">VLAN 10, 20, 100, 150</div>
+              <small style="color:#64748b;">802.1Q Multi-VLAN</small>
+            </div>
+          </div>
+
+          <!-- Highlight Port GE8 for TONOLI-PC (คอมประกันสุขภาพ 2) -->
+          <div style="background:#022c22;border:1.5px solid #22c55e;border-radius:8px;padding:12px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="background:#22c55e;color:#052e16;padding:2px 8px;border-radius:6px;font-weight:800;font-size:11px;">PORT GE8 (ACTIVE)</span>
+                <strong style="color:#86efac;font-size:13px;">คอมพิวเตอร์: คอมประกันสุขภาพ 2 (TONOLI-PC)</strong>
+              </div>
+              <span style="font-size:11px;color:#a7f3d0;font-weight:600;">⚡ 1000 Mbps Full Duplex (Link Up)</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;font-size:11.5px;color:#cbd5e1;background:rgba(0,0,0,0.3);padding:8px;border-radius:6px;">
+              <div>IPv4: <strong style="color:#38bdf8;">${tonoliIp}</strong></div>
+              <div>MAC Address: <strong style="color:#fbbf24;font-family:monospace;">D8:5E:D3:4A:2C:9B</strong></div>
+              <div>VLAN: <strong style="color:#c084fc;">VLAN 20 (ประกันสุขภาพ)</strong></div>
+              <div>เต้ารับผนัง (Wall Outlet): <strong style="color:#f8fafc;">OPD-ADM-02</strong></div>
+              <div>ห้อง / จุดติดตั้ง: <strong style="color:#f8fafc;">ห้องงานประกันสุขภาพยุทธศาสตร์</strong></div>
+              <div>Dynamic Sync: <strong style="color:#4ade80;">Active (ติดตามตาม MAC)</strong></div>
+            </div>
+          </div>
+
+          <div style="background:#0f172a;border-radius:8px;padding:12px;margin-bottom:12px;">
+            <div style="font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:8px;">🔌 แผงพอร์ตสวิตช์หลัก Cisco SG250-26 (Port Matrix 1–26):</div>
+            <div style="display:grid;grid-template-columns:repeat(13, 1fr);gap:6px;font-size:10px;text-align:center;">
+              ${Array.from({length: 26}, (_, i) => {
+                const pNum = i + 1;
+                const isTonoliPort = (pNum === 8);
+                const isConnected = pNum <= 22;
+                let desc = `GE${pNum}`;
+                if (pNum === 1) desc = 'Fortigate';
+                else if (pNum === 2) desc = 'MikroTik';
+                else if (pNum === 3) desc = 'Dell T440';
+                else if (pNum === 4) desc = 'HPE DL360';
+                else if (pNum === 5) desc = 'NAS Storage';
+                else if (pNum === 6) desc = 'iDRAC Host';
+                else if (pNum === 7) desc = 'IT Support';
+                else if (pNum === 8) desc = 'TONOLI-PC';
+                else if (pNum >= 9 && pNum <= 22) desc = `Dist ${pNum}`;
+                else if (pNum >= 25) desc = 'SFP Fiber';
+
+                const borderCol = isTonoliPort ? '#4ade80' : (isConnected ? '#22c55e' : '#475569');
+                const bgCol = isTonoliPort ? 'rgba(34,197,94,0.35)' : (isConnected ? 'rgba(34,197,94,0.15)' : 'rgba(51,65,85,0.4)');
+                return `
+                  <div style="background:${bgCol};border:1.5px solid ${borderCol};border-radius:5px;padding:4px 2px;${isTonoliPort ? 'box-shadow:0 0 10px rgba(74,222,128,0.5);' : ''}">
+                    <div style="color:${isTonoliPort ? '#86efac' : (isConnected ? '#4ade80' : '#64748b')};font-weight:700;">#${pNum}</div>
+                    <div style="color:${isTonoliPort ? '#fef08a' : '#94a3b8'};font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${desc}">${desc}</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <div style="background:#0f172a;padding:12px;border-radius:8px;font-size:12.5px;">
+            <div style="color:#94a3b8;margin-bottom:6px;">พารามิเตอร์การเข้าสู่ระบบ Cisco Switch Management Web GUI:</div>
+            <div style="display:flex;gap:20px;color:#f8fafc;">
+              <div>IP: <strong style="color:#38bdf8;">10.10.100.2</strong></div>
+              <div>Username: <strong style="color:#f8fafc;">admin</strong></div>
+              <div>Password: <strong style="color:#f8fafc;">ksp@12345</strong></div>
             </div>
           </div>
         </div>

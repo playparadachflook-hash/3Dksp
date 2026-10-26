@@ -851,3 +851,72 @@ KSS.toggleDeadlock = function(ipOrCode, customData = {}) {
   }
 };
 
+/* =========================================================================
+ * MAC ADDRESS & DYNAMIC IP TRACKING REGISTRY (DHCP Lease / Host Inventory)
+ * =========================================================================
+ * เก็บบันทึก MAC Address และ Switch Port Mapping ของเครื่องลูกข่าย
+ * เมื่อเครื่องเปิดใช้งานใหม่และได้รับ IP ใหม่ ระบบจะอัปเดตข้อมูลตาม MAC Address อัตโนมัติ
+ */
+KSS.MAC_REGISTRY = {
+  'D8:5E:D3:4A:2C:9B': {
+    mac: 'D8:5E:D3:4A:2C:9B',
+    hostname: 'TONOLI-PC',
+    pcCode: 'PC-ADM-02',
+    name: 'คอมประกันสุขภาพ 2',
+    currentIp: '10.10.20.147',
+    switchId: 'cisco-sg250',
+    switchName: 'Cisco SG250-26 (Core Managed Switch - Computer Room)',
+    switchIp: '10.10.100.2',
+    switchPort: 'Port GE8 (GigabitEthernet 8 / VLAN 20 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: OPD-ADM-02 (ช่องเต้ารับ LAN ผนังห้องประกันสุขภาพ)',
+    vlan: 'VLAN 20 - ประกันสุขภาพและสารสนเทศยุทธศาสตร์',
+    gateway: '10.10.20.1 (Core Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '26/10/2026 10:22:46',
+    status: 'online'
+  }
+};
+
+KSS.getPcByMac = function(mac) {
+  if (!mac) return null;
+  const cleanMac = String(mac).trim().toUpperCase();
+  return KSS.MAC_REGISTRY[cleanMac] || null;
+};
+
+KSS.updatePcIpByMac = function(mac, newIp) {
+  if (!mac || !newIp) return false;
+  const cleanMac = String(mac).trim().toUpperCase();
+  const cleanIp = KSS.cleanIp(newIp);
+  if (!cleanIp) return false;
+
+  let record = KSS.MAC_REGISTRY[cleanMac];
+  if (!record) {
+    record = {
+      mac: cleanMac,
+      hostname: 'PC-' + cleanIp.replace(/\./g, '-'),
+      currentIp: cleanIp,
+      leaseType: 'Dynamic DHCP',
+      lastRenew: new Date().toLocaleTimeString('th-TH')
+    };
+    KSS.MAC_REGISTRY[cleanMac] = record;
+  } else {
+    record.currentIp = cleanIp;
+    record.lastRenew = new Date().toLocaleTimeString('th-TH');
+  }
+
+  // Update live spec if registered
+  if (KSS.TONOLI_PC_SPEC && (KSS.TONOLI_PC_SPEC.mac === cleanMac || cleanMac === 'D8:5E:D3:4A:2C:9B')) {
+    KSS.TONOLI_PC_SPEC.ip = cleanIp;
+  }
+
+  if (window.dispatchEvent) {
+    window.dispatchEvent(new CustomEvent('kss-mac-ip-updated', {
+      detail: { mac: cleanMac, ip: cleanIp, record }
+    }));
+  }
+  return true;
+};
+
+

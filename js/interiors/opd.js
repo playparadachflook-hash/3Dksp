@@ -523,7 +523,7 @@
     // ==========================================
     // SPECIFICATIONS FOR COMPUTERS (OPD_PC_SPECS)
     // ==========================================
-    const pcSpec = (code, name, role, user, ipSuffix, sw = 'HOSxP v3.6 / Windows 11') => ({
+    const pcSpec = (code, name, role, user, ipSuffix, sw = 'HOSxP v3.6 / Windows 11', extra = {}) => ({
       code,
       name,
       role,
@@ -536,7 +536,8 @@
       ip: String(ipSuffix).includes('.') ? ipSuffix : `192.168.10.${ipSuffix}`,
       software: sw,
       peripherals: 'เครื่องอ่านบัตรสมาร์ทการ์ด, Barcode Scanner, UPS 850VA',
-      status: '🟢 ออนไลน์ปกติ'
+      status: '🟢 ออนไลน์ปกติ',
+      ...extra
     });
 
     // --- OUTER WALLS ---
@@ -1150,25 +1151,70 @@
     doorWay(16.85, 7.2, 0, 1.1);         // Meeting 1
     doorWay(21.5, 7.2, 0, 1.1);          // Meeting 2
 
-    // IT Admin Room Desks (คอม 1, 2, 3 along left wall, คอม 4 in center)
+    // IT Admin & Health Insurance Room Desks (คอม 1, 2, 3 along left wall, คอม 4 in center)
     const itAdminPCs = [
       { x: 6.4, z: 3.3, num: 1, ip: '11' },
-      { x: 6.4, z: 4.7, num: 2, ip: '12' },
+      { 
+        x: 6.4, z: 4.7, num: 2, 
+        ip: '10.10.20.147',
+        hostname: 'TONOLI-PC',
+        mac: 'D8:5E:D3:4A:2C:9B',
+        switchId: 'cisco-sg250',
+        switchName: 'Cisco SG250-26 (Core Managed Switch - Computer Room)',
+        switchPort: 'Port GE8 (GigabitEthernet 8 / VLAN 20 Untagged)',
+        wallOutlet: 'Outlet ID: OPD-ADM-02 (ช่องเต้ารับ LAN ผนังห้องประกันสุขภาพ)',
+        vlan: 'VLAN 20 - ประกันสุขภาพและสารสนเทศยุทธศาสตร์',
+        role: 'งานประกันสุขภาพ ตรวจสอบสิทธิ เรียกเก็บเงินชดเชย (e-Claim) และวิเคราะห์ยุทธศาสตร์',
+        user: 'เจ้าหน้าที่งานประกันสุขภาพ (TONOLI-PC)',
+        sw: 'HOSxP v3.6 • โปรแกรม e-Claim สปสช. • Financial Data Hub (FDH) • NHSO Smart Card Agent'
+      },
       { x: 6.4, z: 6.1, num: 3, ip: '13' },
       { x: 8.8, z: 4.7, num: 4, ip: '14' }
     ];
     itAdminPCs.forEach((p) => {
+      const isTonoli = p.num === 2;
+      const spec = isTonoli ? pcSpec(
+        'PC-ADM-02',
+        'คอมประกันสุขภาพ 2 (TONOLI-PC)',
+        p.role,
+        p.user,
+        p.ip,
+        p.sw,
+        {
+          hostname: p.hostname,
+          mac: p.mac,
+          switchId: p.switchId,
+          switchName: p.switchName,
+          switchPort: p.switchPort,
+          wallOutlet: p.wallOutlet,
+          vlan: p.vlan,
+          dhcpTracking: true,
+          status: '🟢 ออนไลน์ปกติ (Dynamic IP Sync)'
+        }
+      ) : pcSpec(
+        `PC-ADM-0${p.num}`,
+        `คอมประกันสุขภาพ ${p.num}`,
+        'งานบริหารและสนับสนุนข้อมูลองค์กรแพทย์',
+        'ธุรการ',
+        p.ip
+      );
+
+      if (isTonoli) {
+        window.KSS = window.KSS || {};
+        window.KSS.TONOLI_PC_SPEC = spec;
+      }
+
       workDesk({
         x: p.x,
         z: p.z,
         w: 1.15,
         d: 0.6,
         rotY: p.num === 4 ? 0 : Math.PI / 2,
-        label: `🖳 คอมธุรการ ${p.num}`,
-        pcInfo: pcSpec(`PC-ADM-0${p.num}`, `คอมธุรการแพทย์ ${p.num}`, `งานบริหารและสนับสนุนข้อมูลองค์กรแพทย์`, `ธุรการ`, p.ip)
+        label: isTonoli ? `🖳 คอมประกันสุขภาพ 2 (TONOLI-PC)` : `🖳 คอมประกันสุขภาพ ${p.num}`,
+        pcInfo: spec
       });
     });
-    L.push({ text: '💻 ห้องปฏิบัติการ/ธุรการแพทย์', pos: V(8.0, 2.2, 4.7), cls: 'int-label sub-tag' });
+    L.push({ text: '💻 ห้องงานประกันสุขภาพยุทธศาสตร์ (TONOLI-PC)', pos: V(8.0, 2.2, 4.7), cls: 'int-label sub-tag' });
 
     // Server Room (ห้อง Server & Network Control Center)
     serverRackDetailed('rack-a', 11.8, 3.6, 0);
@@ -1245,8 +1291,8 @@
       w: 1.1,
       d: 0.55,
       rotY: Math.PI,
-      label: '🖳 คอมห้องประชุม 1',
-      pcInfo: pcSpec('PC-CONF-01', 'คอมห้องประชุม 1', 'ระบบนำเสนอและฉายภาพการประชุมองค์กรแพทย์', 'องค์กรแพทย์', '101', 'Zoom / Microsoft Teams / PACS Viewer')
+      label: '🖳 คอมห้องประชุมองค์กรแพทย์ 1',
+      pcInfo: pcSpec('PC-CONF-01', 'ห้องประชุมองค์กรแพทย์ 1', 'ระบบนำเสนอและฉายภาพการประชุมองค์กรแพทย์', 'องค์กรแพทย์', '101', 'Zoom / Microsoft Teams / PACS Viewer')
     });
     L.push({
       text: `🩺 ห้องประชุมองค์กรแพทย์ ${opdState.confMedOccupied ? '🔴 มีการประชุม' : '🟢 ว่าง'}`,
@@ -1263,11 +1309,11 @@
       w: 1.1,
       d: 0.55,
       rotY: Math.PI,
-      label: '🖳 คอมห้องประชุม 2',
-      pcInfo: pcSpec('PC-CONF-02', 'คอมห้องประชุม 2', 'ระบบบันทึกและถ่ายทอดการประชุมธรรมาภิบาลและจริยธรรม', 'คณะกรรมการธรรมาภิบาล', '102')
+      label: '🖳 คอมห้องประชุมธรรมรักษ์ 1',
+      pcInfo: pcSpec('PC-CONF-02', 'ห้องประชุมธรรมรักษ์ 1', 'ระบบบันทึกและถ่ายทอดการประชุมธรรมาภิบาลและจริยธรรม', 'คณะกรรมการธรรมาภิบาล', '102')
     });
     L.push({
-      text: `⚖️ ห้องประชุมธรรมาภิบาล ${opdState.confGovOccupied ? '🔴 มีการประชุม' : '🟢 ว่าง'}`,
+      text: `⚖️ ห้องประชุมธรรมรักษ์ ${opdState.confGovOccupied ? '🔴 มีการประชุม' : '🟢 ว่าง'}`,
       pos: V(21.5, 2.2, 4.5),
       cls: `int-label toggleable ${opdState.confGovOccupied ? 'busy' : 'free'}`,
       toggleId: 'opd-conf-gov'
@@ -1299,12 +1345,12 @@
       w: 1.2,
       d: 0.65,
       rotY: Math.PI / 2,
-      label: '🖳 คอม IT 2 (Network)',
+      label: '🖳 คอม IT 2 (admin)',
       pcInfo: {
         code: 'PC-IT-02',
-        name: 'คอม IT 2 (Network & Cyber Security)',
+        name: 'คอม IT 2',
         role: 'บริหารระบบเครือข่าย Firewall และความมั่นคงปลอดภัยไซเบอร์',
-        user: 'นักวิชาการคอมพิวเตอร์ (Network Admin)',
+        user: 'นักวิชาการคอมพิวเตอร์ (Admin)',
         os: 'Windows 11 Pro 64-bit / Linux Network Tools',
         cpu: 'Intel Core i7-12700 (12C/20T, 4.9GHz)',
         ram: '32 GB DDR4-3200',
@@ -1322,12 +1368,12 @@
       w: 1.2,
       d: 0.65,
       rotY: Math.PI / 2,
-      label: '🖳 คอม IT 3 (Database)',
+      label: '🖳 คอม IT 3 (admin)',
       pcInfo: {
         code: 'PC-IT-03',
-        name: 'คอม IT 3 (Database Admin)',
+        name: 'คอม IT 3',
         role: 'ผู้ดูแลระบบฐานข้อมูลโรงพยาบาล HOSxP และคลังข้อมูล HDC',
-        user: 'ผู้ดูแลระบบสารสนเทศ (Database Admin)',
+        user: 'ผู้ดูแลระบบสารสนเทศ (Admin)',
         os: 'Windows 11 Pro 64-bit / Ubuntu Server CLI',
         cpu: 'Intel Core i7-12700 (12C/20T, 4.9GHz)',
         ram: '32 GB DDR4-3200',
@@ -1345,12 +1391,12 @@
       w: 1.2,
       d: 0.65,
       rotY: -Math.PI / 2,
-      label: '🖳 คอม IT 1 (Helpdesk)',
+      label: '🖳 คอม IT 1 (admin)',
       pcInfo: {
         code: 'PC-IT-01',
-        name: 'คอม IT 1 (Helpdesk & Support)',
+        name: 'คอม IT 1',
         role: 'รับแจ้งซ่อมคอมพิวเตอร์ จัดการสิทธิ์ผู้ใช้งาน และสนับสนุนเทคนิค',
-        user: 'เจ้าหน้าที่คอมพิวเตอร์ (Helpdesk Support)',
+        user: 'เจ้าหน้าที่คอมพิวเตอร์',
         os: 'Windows 11 Pro 64-bit',
         cpu: 'Intel Core i5-12400 (6C/12T, 4.4GHz)',
         ram: '16 GB DDR4-3200',

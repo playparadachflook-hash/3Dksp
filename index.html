@@ -6,27 +6,27 @@
   <title>แผนผัง 3D Isometric - โรงพยาบาลโคกศรีสุพรรณ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261026a">
+  <link rel="stylesheet" href="css/style.css?v=20261026b">
   <!-- Modular Building Stylesheets (เชื่อมต่อไฟล์ CSS แยกตามแต่ละอาคาร) -->
-  <link rel="stylesheet" href="css/buildings/opd.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/server.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/er.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/pcu.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/ipd.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/psych.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/drivers.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/kitchen.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/rompho.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/maint.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/power.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/dental.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/thaimed.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/finance.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/physio.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/store.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/supply.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/hall.css?v=20261026a">
-  <link rel="stylesheet" href="css/buildings/guard-shop.css?v=20261026a">
+  <link rel="stylesheet" href="css/buildings/opd.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/server.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/er.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/pcu.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/ipd.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/psych.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/drivers.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/kitchen.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/rompho.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/maint.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/power.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/dental.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/thaimed.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/finance.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/physio.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/store.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/supply.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/hall.css?v=20261026b">
+  <link rel="stylesheet" href="css/buildings/guard-shop.css?v=20261026b">
 </head>
 <body>
   <div id="scene"></div>
@@ -98,6 +98,7 @@
       <div class="info-title">
         <h3 id="pc-name">โต๊ะคอมพิวเตอร์</h3>
         <span id="pc-code" class="chip" style="background:#2563eb">PC-ER-01</span>
+        <span id="pc-hostname" class="chip" style="background:#0284c7;display:none;">TONOLI-PC</span>
       </div>
       <button id="pc-close" class="icon-btn">✕</button>
     </div>
@@ -165,10 +166,51 @@
         </button>
       </div>
 
+      <!-- MAC Address Display Row (สำหรับติดตามเครื่องตามฮาร์ดแวร์) -->
+      <div class="pc-mac-display-row" id="pc-mac-row">
+        <div class="pc-mac-main">
+          <small>MAC ADDRESS (Hardware ID สำหรับติดตามเครื่อง)</small>
+          <div class="pc-mac-val" id="pc-mac-text">D8:5E:D3:4A:2C:9B</div>
+        </div>
+        <button class="pc-copy-btn pc-copy-mac-btn" id="pc-copy-mac-btn" type="button" title="คลิกเพื่อคัดลอก MAC Address">
+          <span class="copy-icon">📋</span> <span id="pc-copy-mac-btn-text">คัดลอก MAC</span>
+        </button>
+      </div>
+
       <div class="pc-net-subinfo">
         <div><small>Subnet Mask:</small> <span>255.255.255.0</span></div>
         <div><small>Default Gateway:</small> <span id="pc-gateway-text">10.10.100.1</span></div>
         <div style="grid-column: span 2;"><small>วงเครือข่าย / VLAN:</small> <span id="pc-vlan-text">VLAN 100 - Network Management</span></div>
+      </div>
+
+      <!-- ข้อมูลสวิตช์และพอร์ตเชื่อมต่อ (Switch Port Mapping) -->
+      <div class="pc-switch-box" id="pc-switch-box">
+        <div class="pc-switch-head">
+          <div class="pc-switch-title">
+            <span>🔌</span>
+            <strong>ช่องเชื่อมต่อสวิตช์ฮับ (Switch Port Mapping)</strong>
+          </div>
+          <button id="pc-switch-view-btn" class="pc-switch-link-btn" type="button" title="ดูข้อมูลสวิตช์ใน Server Dashboard">🌐 ดูสวิตช์</button>
+        </div>
+        <div class="pc-switch-details">
+          <div><small>สวิตช์ที่เชื่อมต่อ:</small> <strong id="pc-switch-name">Cisco SG250-26 (10.10.100.2)</strong></div>
+          <div><small>ช่องพอร์ต (Switch Port):</small> <strong id="pc-switch-port" class="hl-port">Port GE8 (VLAN 20)</strong></div>
+          <div style="grid-column: span 2;"><small>เต้ารับผนัง (Wall Outlet):</small> <strong id="pc-switch-outlet">OPD-ADM-02 (ห้องงานประกันสุขภาพ)</strong></div>
+        </div>
+      </div>
+
+      <!-- ระบบติดตาม IP ตาม MAC Address (Dynamic IP Tracking) -->
+      <div class="pc-dhcp-box" id="pc-dhcp-box">
+        <div class="pc-dhcp-head">
+          <span class="dhcp-status-dot">🟢</span>
+          <div>
+            <strong>ระบบติดตามเครื่องตาม MAC Address (Dynamic IP Tracking)</strong>
+            <small>ระบบบันทึก MAC ไว้ เมื่อเครื่องเปิดใหม่และได้ IP ใหม่จะอัปเดตอัตโนมัติ</small>
+          </div>
+        </div>
+        <button id="pc-dhcp-renew-btn" class="pc-dhcp-btn" type="button" title="จำลองการเปิดเครื่องใหม่และขอ IP ใหม่จาก DHCP">
+          🔄 จำลองเปิดเครื่องใหม่ (DHCP Renew IP)
+        </button>
       </div>
 
       <div class="pc-remote-actions">
@@ -313,30 +355,30 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <!-- App -->
-  <script src="js/data.js?v=20261025a"></script>
-  <script src="js/models.js?v=20261025a"></script>
+  <script src="js/data.js?v=20261026b"></script>
+  <script src="js/models.js?v=20261026b"></script>
   <!-- Modular Interiors -->
-  <script src="js/interiors/common.js?v=20261025a"></script>
-  <script src="js/interiors/guard.js?v=20261025a"></script>
-  <script src="js/interiors/shop.js?v=20261025a"></script>
-  <script src="js/interiors/parking.js?v=20261025a"></script>
-  <script src="js/interiors/er.js?v=20261025a"></script>
-  <script src="js/interiors/physio.js?v=20261025a"></script>
-  <script src="js/interiors/ipd.js?v=20261025a"></script>
-  <script src="js/interiors/power.js?v=20261025a"></script>
-  <script src="js/interiors/hall.js?v=20261025a"></script>
-  <script src="js/interiors/maint.js?v=20261025a"></script>
-  <script src="js/interiors/finance.js?v=20261025a"></script>
-  <script src="js/interiors/kitchen.js?v=20261025a"></script>
-  <script src="js/interiors/pharmacy.js?v=20261025a"></script>
-  <script src="js/interiors/dental.js?v=20261025a"></script>
-  <script src="js/interiors/thaimed.js?v=20261025a"></script>
-  <script src="js/interiors/rompho.js?v=20261025a"></script>
-  <script src="js/interiors/store.js?v=20261025a"></script>
-  <script src="js/interiors/supply.js?v=20261025a"></script>
-  <script src="js/interiors/opd.js?v=20261025a"></script>
-  <script src="js/interiors/psych.js?v=20261025a"></script>
-  <script src="js/interiors/drivers.js?v=20261025a"></script>
-  <script src="js/app.js?v=20261025a"></script>
+  <script src="js/interiors/common.js?v=20261026b"></script>
+  <script src="js/interiors/guard.js?v=20261026b"></script>
+  <script src="js/interiors/shop.js?v=20261026b"></script>
+  <script src="js/interiors/parking.js?v=20261026b"></script>
+  <script src="js/interiors/er.js?v=20261026b"></script>
+  <script src="js/interiors/physio.js?v=20261026b"></script>
+  <script src="js/interiors/ipd.js?v=20261026b"></script>
+  <script src="js/interiors/power.js?v=20261026b"></script>
+  <script src="js/interiors/hall.js?v=20261026b"></script>
+  <script src="js/interiors/maint.js?v=20261026b"></script>
+  <script src="js/interiors/finance.js?v=20261026b"></script>
+  <script src="js/interiors/kitchen.js?v=20261026b"></script>
+  <script src="js/interiors/pharmacy.js?v=20261026b"></script>
+  <script src="js/interiors/dental.js?v=20261026b"></script>
+  <script src="js/interiors/thaimed.js?v=20261026b"></script>
+  <script src="js/interiors/rompho.js?v=20261026b"></script>
+  <script src="js/interiors/store.js?v=20261026b"></script>
+  <script src="js/interiors/supply.js?v=20261026b"></script>
+  <script src="js/interiors/opd.js?v=20261026b"></script>
+  <script src="js/interiors/psych.js?v=20261026b"></script>
+  <script src="js/interiors/drivers.js?v=20261026b"></script>
+  <script src="js/app.js?v=20261026b"></script>
 </body>
 </html>

@@ -439,3 +439,144 @@
   color: #f8fafc;
   border-color: #64748b;
 }
+
+/* =========================================================================
+ * PC MODAL: MAC ADDRESS & SWITCH PORT MAPPING STYLES
+ * ========================================================================= */
+.pc-mac-display-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 6px 12px;
+  margin-bottom: 10px;
+}
+.pc-mac-main small {
+  display: block;
+  font-size: 8.5px;
+  color: #94a3b8;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.pc-mac-val {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f59e0b;
+  font-family: 'SF Mono', Monaco, Consolas, monospace;
+  letter-spacing: 0.5px;
+}
+.pc-copy-mac-btn {
+  background: linear-gradient(135deg, #d97706, #b45309) !important;
+  font-size: 10.5px !important;
+  padding: 4px 10px !important;
+}
+.pc-copy-mac-btn:hover {
+  background: linear-gradient(135deg, #b45309, #92400e) !important;
+}
+
+.pc-switch-box {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid #0284c7;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+}
+.pc-switch-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(2, 132, 199, 0.3);
+  padding-bottom: 5px;
+}
+.pc-switch-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #38bdf8;
+  font-weight: 700;
+}
+.pc-switch-link-btn {
+  background: #0284c7;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-size: 9.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.pc-switch-link-btn:hover {
+  background: #0369a1;
+  transform: translateY(-1px);
+}
+.pc-switch-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  font-size: 11px;
+}
+.pc-switch-details small {
+  display: block;
+  font-size: 9px;
+  color: #94a3b8;
+}
+.pc-switch-details strong {
+  color: #e2e8f0;
+  font-size: 11px;
+}
+.hl-port {
+  color: #4ade80 !important;
+  font-weight: 800;
+}
+
+.pc-dhcp-box {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px dashed #334155;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.pc-dhcp-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dhcp-status-dot {
+  font-size: 12px;
+}
+.pc-dhcp-head strong {
+  display: block;
+  font-size: 11px;
+  color: #93c5fd;
+}
+.pc-dhcp-head small {
+  display: block;
+  font-size: 9px;
+  color: #94a3b8;
+}
+.pc-dhcp-btn {
+  background: #1e293b;
+  border: 1px solid #38bdf8;
+  color: #38bdf8;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.pc-dhcp-btn:hover {
+  background: #0284c7;
+  color: #fff;
+  transform: translateY(-1px);
+}
