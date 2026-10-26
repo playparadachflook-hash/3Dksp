@@ -1165,6 +1165,31 @@ KSS.getPcByMac = function(mac) {
   return KSS.MAC_REGISTRY[cleanMac] || null;
 };
 
+KSS.getPcByIp = function(ip) {
+  if (!ip) return null;
+  const clean = KSS.cleanIp(ip);
+  if (!clean) return null;
+  for (const mac in KSS.MAC_REGISTRY) {
+    const item = KSS.MAC_REGISTRY[mac];
+    if (item.currentIp === clean || item.ip === clean) {
+      return item;
+    }
+  }
+  return null;
+};
+
+KSS.getPcByHostname = function(hostname) {
+  if (!hostname) return null;
+  const clean = String(hostname).trim().toUpperCase();
+  for (const mac in KSS.MAC_REGISTRY) {
+    const item = KSS.MAC_REGISTRY[mac];
+    if (item.hostname && item.hostname.toUpperCase() === clean) {
+      return item;
+    }
+  }
+  return null;
+};
+
 KSS.updatePcIpByMac = function(mac, newIp) {
   if (!mac || !newIp) return false;
   const cleanMac = String(mac).trim().toUpperCase();

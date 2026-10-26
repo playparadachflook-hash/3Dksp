@@ -936,25 +936,31 @@
     document.getElementById('pc-code').innerText = `รหัสครุภัณฑ์: ${pc.code || '-'}`;
     document.getElementById('pc-role').innerText = pc.role || '-';
 
+    // 2. Dedicated IP & Remote Connection Box
+    const netInfo = parseIpInfo(pc.ip);
+    currentPcIp = netInfo.cleanIp;
+
+    const macRecord = (pc.mac && K.getPcByMac ? K.getPcByMac(pc.mac) : null) || 
+                      (netInfo.cleanIp && K.getPcByIp ? K.getPcByIp(netInfo.cleanIp) : null) ||
+                      (pc.hostname && K.getPcByHostname ? K.getPcByHostname(pc.hostname) : null);
+    const macVal = pc.mac || macRecord?.mac || '';
+
     const hostEl = document.getElementById('pc-hostname');
+    const displayHostname = pc.hostname || macRecord?.hostname || '';
     if (hostEl) {
-      if (pc.hostname) {
-        hostEl.innerText = pc.hostname;
+      if (displayHostname) {
+        hostEl.innerText = displayHostname;
         hostEl.style.display = 'inline-block';
       } else {
         hostEl.style.display = 'none';
       }
     }
 
-    // 2. Dedicated IP & Remote Connection Box
-    const netInfo = parseIpInfo(pc.ip);
-    currentPcIp = netInfo.cleanIp;
-
     const ipTextEl = document.getElementById('pc-ip-text');
     if (ipTextEl) ipTextEl.innerText = netInfo.cleanIp;
 
     const gwEl = document.getElementById('pc-gateway-text');
-    if (gwEl) gwEl.innerText = netInfo.gateway;
+    if (gwEl) gwEl.innerText = (macRecord && macRecord.gateway) || netInfo.gateway;
 
     const vlanEl = document.getElementById('pc-vlan-text');
     if (vlanEl) vlanEl.innerText = pc.vlan || (macRecord && macRecord.vlan) || netInfo.extra || 'VLAN มาตรฐานโรงพยาบาล';
@@ -969,9 +975,6 @@
     const macRow = document.getElementById('pc-mac-row');
     const macTextEl = document.getElementById('pc-mac-text');
     const switchBox = document.getElementById('pc-switch-box');
-
-    const macRecord = (pc.mac && K.getPcByMac ? K.getPcByMac(pc.mac) : null);
-    const macVal = pc.mac || macRecord?.mac || '';
 
     if (macVal) {
       if (macRow) {
