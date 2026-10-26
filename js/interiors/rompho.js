@@ -85,7 +85,25 @@
   const VIP_PC_SPECS = {
     name: 'เค้าเตอร์โต๊ะคอมห้องพิเศษ (PC-VIP-01)',
     code: 'PC-VIP-01',
+    hostname: 'ROMPHO3',
+    ip: '10.10.40.24',
+    mac: '3C:52:82:7D:6E:24',
+    switchId: 'ksp-sw-rompho1',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - ตึกร่มโพธิ์)',
+    switchIp: '10.10.100.14',
+    switchPort: 'Port 3 (10/100/1000Base-T / VLAN 40 Untagged)',
+    wallOutlet: 'Outlet ID: ROMPHO-FL3-NURSE-01 (เต้ารับ LAN เค้าเตอร์พยาบาลห้องพิเศษ ชั้น 3)',
+    vlan: 'VLAN 40 - แผนกผู้ป่วยใน สูติกรรม และหอผู้ป่วยพิเศษ (VIP Ward)',
+    gateway: '10.10.40.1 (IPD Gateway)',
     role: 'ระบบบริหารจัดการหอผู้ป่วยพิเศษ บันทึกเวชระเบียนผู้ป่วยใน (IPD Charting) และระบบจัดสรรห้องพักพิเศษ',
+    user: 'นางสาวนิดา ว่องไวสงฆ์ (พยาบาลวิชาชีพชำนาญการ)',
+    cpu: 'Intel Core i5-12400 (6 Cores / 12 Threads, up to 4.40 GHz)',
+    ram: '16 GB DDR4 3200MHz',
+    storage: '512 GB M.2 NVMe SSD (High Speed)',
+    monitor: 'Dell 24" Full HD IPS (Anti-Glare, ComfortView Plus)',
+    os: 'Windows 11 Pro 64-bit',
+    status: '🟢 ออนไลน์ปกติ',
+    software: 'HOSxP / HIS Inpatient Department (IPD Ward) • ระบบบริหารจัดการจองห้องพักพิเศษและคำนวณค่าบริการ • EHR Electronic Health Record & Nursing Note • LIS Lab & X-Ray PACS Viewer Integration',
     specs: [
       ['CPU', 'Intel Core i5-12400 (6 Cores / 12 Threads, up to 4.40 GHz)'],
       ['RAM', '16 GB DDR4 3200MHz'],
@@ -93,13 +111,6 @@
       ['Monitor', 'Dell 24" Full HD IPS (Anti-Glare, ComfortView Plus)'],
       ['OS', 'Windows 11 Pro 64-bit'],
       ['Network', 'LAN Gigabit + Hospital Medical VLAN (VIP Ward)']
-    ],
-    software: [
-      'HOSxP / HIS Inpatient Department (IPD Ward)',
-      'ระบบบริหารจัดการจองห้องพักพิเศษและคำนวณค่าบริการ',
-      'EHR Electronic Health Record & Nursing Note',
-      'LIS Lab & X-Ray PACS Viewer Integration',
-      'Microsoft Edge / Hospital Intranet'
     ]
   };
 
@@ -404,6 +415,10 @@
           dg.add(staff);
         }
 
+        dg.traverse((child) => {
+          if (child.isMesh) child.userData.pcInfo = spec;
+        });
+
         g.add(dg);
 
         if (labelText) {
@@ -534,7 +549,7 @@
       makeVipRoomSuite(-1.4, 3.15, 13.5, 5.25, romphoState.vipRooms[11]);
       makeVipRoomSuite(-1.4, 5.25, 13.5, 7.25, romphoState.vipRooms[12]);
 
-      createVipPcDesk(-0.8, 0.4, Math.PI / 2, VIP_PC_SPECS, '🖥️ เค้าเตอร์โต๊ะคอมห้องพิเศษ', { role: 'nurse', pose: 'sit', rotY: Math.PI / 2 });
+      createVipPcDesk(-0.8, 0.4, Math.PI / 2, VIP_PC_SPECS, '🖥️ เค้าเตอร์โต๊ะคอมห้องพิเศษ (ROMPHO3: 10.10.40.24)', { role: 'nurse', pose: 'sit', rotY: Math.PI / 2 });
 
       const nurseCounter = maintBox(8.0, 1.05, 0.65, 0x0284c7);
       nurseCounter.position.set(5.2, 0.525, -1.4);
@@ -595,7 +610,7 @@
         ['🏢', 'ตึกร่มโพธิ์ 3 - ชั้น 3', 'หอผู้ป่วยพิเศษ (VIP Ward - ขยาย 10-15%)'],
         ['🛌', 'ห้องพิเศษ 13 ห้อง (301-308, 309, 311-314)', 'ตู้สีเหลืองเป็นระเบียบ คลิกห้องสลับ ว่าง/มีผู้ป่วย'],
         ['🟡', 'ตู้สีเหลืองประจำห้องพิเศษ', 'ตู้เก็บของสีเหลือง 13 ตู้ จัดวางเป็นระเบียบเรียบร้อย'],
-        ['🖥️', 'PC-VIP-01: เค้าเตอร์โต๊ะคอมห้องพิเศษ', 'ดูสเปก', null, 'free', VIP_PC_SPECS],
+        ['🖥️', 'PC-VIP-01: เค้าเตอร์โต๊ะคอมห้องพิเศษ (ROMPHO3: 10.10.40.24)', 'ดูสเปก', null, 'free', VIP_PC_SPECS],
         ['👩‍⚕️', 'เค้าเตอร์พยาบาลห้องพิเศษ', '1 จุด'],
         ['📊', 'โต๊ะประชุมแพทย์-พยาบาล', '1 ชุด (6 ที่นั่ง)'],
         ['🗄️', 'ชั้นเก็บของและเวชภัณฑ์', '1 จุด'],
@@ -759,6 +774,10 @@
           staff.position.set(0, 0, 0.55);
           dg.add(staff);
         }
+
+        dg.traverse((child) => {
+          if (child.isMesh) child.userData.pcInfo = spec;
+        });
 
         g.add(dg);
 

@@ -10,11 +10,11 @@
   // --- STATE FOR OPD INTERIOR ---
   const opdState = {
     examRooms: [
-      { id: 'opd-exam-1', name: 'ห้องตรวจ 1', occupied: false, doc: 'นพ.ธนกฤต' },
+      { id: 'opd-exam-1', name: 'ห้องตรวจ 1 (CASKCAP)', occupied: false, doc: 'พญ.ณัชชา' },
       { id: 'opd-exam-2', name: 'ห้องตรวจ 2', occupied: true,  doc: 'พญ.ศิรินทิพย์' },
-      { id: 'opd-exam-3', name: 'ห้องตรวจ 3', occupied: false, doc: 'นพ.วรวิทย์' },
-      { id: 'opd-exam-4', name: 'ห้องตรวจ 4', occupied: true,  doc: 'พญ.กานดา' },
-      { id: 'opd-exam-5', name: 'ห้องตรวจ 5', occupied: false, doc: 'นพ.ชยพล' },
+      { id: 'opd-exam-3', name: 'ห้องตรวจ 3 (DOCTOR-OPD3)', occupied: false, doc: 'นพ.อดิเทพ' },
+      { id: 'opd-exam-4', name: 'ห้องตรวจ 4 (DOCTOR4)', occupied: true,  doc: 'นพ.ธนากร' },
+      { id: 'opd-exam-5', name: 'ห้องตรวจ 5 (DOCTOR5)', occupied: false, doc: 'นพ.วรวิต' },
       { id: 'opd-exam-6', name: 'ห้องตรวจ 6', occupied: false, doc: 'พญ.ณัฐธิดา' }
     ],
     ekgOccupied: false,
@@ -595,11 +595,31 @@
     // USER MANDATE: "ห้องตรวจ 1-6 มีคอมพิวเตอร์ 1 เครื่องชิดกำแพงขวา"
     const examRoomDefs = [
       { num: 6, xL: -24.0, xR: -20.1, doc: 'พญ.ณัฐธิดา', specCode: 'PC-EXAM-06', ip: '66' },
-      { num: 5, xL: -20.1, xR: -16.2, doc: 'นพ.ชยพล',   specCode: 'PC-EXAM-05', ip: '65' },
-      { num: 4, xL: -16.2, xR: -12.3, doc: 'พญ.กานดา',   specCode: 'PC-EXAM-04', ip: '64' },
-      { num: 3, xL: -12.3, xR:  -8.4, doc: 'นพ.วรวิทย์', specCode: 'PC-EXAM-03', ip: '63' },
+      { 
+        num: 5, xL: -20.1, xR: -16.2, doc: 'นพ.วรวิต สิทธิวิทยานิชย์', specCode: 'PC-EXAM-05', 
+        ip: '10.10.30.39', hostname: 'DOCTOR5', mac: 'D4:5D:64:8B:11:05',
+        switchId: 'ksp-sw-opd', switchName: 'Aruba / HPE 2530 24G (KSP-SW-OPD - ตึกผู้ป่วยนอก)',
+        switchPort: 'Port 5 (VLAN 30)', wallOutlet: 'OPD-EXAM-05 (ห้องตรวจโรค 5)'
+      },
+      { 
+        num: 4, xL: -16.2, xR: -12.3, doc: 'นพ.ธนากร วากลาง', specCode: 'PC-EXAM-04', 
+        ip: '10.10.30.38', hostname: 'DOCTOR4', mac: 'D4:5D:64:8B:11:04',
+        switchId: 'ksp-sw-opd', switchName: 'Aruba / HPE 2530 24G (KSP-SW-OPD - ตึกผู้ป่วยนอก)',
+        switchPort: 'Port 4 (VLAN 30)', wallOutlet: 'OPD-EXAM-04 (ห้องตรวจโรค 4)'
+      },
+      { 
+        num: 3, xL: -12.3, xR:  -8.4, doc: 'นพ.อดิเทพ จันทราภรณ์', specCode: 'PC-EXAM-03', 
+        ip: '10.10.30.40', hostname: 'DOCTOR-OPD3', mac: 'D4:5D:64:8B:11:03',
+        switchId: 'ksp-sw-opd', switchName: 'Aruba / HPE 2530 24G (KSP-SW-OPD - ตึกผู้ป่วยนอก)',
+        switchPort: 'Port 3 (VLAN 30)', wallOutlet: 'OPD-EXAM-03 (ห้องตรวจโรค 3)'
+      },
       { num: 2, xL:  -8.4, xR:  -4.5, doc: 'พญ.ศิรินทิพย์', specCode: 'PC-EXAM-02', ip: '62' },
-      { num: 1, xL:  -4.5, xR:  -0.6, doc: 'นพ.ธนกฤต',  specCode: 'PC-EXAM-01', ip: '61' }
+      { 
+        num: 1, xL:  -4.5, xR:  -0.6, doc: 'พญ.ณัชชา สัตยา', specCode: 'PC-EXAM-01', 
+        ip: '10.10.30.43', hostname: 'CASKCAP', mac: 'D4:5D:64:8B:11:01',
+        switchId: 'ksp-sw-opd', switchName: 'Aruba / HPE 2530 24G (KSP-SW-OPD - ตึกผู้ป่วยนอก)',
+        switchPort: 'Port 1 (VLAN 30)', wallOutlet: 'OPD-EXAM-01 (ห้องตรวจโรค 1)'
+      }
     ];
 
     examRoomDefs.forEach((r) => {
@@ -609,8 +629,25 @@
         x: r.xR - 0.45,
         z: -5.5,
         rotY: 0,
-        label: `🖳 คอมห้องตรวจ ${r.num}`,
-        pcInfo: pcSpec(r.specCode, `คอมห้องตรวจ ${r.num}`, `ระบบเวชระเบียนและสั่งการรักษาแพทย์ ห้องตรวจ ${r.num}`, `แพทย์ตรวจโรค (${r.doc})`, r.ip, 'HOSxP Doctor Station / Electronic Medical Record (EMR)')
+        label: `🖳 คอมห้องตรวจ ${r.num}${r.hostname ? ' (' + r.hostname + ')' : ''}`,
+        pcInfo: pcSpec(
+          r.specCode, 
+          `คอมห้องตรวจ ${r.num}`, 
+          `ระบบเวชระเบียนและสั่งการรักษาแพทย์ ห้องตรวจ ${r.num}`, 
+          `แพทย์ตรวจโรค (${r.doc})`, 
+          r.ip, 
+          'HOSxP Doctor Station / Electronic Medical Record (EMR)',
+          {
+            hostname: r.hostname,
+            mac: r.mac,
+            switchId: r.switchId,
+            switchName: r.switchName,
+            switchPort: r.switchPort,
+            wallOutlet: r.wallOutlet,
+            gateway: '10.10.30.1 (OPD Gateway)',
+            vlan: 'VLAN 30 - ห้องตรวจแพทย์และบริการผู้ป่วยนอก (OPD)'
+          }
+        )
       });
 
       // 2. Exam bed on the left side of room
@@ -1497,11 +1534,11 @@
 
     // Build items list for interior panel (Array schema for KSS.app.js)
     const itemsList = [
-      ['🚪', 'ห้องตรวจ 1 (นพ.ธนกฤต)', opdState.examRooms[0].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-1', opdState.examRooms[0].occupied ? 'busy' : 'free'],
+      ['🚪', 'ห้องตรวจ 1 (CASKCAP: 10.10.30.43 - พญ.ณัชชา)', opdState.examRooms[0].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-1', opdState.examRooms[0].occupied ? 'busy' : 'free'],
       ['🚪', 'ห้องตรวจ 2 (พญ.ศิรินทิพย์)', opdState.examRooms[1].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-2', opdState.examRooms[1].occupied ? 'busy' : 'free'],
-      ['🚪', 'ห้องตรวจ 3 (นพ.วรวิทย์)', opdState.examRooms[2].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-3', opdState.examRooms[2].occupied ? 'busy' : 'free'],
-      ['🚪', 'ห้องตรวจ 4 (พญ.กานดา)', opdState.examRooms[3].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-4', opdState.examRooms[3].occupied ? 'busy' : 'free'],
-      ['🚪', 'ห้องตรวจ 5 (นพ.ชยพล)', opdState.examRooms[4].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-5', opdState.examRooms[4].occupied ? 'busy' : 'free'],
+      ['🚪', 'ห้องตรวจ 3 (DOCTOR-OPD3: 10.10.30.40 - นพ.อดิเทพ)', opdState.examRooms[2].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-3', opdState.examRooms[2].occupied ? 'busy' : 'free'],
+      ['🚪', 'ห้องตรวจ 4 (DOCTOR4: 10.10.30.38 - นพ.ธนากร)', opdState.examRooms[3].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-4', opdState.examRooms[3].occupied ? 'busy' : 'free'],
+      ['🚪', 'ห้องตรวจ 5 (DOCTOR5: 10.10.30.39 - นพ.วรวิต)', opdState.examRooms[4].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-5', opdState.examRooms[4].occupied ? 'busy' : 'free'],
       ['🚪', 'ห้องตรวจ 6 (พญ.ณัฐธิดา)', opdState.examRooms[5].occupied ? '🔴 กำลังตรวจ' : '🟢 ว่าง', 'opd-exam-6', opdState.examRooms[5].occupied ? 'busy' : 'free'],
       ['🫀', 'ห้องตรวจคลื่นไฟฟ้าหัวใจ (EKG)', opdState.ekgOccupied ? '🔴 กำลังบันทึก' : '🟢 ว่าง', 'opd-ekg', opdState.ekgOccupied ? 'busy' : 'free'],
       ['🖥️', 'ห้องแม่ข่ายคอมพิวเตอร์ (Server & Controllers)', '🟢 ตรวจสอบสถานะ 9/9 เครื่อง (คลิกเพื่อ Login)', 'open-server-dashboard', 'free'],
