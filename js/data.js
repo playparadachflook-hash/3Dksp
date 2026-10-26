@@ -852,6 +852,90 @@ KSS.toggleDeadlock = function(ipOrCode, customData = {}) {
 };
 
 /* =========================================================================
+ * COMPUTER POWER & OPERATIONAL STATUS REGISTRY (เปิดใช้งาน / ไม่ได้เปิดใช้งาน)
+ * =========================================================================
+ * จัดการสถานะเปิดใช้งาน (Online - สีเขียว) และ ไม่ได้เปิดใช้งาน (Offline / Standby - สีแดง)
+ * รองรับการตรวจสอบแบบไดนามิกและการสลับสถานะ (Toggle) เพื่อทดสอบแบบ Real-time
+ */
+KSS.OFFLINE_PCS = {
+  'PC-EXAM-02': { reason: 'ห้องตรวจ 2 ยังไม่เปิดให้บริการ / แพทย์ไม่ได้ลงตรวจ' },
+  'PC-EXAM-06': { reason: 'ห้องตรวจ 6 สำรอง / ยังไม่เปิดให้บริการ' },
+  'PC-CARD-03A': { reason: 'เครื่องสำรองห้องบัตร / ปิดเครื่อง Standby' },
+  'PC-CARD-03B': { reason: 'เครื่องสำรองห้องบัตร / ปิดเครื่อง Standby' },
+  'PC-STORE-04': { reason: 'เครื่องสำรองคลังยา / ปิดเครื่อง' },
+  'PC-STORE-05': { reason: 'เครื่องสำรองคลังเวชภัณฑ์ / ปิดเครื่อง' },
+  'PC-STORE-06': { reason: 'เครื่องสำรองพัสดุ / ปิดเครื่อง' },
+  'NB-PT-01': { reason: 'โน้ตบุ๊กงานกายภาพบำบัด / ชาร์จแบตเตอรี่ Standby' },
+  'PC-HALL-01': { reason: 'คอมห้องประชุมใหญ่ / ไม่มีวาระการประชุม ปิดเครื่อง' },
+  'PC-MAINT-01': { reason: 'คอมช่างซ่อมบำรุง / นอกเวลาปฏิบัติงาน' }
+};
+
+KSS.PC_POWER_STATE = {};
+
+// Helper: ตรวจสอบว่าเครื่องคอมพิวเตอร์เปิดใช้งานอยู่หรือไม่ (true = เปิด/เขียว, false = ปิด/แดง)
+KSS.isPcOnline = function(pcOrCode) {
+  if (!pcOrCode) return true;
+  var code = (typeof pcOrCode === 'string' ? pcOrCode : (pcOrCode.code || '')).trim().toUpperCase();
+  var ip = typeof pcOrCode === 'object' ? (KSS.cleanIp ? KSS.cleanIp(pcOrCode.ip || '') : pcOrCode.ip) : (String(pcOrCode).indexOf('.') !== -1 ? pcOrCode : '');
+
+  // 1. ตรวจสอบสถานะไดนามิกที่สลับโดยผู้ใช้ (User Override)
+  if (code && typeof KSS.PC_POWER_STATE[code] === 'boolean') {
+    return KSS.PC_POWER_STATE[code];
+  }
+  if (ip && typeof KSS.PC_POWER_STATE[ip] === 'boolean') {
+    return KSS.PC_POWER_STATE[ip];
+  }
+
+  // 2. ถ้าติด Deadlock ถือว่าเกิดปัญหา (แดง)
+  if ((code && KSS.isDeadlocked && KSS.isDeadlocked(code)) || (ip && KSS.isDeadlocked && KSS.isDeadlocked(ip))) {
+    return false;
+  }
+
+  // 3. ตรวจสอบในรายการเครื่องที่ไม่เปิดใช้งาน (Offline List)
+  if (code && KSS.OFFLINE_PCS[code]) {
+    return false;
+  }
+
+  // 4. ตรวจสอบค่า status ใน object
+  if (typeof pcOrCode === 'object' && pcOrCode.status) {
+    var st = String(pcOrCode.status).toLowerCase();
+    if (st.indexOf('offline') !== -1 || st.indexOf('ปิด') !== -1 || st.indexOf('ไม่ได้เปิด') !== -1 || st.indexOf('deadlock') !== -1 || st.indexOf('🔴') !== -1) {
+      return false;
+    }
+  }
+
+  // 5. ตรวจสอบใน MAC_REGISTRY
+  if (typeof pcOrCode === 'object') {
+    var rec = (pcOrCode.mac && KSS.getPcByMac ? KSS.getPcByMac(pcOrCode.mac) : null) || 
+              (ip && KSS.getPcByIp ? KSS.getPcByIp(ip) : null);
+    if (rec && rec.status) {
+      var rSt = String(rec.status).toLowerCase();
+      if (rSt.indexOf('offline') !== -1 || rSt.indexOf('ปิด') !== -1 || rSt.indexOf('deadlock') !== -1 || rSt.indexOf('🔴') !== -1) {
+        return false;
+      }
+    }
+  }
+
+  return true; // เครื่องที่เปิดใช้งานปกติ
+};
+
+// Helper: สลับสถานะเปิด/ปิดเครื่องคอมพิวเตอร์
+KSS.togglePcPower = function(pcOrCode) {
+  var code = (typeof pcOrCode === 'string' ? pcOrCode : (pcOrCode.code || '')).trim().toUpperCase();
+  var current = KSS.isPcOnline(pcOrCode);
+  var newState = !current;
+  if (code) KSS.PC_POWER_STATE[code] = newState;
+  if (typeof pcOrCode === 'object' && pcOrCode.ip) {
+    var clean = KSS.cleanIp ? KSS.cleanIp(pcOrCode.ip) : pcOrCode.ip;
+    if (clean) KSS.PC_POWER_STATE[clean] = newState;
+  }
+  if (typeof window !== 'undefined' && window.dispatchEvent) {
+    window.dispatchEvent(new CustomEvent('kss-pc-power-change', { detail: { code: code, online: newState } }));
+  }
+  return newState;
+};
+
+/* =========================================================================
  * MAC ADDRESS & DYNAMIC IP TRACKING REGISTRY (DHCP Lease / Host Inventory)
  * =========================================================================
  * เก็บบันทึก MAC Address และ Switch Port Mapping ของเครื่องลูกข่าย

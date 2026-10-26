@@ -997,9 +997,37 @@
 
     // 2.1 Database Deadlock Status Check
     const deadlock = (K.getDeadlock ? K.getDeadlock(netInfo.cleanIp) || K.getDeadlock(pc.code) : null);
+    const isOnline = K.isPcOnline ? K.isPcOnline(pc) : true;
     const dlBanner = document.getElementById('pc-deadlock-banner');
     const remoteStatusEl = document.getElementById('pc-remote-status');
     const toggleDlBtn = document.getElementById('pc-toggle-deadlock-btn');
+    const powerChip = document.getElementById('pc-power-chip');
+    const togglePowerBtn = document.getElementById('pc-toggle-power-btn');
+
+    if (powerChip) {
+      if (deadlock) {
+        powerChip.className = 'chip status-deadlock';
+        powerChip.innerText = '⚠️ ติดล็อค DB';
+      } else if (isOnline) {
+        powerChip.className = 'chip status-online';
+        powerChip.innerText = '🟢 เปิดใช้งาน';
+      } else {
+        powerChip.className = 'chip status-offline';
+        powerChip.innerText = '🔴 ไม่ได้เปิดใช้งาน';
+      }
+    }
+
+    if (togglePowerBtn) {
+      togglePowerBtn.innerText = isOnline ? '🔴 ปิดเครื่องนี้ (Set Offline)' : '🟢 เปิดเครื่องนี้ (Set Online)';
+      togglePowerBtn.className = isOnline ? 'pc-power-toggle-btn pc-btn-toggle-off' : 'pc-power-toggle-btn pc-btn-toggle-on';
+      togglePowerBtn.onclick = () => {
+        if (K.togglePcPower) {
+          const newState = K.togglePcPower(pc);
+          showToast((newState ? '🟢 เปิดเครื่อง ' : '🔴 ปิดเครื่อง ') + (pc.name || pc.code) + ' สำเร็จ');
+          showPcModal(pc);
+        }
+      };
+    }
 
     if (deadlock) {
       if (dlBanner) {
@@ -1021,7 +1049,7 @@
       }
       if (remoteStatusEl) {
         remoteStatusEl.innerText = '⚠️ DEADLOCK (ติดล็อค DB)';
-        remoteStatusEl.classList.add('status-deadlock');
+        remoteStatusEl.className = 'pc-remote-badge status-deadlock';
       }
       if (toggleDlBtn) {
         toggleDlBtn.innerText = '✅ ปลดล็อค Deadlock เครื่องนี้';
@@ -1029,8 +1057,13 @@
     } else {
       if (dlBanner) dlBanner.classList.add('hidden');
       if (remoteStatusEl) {
-        remoteStatusEl.classList.remove('status-deadlock');
-        remoteStatusEl.innerText = (pc.status && pc.status.includes('ออนไลน์')) ? '🟢 พร้อมรับรีโมท' : (pc.status || '🟢 พร้อมรับรีโมท');
+        if (isOnline) {
+          remoteStatusEl.className = 'pc-remote-badge status-online';
+          remoteStatusEl.innerText = '🟢 เปิดใช้งาน (พร้อมรับรีโมท)';
+        } else {
+          remoteStatusEl.className = 'pc-remote-badge status-offline';
+          remoteStatusEl.innerText = '🔴 ไม่ได้เปิดใช้งาน (ปิดเครื่อง)';
+        }
       }
       if (toggleDlBtn) {
         toggleDlBtn.innerText = '⚠️ จำลอง Deadlock เครื่องนี้';
@@ -2845,6 +2878,49 @@
     interiorGroup.add(data.group);
     interiorGroup.visible = true;
 
+    // Dynamic PC Screen Mesh Coloring (Online: Green / Offline: Red / Deadlock: Pulsing Red)
+    if (data.group) {
+      data.group.traverse(function(obj) {
+        if (obj.isMesh && obj.userData && obj.userData.pcInfo) {
+          var pc = obj.userData.pcInfo;
+          var isOnline = K.isPcOnline ? K.isPcOnline(pc) : true;
+          var isDl = (K.getDeadlock ? (K.getDeadlock(pc.ip) || K.getDeadlock(pc.code)) : null);
+
+          if (obj.material) {
+            if (!obj.userData._baseMat) {
+              obj.userData._baseMat = obj.material;
+              obj.material = obj.material.clone();
+            }
+            if (isDl) {
+              if (obj.material.emissive) {
+                obj.material.emissive.setHex(0xdc2626);
+                obj.material.emissiveIntensity = 0.85;
+              }
+              if (obj.material.color && obj.material.color.getHex() !== 0x0f172a && obj.material.color.getHex() !== 0x1e293b && obj.material.color.getHex() !== 0x334155) {
+                obj.material.color.setHex(0xb91c1c);
+              }
+            } else if (!isOnline) {
+              if (obj.material.emissive) {
+                obj.material.emissive.setHex(0xef4444);
+                obj.material.emissiveIntensity = 0.35;
+              }
+              if (obj.material.color && obj.material.color.getHex() !== 0x0f172a && obj.material.color.getHex() !== 0x1e293b && obj.material.color.getHex() !== 0x334155) {
+                obj.material.color.setHex(0x991b1b);
+              }
+            } else {
+              if (obj.material.emissive) {
+                obj.material.emissive.setHex(0x22c55e);
+                obj.material.emissiveIntensity = 0.55;
+              }
+              if (obj.material.color && obj.material.color.getHex() !== 0x0f172a && obj.material.color.getHex() !== 0x1e293b && obj.material.color.getHex() !== 0x334155) {
+                obj.material.color.setHex(0x16a34a);
+              }
+            }
+          }
+        }
+      });
+    }
+
     // Interior Labels (CSS2D)
     data.labels.forEach(l => {
       const labelDiv = document.createElement('div');
@@ -2857,6 +2933,22 @@
         labelDiv.className += ' deadlock';
         labelDiv.innerHTML = `⚠️ <strong>DEADLOCK</strong> • ${l.text}`;
         labelDiv.title = `⚠️ เครื่องนี้ติด Database Deadlock (${dl.table})! คลิกเพื่อดูรายละเอียดและสั่ง Kill Thread`;
+        labelDiv.onclick = (e) => {
+          e.stopPropagation();
+          showPcModal(l.pcInfo);
+        };
+      } else if (l.pcInfo) {
+        const isOnline = K.isPcOnline ? K.isPcOnline(l.pcInfo) : true;
+        const cleanName = l.text.replace(/^[🖥️🖳🏧⚡\s]+/, '');
+        if (isOnline) {
+          labelDiv.className += ' pc-online';
+          labelDiv.innerHTML = `🟢 🖥️ ${cleanName}`;
+          labelDiv.title = `🟢 เปิดใช้งาน (Online) - คลิกเพื่อดูรายละเอียดสเปก`;
+        } else {
+          labelDiv.className += ' pc-offline';
+          labelDiv.innerHTML = `🔴 🖥️ ${cleanName} <span class="pc-off-badge">ปิดใช้งาน</span>`;
+          labelDiv.title = `🔴 ไม่ได้เปิดใช้งาน (Offline) - คลิกเพื่อดูรายละเอียดสเปก`;
+        }
         labelDiv.onclick = (e) => {
           e.stopPropagation();
           showPcModal(l.pcInfo);
@@ -2879,12 +2971,6 @@
           if (K.Interiors.toggleStatus && K.Interiors.toggleStatus(l.toggleId)) {
             enterInterior(b, true);
           }
-        };
-      } else if (l.pcInfo) {
-        labelDiv.title = 'คลิกเพื่อดูรายละเอียดสเปกคอมพิวเตอร์';
-        labelDiv.onclick = (e) => {
-          e.stopPropagation();
-          showPcModal(l.pcInfo);
         };
       }
       const labelObj = new THREE.CSS2DObject(labelDiv);
@@ -2922,11 +3008,20 @@
         pcInfo = it.pcInfo || null;
       }
 
-      // Deadlock Status Check in Interior Item List
+      // Deadlock & PC Power Status in Interior Item List
       const dl = (pcInfo && K.getDeadlock) ? (K.getDeadlock(pcInfo.ip) || K.getDeadlock(pcInfo.code)) : null;
       if (dl) {
         badgeCls = 'deadlock';
         status = `⚠️ Deadlock (${dl.table || 'DB Lock'})`;
+      } else if (pcInfo) {
+        const isOnline = K.isPcOnline ? K.isPcOnline(pcInfo) : true;
+        if (isOnline) {
+          badgeCls = 'online';
+          status = '🟢 เปิดใช้งาน';
+        } else {
+          badgeCls = 'offline';
+          status = '🔴 ไม่ได้เปิดใช้งาน';
+        }
       }
 
       if (toggleId) {
@@ -3162,10 +3257,30 @@
     };
   }
 
+  // PC Status Toolbar Button
+  const btnPcStatus = document.getElementById('btn-pc-status');
+  if (btnPcStatus) {
+    btnPcStatus.onclick = () => {
+      const offEntries = K.OFFLINE_PCS || {};
+      const offNames = [];
+      for (const k in offEntries) {
+        if (!K.isPcOnline(k)) {
+          offNames.push(k);
+        }
+      }
+      showToast(`🖥️ ตรวจสอบสถานะ: คอมพิวเตอร์เปิดใช้งาน 🟢 ออนไลน์ปกติ (พบเครื่องปิดใช้งาน 🔴 ${offNames.length} เครื่อง: ${offNames.slice(0, 4).join(', ')}...)`);
+    };
+  }
+
+  window.addEventListener('kss-pc-power-change', () => {
+    refreshCurrentInteriorIfActive();
+  });
+
   window.addEventListener('kss-deadlock-change', () => {
     updateDeadlockStatusEverywhere();
     refreshCurrentInteriorIfActive();
   });
+
 
   // Initial check for active deadlocks on load
   updateDeadlockStatusEverywhere();

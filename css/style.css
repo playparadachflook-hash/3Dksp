@@ -245,3 +245,117 @@ body.mode-interior #info { display: none !important; }
   .server-stats-ribbon { grid-template-columns: repeat(2, 1fr); }
   .server-cards-grid { grid-template-columns: 1fr; }
 }
+
+
+/* =========================================================================
+ * PC ONLINE (GREEN) & OFFLINE (RED) POWER STATUS STYLES
+ * ========================================================================= */
+.int-label.pc-tag.pc-online {
+  background: #f0fdf4 !important;
+  color: #166534 !important;
+  border: 1.5px solid #22c55e !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.45) !important;
+}
+.int-label.pc-tag.pc-online:hover {
+  background: #16a34a !important;
+  color: #ffffff !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.5) !important;
+}
+
+.int-label.pc-tag.pc-offline {
+  background: #fef2f2 !important;
+  color: #991b1b !important;
+  border: 1.5px solid #ef4444 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.45) !important;
+}
+.int-label.pc-tag.pc-offline:hover {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.5) !important;
+}
+
+.int-label .pc-off-badge {
+  display: inline-block;
+  background: #dc2626;
+  color: #ffffff;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 9.5px;
+  margin-left: 4px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.interior-items li span.q.online {
+  color: #15803d;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.interior-items li span.q.offline {
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.chip.status-online {
+  background: #16a34a !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+.chip.status-offline {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.pc-remote-badge.status-online {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+.pc-remote-badge.status-offline {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.pc-power-toggle-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all .15s;
+}
+.pc-btn-toggle-off {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+.pc-btn-toggle-off:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+.pc-btn-toggle-on {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+.pc-btn-toggle-on:hover {
+  background: #22c55e;
+  color: #ffffff;
+}
