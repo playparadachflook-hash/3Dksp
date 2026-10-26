@@ -992,26 +992,229 @@
     L.push({ text: '🗂️ ชั้นเก็บ OPD card (คู่กลาง)', pos: rV(37.95, 1.8, 2.15), cls: 'int-label sub-tag' });
     L.push({ text: '🗂️ ชั้นเก็บ OPD card', pos: rV(40.1, 1.8, 2.15), cls: 'int-label sub-tag' });
 
+        const cardPc1Spec = makePcSpec(
+      'PC-CARD-01',
+      'โต๊ะคอมพิวเตอร์ 1 (เคาน์เตอร์ลงทะเบียนผู้มารับบริการ)',
+      'เจ้าหน้าที่เวชระเบียนรับลงทะเบียนผู้มารับบริการ ค้นหา OPD Card และออกคิวตรวจ (ช่อง 1)',
+      '10.10.20.21',
+      'ระบบ HOSxP Front-Desk Registration • ระบบอ่านบัตรประชาชน Smart Card & คิวอัตโนมัติ',
+      {
+        hostname: 'CARD-DESK-01',
+        mac: '00:1E:67:D8:1A:01',
+        switchId: 'ksp-sw-xray',
+        switchName: 'Aruba / HPE 2530 24G (KSP-SW-XRAY - ตึก X-Ray/ห้องบัตร)',
+        switchPort: 'Port 7 (10/100/1000Base-T / VLAN 20 Untagged)',
+        wallOutlet: 'Outlet ID: CARD-CTR-01 (เคาน์เตอร์ลงทะเบียนห้องบัตร ช่อง 1)',
+        gateway: '10.10.20.1 (Core Gateway)',
+        vlan: 'VLAN 20 - งานเวชระเบียนและสารสนเทศยุทธศาสตร์',
+        printer: 'Zebra ZD230 Barcode Sticker Printer + Epson Dot Matrix LQ-310'
+      }
+    );
+
     rDesk({
-      x: 38.4, z: 6.25, w: 1.5, d: 0.64, rotY: 0,
-      hasPC: true, label: 'โต๊ะคอม 1', staffRole: 'nurse',
-      pcInfo: makePcSpec('PC-CARD-01', 'โต๊ะคอมพิวเตอร์ 1 (เคาน์เตอร์ลงทะเบียนผู้มารับบริการ)', 'เจ้าหน้าที่เวชระเบียนรับลงทะเบียนผู้มารับบริการ ค้นหา OPD Card และออกคิวตรวจ', '221', 'ระบบ HOSxP Front-Desk Registration • ระบบอ่านบัตรประชาชน Smart Card & คิวอัตโนมัติ')
+      x: 39.4, z: 6.25, w: 1.4, d: 0.64, rotY: 0,
+      hasPC: true, label: 'โต๊ะคอม 1 (ห้องบัตร)', staffRole: 'nurse',
+      pcInfo: cardPc1Spec
+    });
+
+    const cardPc2Spec = makePcSpec(
+      'PC-CARD-03',
+      'โต๊ะคอมพิวเตอร์ 2 (เคาน์เตอร์ลงทะเบียนห้องบัตร)',
+      'เจ้าหน้าที่เวชระเบียนรับลงทะเบียนผู้มารับบริการ ช่อง 2 (ALL-IN-ONE-ADMI)',
+      '10.10.20.42',
+      'ระบบ HOSxP Front-Desk Registration • ระบบอ่านบัตรประชาชน Smart Card & คิวอัตโนมัติ Q-Online',
+      {
+        hostname: 'ALL-IN-ONE-ADMI',
+        mac: '70:85:C2:44:A2:42',
+        switchId: 'ksp-sw-xray',
+        switchName: 'Aruba / HPE 2530 24G (KSP-SW-XRAY - ตึก X-Ray/ห้องบัตร)',
+        switchIp: '10.10.100.7',
+        switchPort: 'Port 8 (10/100/1000Base-T / VLAN 20 Untagged)',
+        wallOutlet: 'Outlet ID: CARD-CTR-02 (เคาน์เตอร์ลงทะเบียนห้องบัตร ช่อง 2)',
+        gateway: '10.10.20.1 (Core Gateway)',
+        vlan: 'VLAN 20 - งานเวชระเบียนและสารสนเทศยุทธศาสตร์',
+        cpu: 'Intel Core i5-10400 (6 Cores / 12 Threads, 2.90GHz - 4.30GHz)',
+        ram: '16 GB DDR4-2666 MHz',
+        storage: '512 GB NVMe M.2 SSD + 1 TB SATA III HDD',
+        monitor: '23.8\" FHD IPS Borderless Anti-Glare Monitor',
+        printer: 'Zebra ZD230 Barcode Sticker Printer + Canon LBP2900 Laser Printer'
+      }
+    );
+
+    rDesk({
+      x: 36.8, z: 6.25, w: 1.4, d: 0.64, rotY: 0,
+      hasPC: true, label: 'โต๊ะคอม 2 (ห้องบัตร)', staffRole: 'nurse',
+      pcInfo: cardPc2Spec
     });
 
     const frontRegCounter = rBox(4.8, 0.88, 0.78, M.mat(0xfef08a), 38.4, 0.44, 7.65);
     addEdges(frontRegCounter, 0xca8a04);
     rBox(4.9, 0.05, 0.86, M.mat(0xffffff), 38.4, 0.9, 7.65);
     rBox(4.6, 0.42, 0.04, M.glass(0xdbeafe, 0.35), 38.4, 1.13, 7.98);
-    [37.2, 39.6].forEach((px, i) => {
-      const visitor = makePerson({ role: i === 0 ? 'patient' : 'relative', pose: 'stand', rotY: Math.PI / 2 });
-      visitor.position.set(WX(px, 8.35), 0, WZ(px));
-      g.add(visitor);
+
+    // ป้ายบอกช่องบริการ 1 และ 2 บนหน้าต่างกระจก
+    L.push({
+      text: '🪪 ช่อง 1: ลงทะเบียนผู้ป่วยใหม่/สิทธิ',
+      pos: rV(39.4, 1.35, 7.98),
+      cls: 'int-label sub-tag'
     });
+    L.push({
+      text: '🪪 ช่อง 2: ออกบัตรคิว/ตรวจสอบประวัติ',
+      pos: rV(36.8, 1.35, 7.98),
+      cls: 'int-label sub-tag'
+    });
+
+    const visitor1 = makePerson({ role: 'patient', pose: 'stand', rotY: Math.PI / 2 });
+    visitor1.position.set(WX(36.8, 8.35), 0, WZ(36.8));
+    g.add(visitor1);
+
     L.push({
       text: '🪪 เค้าเตอร์ลงทะเบียนผู้มารับบริการ (หันหน้าไปทาง ER)',
       pos: rV(38.4, 1.85, 7.65),
       cls: 'int-label room-title'
     });
+
+    const kioskSpec = makePcSpec(
+      'KIOSK-REG-01',
+      'ตู้ Kiosk ออกบัตรคิวและลงทะเบียนอัตโนมัติ (Smart Queue Kiosk)',
+      'จุดบริการตนเอง หน้าเคาน์เตอร์ลงทะเบียนผู้มารับบริการ (Self-Service Kiosk)',
+      '10.10.20.199',
+      'KSS Smart Queue & Self-Registration App • HOSxP Kiosk Gateway • Face & ID Validation',
+      {
+        hostname: 'KIOSK-CARD-01',
+        mac: '00:E0:4C:88:A1:01',
+        switchId: 'ksp-sw-xray',
+        switchName: 'Aruba / HPE 2530 24G (KSP-SW-XRAY - ตึก X-Ray/ห้องบัตร)',
+        switchIp: '10.10.100.7',
+        switchPort: 'Port 9 (10/100/1000Base-T / VLAN 20 Untagged)',
+        wallOutlet: 'Outlet ID: KIOSK-FRONT-01 (เต้ารับ LAN เสาหน้าเคาน์เตอร์ลงทะเบียน)',
+        gateway: '10.10.20.1 (Core Gateway)',
+        vlan: 'VLAN 20 - งานเวชระเบียนและสารสนเทศยุทธศาสตร์',
+        cpu: 'Intel Core i3-1115G4 (Dual-Core, up to 4.10GHz Industrial IPC)',
+        ram: '8 GB DDR4-3200 Industrial Grade',
+        storage: '256 GB Industrial M.2 SSD',
+        monitor: '21.5\" Full HD Projected Capacitive Touchscreen (10-Point Touch)',
+        printer: 'เครื่องพิมพ์ใบสั่งคิวความร้อนความเร็วสูง 80mm High-Speed Thermal Queue Printer พร้อมระบบตัดกระดาษอัตโนมัติ (Auto-Cutter)'
+      }
+    );
+
+    function createSmartKiosk(kx, kz) {
+      const kg = new THREE.Group();
+      kg.position.set(WX(kx, kz), 0, WZ(kx));
+
+      // ฐานตั้งถ่วงน้ำหนัก (Weighted Pedestal Base)
+      const kBase = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.05, 0.52), M.mat(0x0f172a));
+      kBase.position.y = 0.025;
+      kBase.castShadow = true;
+      kg.add(kBase);
+
+      // แถบสะท้อนแสงเซฟตี้ขอบฐาน (Safety Trim)
+      const kTrim = new THREE.Mesh(new THREE.BoxGeometry(0.60, 0.02, 0.54), M.mat(0xf97316));
+      kTrim.position.y = 0.01;
+      kg.add(kTrim);
+
+      // โครงสร้างเสากลางตู้ Kiosk โลหะสีฟ้าอมน้ำเงิน
+      const kBody = new THREE.Mesh(new THREE.BoxGeometry(0.46, 1.05, 0.30), M.mat(0x0284c7));
+      kBody.position.y = 0.56;
+      kBody.castShadow = true;
+      kg.add(kBody);
+
+      // ฝาหน้าสีขาวมุก
+      const kFront = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.98, 0.04), M.mat(0xf8fafc));
+      kFront.position.set(0, 0.56, 0.14);
+      kg.add(kFront);
+
+      // ช่องเสียบบัตรประชาชน Smart Card เรืองแสงสีเขียว
+      const cardSlot = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.025, 0.05), M.mat(0x10b981));
+      cardSlot.position.set(0, 0.78, 0.16);
+      kg.add(cardSlot);
+
+      // ช่องพิมพ์ใบกระดาษคิว Thermal Paper Exit
+      const ticketSlot = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.02, 0.04), M.mat(0x1e293b));
+      ticketSlot.position.set(0, 0.68, 0.16);
+      kg.add(ticketSlot);
+      const ticketPaper = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.04, 0.01), M.mat(0xffffff));
+      ticketPaper.position.set(0, 0.67, 0.18);
+      kg.add(ticketPaper);
+
+      // หน้าต่างเซ็นเซอร์สแกน QR Code / บาร์โค้ดคนไข้
+      const qrScan = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.03), M.mat(0x38bdf8));
+      qrScan.position.set(0, 0.55, 0.16);
+      kg.add(qrScan);
+
+      // ส่วนหัวหน้าจอสัมผัสเอียง 18 องศา (Tilted 21.5" Touchscreen Head)
+      const headGroup = new THREE.Group();
+      headGroup.position.set(0, 1.15, 0.08);
+      headGroup.rotation.x = -0.30;
+
+      const scrBezel = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.42, 0.06), M.mat(0x0f172a));
+      scrBezel.castShadow = true;
+      headGroup.add(scrBezel);
+
+      // กระจกหน้าจอแสดงผลสว่างสีฟ้า
+      const scrGlass = new THREE.Mesh(
+        new THREE.BoxGeometry(0.48, 0.36, 0.02),
+        new THREE.MeshBasicMaterial({ color: 0x38bdf8 })
+      );
+      scrGlass.position.z = 0.035;
+      headGroup.add(scrGlass);
+
+      // จำลอง UI ปุ่มสัมผัส Smart Queue
+      const uiHeader = new THREE.Mesh(
+        new THREE.BoxGeometry(0.44, 0.07, 0.01),
+        new THREE.MeshBasicMaterial({ color: 0x0369a1 })
+      );
+      uiHeader.position.set(0, 0.12, 0.045);
+      headGroup.add(uiHeader);
+
+      const uiBtn1 = new THREE.Mesh(
+        new THREE.BoxGeometry(0.18, 0.09, 0.01),
+        new THREE.MeshBasicMaterial({ color: 0x10b981 })
+      );
+      uiBtn1.position.set(-0.11, -0.02, 0.045);
+      headGroup.add(uiBtn1);
+
+      const uiBtn2 = new THREE.Mesh(
+        new THREE.BoxGeometry(0.18, 0.09, 0.01),
+        new THREE.MeshBasicMaterial({ color: 0xf59e0b })
+      );
+      uiBtn2.position.set(0.11, -0.02, 0.045);
+      headGroup.add(uiBtn2);
+
+      kg.add(headGroup);
+
+      // ไฟโดมสถานะด้านบนตู้ Kiosk สีเขียวออนไลน์
+      const ledBar = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.03, 0.04), M.mat(0x22c55e));
+      ledBar.position.set(0, 1.40, 0.02);
+      kg.add(ledBar);
+
+      // ผูก pcInfo เพื่อให้คลิกชิ้นส่วน 3D แล้วเปิด Modal สเปกได้
+      kg.traverse((ch) => {
+        if (ch.isMesh) {
+          ch.userData = { clickable: true, type: 'pc', pcInfo: kioskSpec };
+        }
+      });
+      kg.userData = { clickable: true, type: 'pc', pcInfo: kioskSpec };
+
+      g.add(kg);
+      return kg;
+    }
+
+    createSmartKiosk(39.8, 8.45);
+
+    // ป้าย 3D คลิกได้สำหรับตู้ Kiosk
+    L.push({
+      text: '🏧 ตู้ Kiosk ออกบัตรคิวและลงทะเบียนอัตโนมัติ',
+      pos: rV(39.8, 1.65, 8.45),
+      cls: 'int-label pc-tag',
+      clickable: true,
+      pcInfo: kioskSpec
+    });
+
+    // ผู้รับบริการยืนใช้งานตู้ Kiosk
+    const kioskVisitor = makePerson({ role: 'patient', pose: 'stand', rotY: 0 });
+    kioskVisitor.position.set(WX(39.8, 9.15), 0, WZ(39.8));
+    g.add(kioskVisitor);
 
     const items = [];
     erPcuState.extRooms.forEach((r) => {
