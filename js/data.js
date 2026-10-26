@@ -858,6 +858,25 @@ KSS.toggleDeadlock = function(ipOrCode, customData = {}) {
  * เมื่อเครื่องเปิดใช้งานใหม่และได้รับ IP ใหม่ ระบบจะอัปเดตข้อมูลตาม MAC Address อัตโนมัติ
  */
 KSS.MAC_REGISTRY = {
+  '14:B3:1F:28:9A:11': {
+    mac: '14:B3:1F:28:9A:11',
+    hostname: 'NIRUN-PC',
+    pcCode: 'PC-ADM-01',
+    name: 'คอมประกันสุขภาพ 1',
+    currentIp: '10.10.20.21',
+    switchId: 'cisco-sg250',
+    switchName: 'Cisco SG250-26 (Core Managed Switch - Computer Room)',
+    switchIp: '10.10.100.2',
+    switchPort: 'Port GE7 (GigabitEthernet 7 / VLAN 20 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: OPD-ADM-01 (ช่องเต้ารับ LAN ผนังห้องประกันสุขภาพ)',
+    vlan: 'VLAN 20 - ประกันสุขภาพและสารสนเทศยุทธศาสตร์',
+    gateway: '10.10.20.1 (Core Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '26/10/2026 11:14:57',
+    status: 'online'
+  },
   'D8:5E:D3:4A:2C:9B': {
     mac: 'D8:5E:D3:4A:2C:9B',
     hostname: 'TONOLI-PC',
@@ -874,7 +893,45 @@ KSS.MAC_REGISTRY = {
     gateway: '10.10.20.1 (Core Gateway)',
     subnet: '255.255.255.0',
     leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
-    lastRenew: '26/10/2026 10:22:46',
+    lastRenew: '26/10/2026 11:14:57',
+    status: 'online'
+  },
+  '2C:F0:5D:8B:4E:33': {
+    mac: '2C:F0:5D:8B:4E:33',
+    hostname: 'พี่ติ๊ก',
+    pcCode: 'PC-ADM-03',
+    name: 'คอมประกันสุขภาพ 3',
+    currentIp: '10.10.20.111',
+    switchId: 'cisco-sg250',
+    switchName: 'Cisco SG250-26 (Core Managed Switch - Computer Room)',
+    switchIp: '10.10.100.2',
+    switchPort: 'Port GE9 (GigabitEthernet 9 / VLAN 20 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: OPD-ADM-03 (ช่องเต้ารับ LAN ผนังห้องประกันสุขภาพ)',
+    vlan: 'VLAN 20 - ประกันสุขภาพและสารสนเทศยุทธศาสตร์',
+    gateway: '10.10.20.1 (Core Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '26/10/2026 11:14:57',
+    status: 'online'
+  },
+  '50:EB:71:A9:3D:44': {
+    mac: '50:EB:71:A9:3D:44',
+    hostname: 'DESKTOP-HOGODQJ',
+    pcCode: 'PC-ADM-04',
+    name: 'คอมประกันสุขภาพ 4',
+    currentIp: '10.10.20.135',
+    switchId: 'cisco-sg250',
+    switchName: 'Cisco SG250-26 (Core Managed Switch - Computer Room)',
+    switchIp: '10.10.100.2',
+    switchPort: 'Port GE10 (GigabitEthernet 10 / VLAN 20 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: OPD-ADM-04 (ช่องเต้ารับ LAN ผนังห้องประกันสุขภาพ)',
+    vlan: 'VLAN 20 - ประกันสุขภาพและสารสนเทศยุทธศาสตร์',
+    gateway: '10.10.20.1 (Core Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '26/10/2026 11:14:57',
     status: 'online'
   }
 };
@@ -906,7 +963,10 @@ KSS.updatePcIpByMac = function(mac, newIp) {
     record.lastRenew = new Date().toLocaleTimeString('th-TH');
   }
 
-  // Update live spec if registered
+  // Update live specs if registered
+  if (KSS.INSURANCE_SPECS && KSS.INSURANCE_SPECS[cleanMac]) {
+    KSS.INSURANCE_SPECS[cleanMac].ip = cleanIp;
+  }
   if (KSS.TONOLI_PC_SPEC && (KSS.TONOLI_PC_SPEC.mac === cleanMac || cleanMac === 'D8:5E:D3:4A:2C:9B')) {
     KSS.TONOLI_PC_SPEC.ip = cleanIp;
   }

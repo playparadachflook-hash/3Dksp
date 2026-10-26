@@ -1827,22 +1827,64 @@
             </div>
           </div>
 
-          <!-- Highlight Port GE8 for TONOLI-PC (คอมประกันสุขภาพ 2) -->
+          <!-- Health Insurance Department (VLAN 20) Switch Port Table -->
           <div style="background:#022c22;border:1.5px solid #22c55e;border-radius:8px;padding:12px;margin-bottom:12px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
               <div style="display:flex;align-items:center;gap:8px;">
-                <span style="background:#22c55e;color:#052e16;padding:2px 8px;border-radius:6px;font-weight:800;font-size:11px;">PORT GE8 (ACTIVE)</span>
-                <strong style="color:#86efac;font-size:13px;">คอมพิวเตอร์: คอมประกันสุขภาพ 2 (TONOLI-PC)</strong>
+                <span style="background:#22c55e;color:#052e16;padding:2px 8px;border-radius:6px;font-weight:800;font-size:11px;">VLAN 20 • ACTIVE PORTS</span>
+                <strong style="color:#86efac;font-size:13px;">กลุ่มคอมพิวเตอร์ห้องงานประกันสุขภาพยุทธศาสตร์ (4 เครื่อง)</strong>
               </div>
-              <span style="font-size:11px;color:#a7f3d0;font-weight:600;">⚡ 1000 Mbps Full Duplex (Link Up)</span>
+              <span style="font-size:11px;color:#a7f3d0;font-weight:600;">⚡ 1000 Mbps Full Duplex (Links Up 🟢)</span>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;font-size:11.5px;color:#cbd5e1;background:rgba(0,0,0,0.3);padding:8px;border-radius:6px;">
-              <div>IPv4: <strong style="color:#38bdf8;">${tonoliIp}</strong></div>
-              <div>MAC Address: <strong style="color:#fbbf24;font-family:monospace;">D8:5E:D3:4A:2C:9B</strong></div>
-              <div>VLAN: <strong style="color:#c084fc;">VLAN 20 (ประกันสุขภาพ)</strong></div>
-              <div>เต้ารับผนัง (Wall Outlet): <strong style="color:#f8fafc;">OPD-ADM-02</strong></div>
-              <div>ห้อง / จุดติดตั้ง: <strong style="color:#f8fafc;">ห้องงานประกันสุขภาพยุทธศาสตร์</strong></div>
-              <div>Dynamic Sync: <strong style="color:#4ade80;">Active (ติดตามตาม MAC)</strong></div>
+            
+            <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:8px;font-size:11px;">
+              <div style="background:rgba(0,0,0,0.35);padding:8px 10px;border-radius:6px;border:1px solid #166534;">
+                <div style="display:flex;justify-content:space-between;color:#86efac;font-weight:700;margin-bottom:3px;">
+                  <span>🔌 Port GE7: คอมประกันสุขภาพ 1</span>
+                  <span style="color:#fef08a;">NIRUN-PC</span>
+                </div>
+                <div style="color:#cbd5e1;display:flex;gap:12px;">
+                  <span>IP: <strong style="color:#38bdf8;">10.10.20.21</strong></span>
+                  <span>MAC: <strong style="color:#fbbf24;font-family:monospace;">14:B3:1F:28:9A:11</strong></span>
+                  <span>เต้ารับ: <strong style="color:#f8fafc;">OPD-ADM-01</strong></span>
+                </div>
+              </div>
+
+              <div style="background:rgba(0,0,0,0.35);padding:8px 10px;border-radius:6px;border:1px solid #166534;">
+                <div style="display:flex;justify-content:space-between;color:#86efac;font-weight:700;margin-bottom:3px;">
+                  <span>🔌 Port GE8: คอมประกันสุขภาพ 2</span>
+                  <span style="color:#fef08a;">TONOLI-PC</span>
+                </div>
+                <div style="color:#cbd5e1;display:flex;gap:12px;">
+                  <span>IP: <strong style="color:#38bdf8;">10.10.20.147</strong></span>
+                  <span>MAC: <strong style="color:#fbbf24;font-family:monospace;">D8:5E:D3:4A:2C:9B</strong></span>
+                  <span>เต้ารับ: <strong style="color:#f8fafc;">OPD-ADM-02</strong></span>
+                </div>
+              </div>
+
+              <div style="background:rgba(0,0,0,0.35);padding:8px 10px;border-radius:6px;border:1px solid #166534;">
+                <div style="display:flex;justify-content:space-between;color:#86efac;font-weight:700;margin-bottom:3px;">
+                  <span>🔌 Port GE9: คอมประกันสุขภาพ 3</span>
+                  <span style="color:#fef08a;">พี่ติ๊ก</span>
+                </div>
+                <div style="color:#cbd5e1;display:flex;gap:12px;">
+                  <span>IP: <strong style="color:#38bdf8;">10.10.20.111</strong></span>
+                  <span>MAC: <strong style="color:#fbbf24;font-family:monospace;">2C:F0:5D:8B:4E:33</strong></span>
+                  <span>เต้ารับ: <strong style="color:#f8fafc;">OPD-ADM-03</strong></span>
+                </div>
+              </div>
+
+              <div style="background:rgba(0,0,0,0.35);padding:8px 10px;border-radius:6px;border:1px solid #166534;">
+                <div style="display:flex;justify-content:space-between;color:#86efac;font-weight:700;margin-bottom:3px;">
+                  <span>🔌 Port GE10: คอมประกันสุขภาพ 4</span>
+                  <span style="color:#fef08a;">DESKTOP-HOGODQJ</span>
+                </div>
+                <div style="color:#cbd5e1;display:flex;gap:12px;">
+                  <span>IP: <strong style="color:#38bdf8;">10.10.20.135</strong></span>
+                  <span>MAC: <strong style="color:#fbbf24;font-family:monospace;">50:EB:71:A9:3D:44</strong></span>
+                  <span>เต้ารับ: <strong style="color:#f8fafc;">OPD-ADM-04</strong></span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1851,7 +1893,7 @@
             <div style="display:grid;grid-template-columns:repeat(13, 1fr);gap:6px;font-size:10px;text-align:center;">
               ${Array.from({length: 26}, (_, i) => {
                 const pNum = i + 1;
-                const isTonoliPort = (pNum === 8);
+                const isInsurancePort = (pNum >= 7 && pNum <= 10);
                 const isConnected = pNum <= 22;
                 let desc = `GE${pNum}`;
                 if (pNum === 1) desc = 'Fortigate';
@@ -1860,17 +1902,19 @@
                 else if (pNum === 4) desc = 'HPE DL360';
                 else if (pNum === 5) desc = 'NAS Storage';
                 else if (pNum === 6) desc = 'iDRAC Host';
-                else if (pNum === 7) desc = 'IT Support';
+                else if (pNum === 7) desc = 'NIRUN-PC';
                 else if (pNum === 8) desc = 'TONOLI-PC';
-                else if (pNum >= 9 && pNum <= 22) desc = `Dist ${pNum}`;
+                else if (pNum === 9) desc = 'พี่ติ๊ก';
+                else if (pNum === 10) desc = 'HOGODQJ';
+                else if (pNum >= 11 && pNum <= 22) desc = `Dist ${pNum}`;
                 else if (pNum >= 25) desc = 'SFP Fiber';
 
-                const borderCol = isTonoliPort ? '#4ade80' : (isConnected ? '#22c55e' : '#475569');
-                const bgCol = isTonoliPort ? 'rgba(34,197,94,0.35)' : (isConnected ? 'rgba(34,197,94,0.15)' : 'rgba(51,65,85,0.4)');
+                const borderCol = isInsurancePort ? '#4ade80' : (isConnected ? '#22c55e' : '#475569');
+                const bgCol = isInsurancePort ? 'rgba(34,197,94,0.35)' : (isConnected ? 'rgba(34,197,94,0.15)' : 'rgba(51,65,85,0.4)');
                 return `
-                  <div style="background:${bgCol};border:1.5px solid ${borderCol};border-radius:5px;padding:4px 2px;${isTonoliPort ? 'box-shadow:0 0 10px rgba(74,222,128,0.5);' : ''}">
-                    <div style="color:${isTonoliPort ? '#86efac' : (isConnected ? '#4ade80' : '#64748b')};font-weight:700;">#${pNum}</div>
-                    <div style="color:${isTonoliPort ? '#fef08a' : '#94a3b8'};font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${desc}">${desc}</div>
+                  <div style="background:${bgCol};border:1.5px solid ${borderCol};border-radius:5px;padding:4px 2px;${isInsurancePort ? 'box-shadow:0 0 10px rgba(74,222,128,0.5);' : ''}">
+                    <div style="color:${isInsurancePort ? '#86efac' : (isConnected ? '#4ade80' : '#64748b')};font-weight:700;">#${pNum}</div>
+                    <div style="color:${isInsurancePort ? '#fef08a' : '#94a3b8'};font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${desc}">${desc}</div>
                   </div>
                 `;
               }).join('')}

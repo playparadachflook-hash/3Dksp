@@ -1153,7 +1153,20 @@
 
     // IT Admin & Health Insurance Room Desks (คอม 1, 2, 3 along left wall, คอม 4 in center)
     const itAdminPCs = [
-      { x: 6.4, z: 3.3, num: 1, ip: '11' },
+      { 
+        x: 6.4, z: 3.3, num: 1, 
+        ip: '10.10.20.21',
+        hostname: 'NIRUN-PC',
+        mac: '14:B3:1F:28:9A:11',
+        switchId: 'cisco-sg250',
+        switchName: 'Cisco SG250-26 (Core Managed Switch - Computer Room)',
+        switchPort: 'Port GE7 (GigabitEthernet 7 / VLAN 20 Untagged)',
+        wallOutlet: 'Outlet ID: OPD-ADM-01 (ช่องเต้ารับ LAN ผนังห้องประกันสุขภาพ)',
+        vlan: 'VLAN 20 - ประกันสุขภาพและสารสนเทศยุทธศาสตร์',
+        role: 'งานประกันสุขภาพ ลงทะเบียนสิทธิ ตรวจสอบความถูกต้องเวชระเบียนผู้ป่วย',
+        user: 'คุณนิรันดร์ (เจ้าหน้าที่งานประกันสุขภาพ)',
+        sw: 'HOSxP v3.6 • โปรแกรม e-Claim สปสช. • NHSO Smart Card Authen • ระบบตรวจสอบสิทธิการรักษา'
+      },
       { 
         x: 6.4, z: 4.7, num: 2, 
         ip: '10.10.20.147',
@@ -1168,14 +1181,39 @@
         user: 'เจ้าหน้าที่งานประกันสุขภาพ (TONOLI-PC)',
         sw: 'HOSxP v3.6 • โปรแกรม e-Claim สปสช. • Financial Data Hub (FDH) • NHSO Smart Card Agent'
       },
-      { x: 6.4, z: 6.1, num: 3, ip: '13' },
-      { x: 8.8, z: 4.7, num: 4, ip: '14' }
+      { 
+        x: 6.4, z: 6.1, num: 3, 
+        ip: '10.10.20.111',
+        hostname: 'พี่ติ๊ก',
+        mac: '2C:F0:5D:8B:4E:33',
+        switchId: 'cisco-sg250',
+        switchName: 'Cisco SG250-26 (Core Managed Switch - Computer Room)',
+        switchPort: 'Port GE9 (GigabitEthernet 9 / VLAN 20 Untagged)',
+        wallOutlet: 'Outlet ID: OPD-ADM-03 (ช่องเต้ารับ LAN ผนังห้องประกันสุขภาพ)',
+        vlan: 'VLAN 20 - ประกันสุขภาพและสารสนเทศยุทธศาสตร์',
+        role: 'งานประกันสุขภาพ ประสานสิทธิ์ ชดเชยค่าบริการทางการแพทย์ และสรุปรายงานลูกหนี้สิทธิ',
+        user: 'พี่ติ๊ก (เจ้าหน้าที่งานประกันสุขภาพ)',
+        sw: 'HOSxP v3.6 • ระบบ e-Claim สปสช. • MOPH Claim • Smart Card Agent'
+      },
+      { 
+        x: 8.8, z: 4.7, num: 4, 
+        ip: '10.10.20.135',
+        hostname: 'DESKTOP-HOGODQJ',
+        mac: '50:EB:71:A9:3D:44',
+        switchId: 'cisco-sg250',
+        switchName: 'Cisco SG250-26 (Core Managed Switch - Computer Room)',
+        switchPort: 'Port GE10 (GigabitEthernet 10 / VLAN 20 Untagged)',
+        wallOutlet: 'Outlet ID: OPD-ADM-04 (ช่องเต้ารับ LAN ผนังห้องประกันสุขภาพ)',
+        vlan: 'VLAN 20 - ประกันสุขภาพและสารสนเทศยุทธศาสตร์',
+        role: 'งานประกันสุขภาพและเวชสารสนเทศยุทธศาสตร์ จัดทำข้อมูล 43 แฟ้ม และตรวจสอบข้อมูล HDC',
+        user: 'เจ้าหน้าที่งานประกันสุขภาพยุทธศาสตร์ (DESKTOP-HOGODQJ)',
+        sw: 'HOSxP v3.6 • โปรแกรมตรวจสอบ 43 แฟ้ม OPPP • FDH Data Validator • e-Claim'
+      }
     ];
     itAdminPCs.forEach((p) => {
-      const isTonoli = p.num === 2;
-      const spec = isTonoli ? pcSpec(
-        'PC-ADM-02',
-        'คอมประกันสุขภาพ 2 (TONOLI-PC)',
+      const spec = pcSpec(
+        `PC-ADM-0${p.num}`,
+        `คอมประกันสุขภาพ ${p.num} (${p.hostname})`,
         p.role,
         p.user,
         p.ip,
@@ -1191,16 +1229,12 @@
           dhcpTracking: true,
           status: '🟢 ออนไลน์ปกติ (Dynamic IP Sync)'
         }
-      ) : pcSpec(
-        `PC-ADM-0${p.num}`,
-        `คอมประกันสุขภาพ ${p.num}`,
-        'งานบริหารและสนับสนุนข้อมูลองค์กรแพทย์',
-        'ธุรการ',
-        p.ip
       );
 
-      if (isTonoli) {
-        window.KSS = window.KSS || {};
+      window.KSS = window.KSS || {};
+      window.KSS.INSURANCE_SPECS = window.KSS.INSURANCE_SPECS || {};
+      window.KSS.INSURANCE_SPECS[p.mac] = spec;
+      if (p.num === 2) {
         window.KSS.TONOLI_PC_SPEC = spec;
       }
 
@@ -1210,11 +1244,11 @@
         w: 1.15,
         d: 0.6,
         rotY: p.num === 4 ? 0 : Math.PI / 2,
-        label: isTonoli ? `🖳 คอมประกันสุขภาพ 2 (TONOLI-PC)` : `🖳 คอมประกันสุขภาพ ${p.num}`,
+        label: `🖳 คอมประกันสุขภาพ ${p.num} (${p.hostname})`,
         pcInfo: spec
       });
     });
-    L.push({ text: '💻 ห้องงานประกันสุขภาพยุทธศาสตร์ (TONOLI-PC)', pos: V(8.0, 2.2, 4.7), cls: 'int-label sub-tag' });
+    L.push({ text: '💻 ห้องงานประกันสุขภาพยุทธศาสตร์ (4 เครื่อง)', pos: V(8.0, 2.2, 4.7), cls: 'int-label sub-tag' });
 
     // Server Room (ห้อง Server & Network Control Center)
     serverRackDetailed('rack-a', 11.8, 3.6, 0);
