@@ -120,6 +120,21 @@ button.primary:hover { background: #15803d !important; }
 .interior-items li span.q { font-weight: 600; color: #15803d; white-space: nowrap; }
 .interior-items li span.q.busy { color: #dc2626; background: #fee2e2; padding: 2px 8px; border-radius: 999px; font-size: 11px; }
 .interior-items li span.q.free { color: #15803d; background: #dcfce7; padding: 2px 8px; border-radius: 999px; font-size: 11px; }
+.interior-items li span.q.deadlock {
+  color: #ffffff;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  border: 1px solid #f87171;
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.4);
+  animation: deadlock-badge-blink 1.5s infinite ease-in-out;
+}
+@keyframes deadlock-badge-blink {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.85; }
+}
 
 body.mode-interior .topbar,
 body.mode-interior #toolbar,
@@ -166,6 +181,44 @@ body.mode-interior #info { display: none !important; }
   box-shadow: 0 4px 12px rgba(37, 99, 235, .35);
 }
 .int-label.sub-tag { background: rgba(255, 255, 255, .92); color: #334155; border-color: #cbd5e1; font-size: 10px; padding: 1px 6px; }
+
+/* Deadlock 3D Tag & Pulse Animation */
+.int-label.deadlock, .int-label.pc-tag.deadlock {
+  background: linear-gradient(135deg, #991b1b, #ef4444) !important;
+  color: #ffffff !important;
+  border: 1.5px solid #fecaca !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  padding: 3px 8px !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.8) !important;
+  animation: deadlock-pulse 1.3s infinite ease-in-out !important;
+}
+@keyframes deadlock-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  }
+  50% {
+    transform: scale(1.12);
+    box-shadow: 0 0 22px rgba(239, 68, 68, 0.95);
+  }
+}
+
+/* Deadlock Toolbar Button */
+.toolbar .deadlock-alert-btn {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: #fff;
+  border: 1px solid #f87171;
+  font-weight: 700;
+  animation: deadlock-pulse 1.8s infinite ease-in-out;
+  cursor: pointer;
+}
+.toolbar .deadlock-alert-btn:hover {
+  background: #dc2626;
+  color: #fff;
+}
 
 /* Toast Notification */
 .toast-notify {

@@ -726,3 +726,128 @@ KSS.SERVER_DEVICES = [
     os: 'Proxmox VE 8.1 / Debian 12 Bookworm'
   }
 ];
+
+/* =========================================================================
+ * DATABASE DEADLOCK MONITORING & DIAGNOSTICS REGISTRY (HOSxP / MySQL Deadlocks)
+ * =========================================================================
+ * เก็บบันทึกข้อมูลสถานะเครื่องลูกข่าย (PC Client) ที่เกิดสภาวะ Deadlock ในฐานข้อมูล
+ * รองรับการค้นหาตาม IP Address หรือ รหัสครุภัณฑ์ (PC Code)
+ * พร้อมคำสั่ง SQL, Thread ID, Locked Tables และคำแนะนำในการแก้ไข (KILL / Remote)
+ */
+KSS.DEADLOCKS = {
+  '192.168.10.43': {
+    ip: '192.168.10.43',
+    pcCode: 'PC-OPD-03',
+    pcName: 'โต๊ะคอมพิวเตอร์ OPD 3 (จุดคัดกรอง)',
+    buildingId: 'opd',
+    buildingName: 'อาคารผู้ป่วยนอก (OPD)',
+    location: 'โถงคัดกรองผู้ป่วยนอก OPD โต๊ะที่ 3',
+    dbServer: '10.10.10.251:3306 (MariaDB Primary Master - DELL T440)',
+    database: 'hos',
+    table: 'ovst, vn_stat, opdscreen',
+    threadId: '84920',
+    lockTime: '184 วินาที',
+    lockSeconds: 184,
+    lockType: 'InnoDB Row Lock Contention (Deadlock Detected)',
+    waitingQuery: "UPDATE ovst SET oq_status = '2', cur_dep = '018', last_dep = '011' WHERE vn = '671026084922';",
+    blockingIp: '192.168.10.63',
+    blockingPc: 'PC-EXAM-03 (ห้องตรวจ 3 - นพ.วิทวัส)',
+    blockingQuery: "UPDATE vn_stat SET pttype = 'UCS', inc_dru = inc_dru + 150 WHERE vn = '671026084922';",
+    state: 'Waiting for table metadata lock / Row Lock on vn=671026084922',
+    timeDetected: '10:14:02 น.',
+    status: 'DEADLOCK'
+  }
+};
+
+// Helper: ทำความสะอาด IP string ให้เหลือเฉพาะ IPv4
+KSS.cleanIp = function(ipStr) {
+  if (!ipStr) return '';
+  const match = String(ipStr).match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/);
+  return match ? match[1] : String(ipStr).trim();
+};
+
+// Helper: ดึงข้อมูล Deadlock ตาม IP หรือ รหัสเครื่อง
+KSS.getDeadlock = function(ipOrCode) {
+  if (!ipOrCode) return null;
+  const clean = KSS.cleanIp(ipOrCode);
+  if (clean && KSS.DEADLOCKS[clean]) {
+    return KSS.DEADLOCKS[clean];
+  }
+  const code = String(ipOrCode).trim().toUpperCase();
+  for (const key in KSS.DEADLOCKS) {
+    const item = KSS.DEADLOCKS[key];
+    if (item && (item.pcCode === code || item.ip === clean)) {
+      return item;
+    }
+  }
+  return null;
+};
+
+// Helper: ตรวจสอบว่า IP/เครื่องนี้มี Deadlock หรือไม่
+KSS.isDeadlocked = function(ipOrCode) {
+  return !!KSS.getDeadlock(ipOrCode);
+};
+
+// Helper: รายการ Deadlock ที่กำลังเกิดขึ้นทั้งหมด
+KSS.getAllDeadlocks = function() {
+  return Object.values(KSS.DEADLOCKS || {});
+};
+
+// Helper: ลงทะเบียนหรือจำลอง Deadlock ใหม่
+KSS.setDeadlock = function(ip, data = {}) {
+  const clean = KSS.cleanIp(ip);
+  if (!clean) return null;
+  const def = {
+    ip: clean,
+    pcCode: data.pcCode || 'PC-' + clean.split('.').pop(),
+    pcName: data.pcName || `คอมพิวเตอร์ (${clean})`,
+    buildingId: data.buildingId || 'opd',
+    buildingName: data.buildingName || 'อาคารผู้ป่วยนอก (OPD)',
+    location: data.location || 'จุดบริการในโรงพยาบาล',
+    dbServer: data.dbServer || '10.10.10.251:3306 (MariaDB Primary Master)',
+    database: data.database || 'hos',
+    table: data.table || 'ovst, vn_stat',
+    threadId: data.threadId || String(Math.floor(10000 + Math.random() * 90000)),
+    lockTime: data.lockTime || '120 วินาที',
+    lockSeconds: data.lockSeconds || 120,
+    lockType: data.lockType || 'InnoDB Row Lock (Deadlock Conflict)',
+    waitingQuery: data.waitingQuery || `UPDATE ovst SET oq_status = '2' WHERE vn = '6710260${Math.floor(100000 + Math.random() * 900000)}';`,
+    blockingIp: data.blockingIp || '192.168.10.63',
+    blockingPc: data.blockingPc || 'PC-EXAM-03 (ห้องตรวจ)',
+    blockingQuery: data.blockingQuery || `UPDATE vn_stat SET pttype = 'UCS' WHERE vn = '671026084922';`,
+    state: data.state || 'Waiting for table metadata lock',
+    timeDetected: data.timeDetected || new Date().toLocaleTimeString('th-TH'),
+    status: 'DEADLOCK'
+  };
+  KSS.DEADLOCKS[clean] = { ...def, ...data };
+  if (window.dispatchEvent) {
+    window.dispatchEvent(new CustomEvent('kss-deadlock-change', { detail: { type: 'set', ip: clean } }));
+  }
+  return KSS.DEADLOCKS[clean];
+};
+
+// Helper: เคลียร์/ปลดล็อค Deadlock
+KSS.clearDeadlock = function(ipOrCode) {
+  const dl = KSS.getDeadlock(ipOrCode);
+  if (dl && dl.ip && KSS.DEADLOCKS[dl.ip]) {
+    delete KSS.DEADLOCKS[dl.ip];
+    if (window.dispatchEvent) {
+      window.dispatchEvent(new CustomEvent('kss-deadlock-change', { detail: { type: 'clear', ip: dl.ip } }));
+    }
+    return true;
+  }
+  return false;
+};
+
+// Helper: สลับสถานะ Deadlock เพื่อทดสอบ
+KSS.toggleDeadlock = function(ipOrCode, customData = {}) {
+  const dl = KSS.getDeadlock(ipOrCode);
+  if (dl) {
+    KSS.clearDeadlock(ipOrCode);
+    return false;
+  } else {
+    KSS.setDeadlock(ipOrCode, customData);
+    return true;
+  }
+};
+

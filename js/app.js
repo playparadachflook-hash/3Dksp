@@ -858,6 +858,7 @@
 
   // --- Computer Specification Modal ---
   let currentPcIp = '';
+  let currentPcObject = null;
 
   function parseIpInfo(ipStr) {
     if (!ipStr) return { cleanIp: '-', extra: '', gateway: '-' };
@@ -920,6 +921,7 @@
 
   function showPcModal(pc) {
     if (!pc) return;
+    currentPcObject = pc;
     const modal = document.getElementById('pc-modal');
     if (!modal) return;
 
@@ -947,9 +949,46 @@
     const pingSpan = document.getElementById('pc-ping-cmd');
     if (pingSpan) pingSpan.innerText = `ping -t ${netInfo.cleanIp}`;
 
+    // 2.1 Database Deadlock Status Check
+    const deadlock = (K.getDeadlock ? K.getDeadlock(netInfo.cleanIp) || K.getDeadlock(pc.code) : null);
+    const dlBanner = document.getElementById('pc-deadlock-banner');
     const remoteStatusEl = document.getElementById('pc-remote-status');
-    if (remoteStatusEl) {
-      remoteStatusEl.innerText = (pc.status && pc.status.includes('ออนไลน์')) ? '🟢 พร้อมรับรีโมท' : (pc.status || '🟢 พร้อมรับรีโมท');
+    const toggleDlBtn = document.getElementById('pc-toggle-deadlock-btn');
+
+    if (deadlock) {
+      if (dlBanner) {
+        dlBanner.classList.remove('hidden');
+        const dlServer = document.getElementById('dl-server');
+        if (dlServer) dlServer.innerText = deadlock.dbServer || '10.10.10.251:3306 (MariaDB Primary Master)';
+        const dlTable = document.getElementById('dl-table');
+        if (dlTable) dlTable.innerText = deadlock.table || 'ovst, vn_stat';
+        const dlThread = document.getElementById('dl-thread');
+        if (dlThread) dlThread.innerText = '#' + (deadlock.threadId || '84920');
+        const dlDuration = document.getElementById('dl-duration');
+        if (dlDuration) dlDuration.innerText = deadlock.lockTime || (deadlock.lockSeconds ? `${deadlock.lockSeconds} วินาที` : 'ค้างอยู่');
+        const dlBlocking = document.getElementById('dl-blocking');
+        if (dlBlocking) dlBlocking.innerText = `${deadlock.blockingIp || '-'} (${deadlock.blockingPc || 'เครื่องลูกข่ายอื่น'})`;
+        const dlQuery = document.getElementById('dl-query-sql');
+        if (dlQuery) dlQuery.innerText = deadlock.waitingQuery || "UPDATE ovst SET oq_status = '2' WHERE vn = '671026084922';";
+        const dlKill = document.getElementById('dl-kill-cmd');
+        if (dlKill) dlKill.innerText = `KILL ${deadlock.threadId || '84920'};`;
+      }
+      if (remoteStatusEl) {
+        remoteStatusEl.innerText = '⚠️ DEADLOCK (ติดล็อค DB)';
+        remoteStatusEl.classList.add('status-deadlock');
+      }
+      if (toggleDlBtn) {
+        toggleDlBtn.innerText = '✅ ปลดล็อค Deadlock เครื่องนี้';
+      }
+    } else {
+      if (dlBanner) dlBanner.classList.add('hidden');
+      if (remoteStatusEl) {
+        remoteStatusEl.classList.remove('status-deadlock');
+        remoteStatusEl.innerText = (pc.status && pc.status.includes('ออนไลน์')) ? '🟢 พร้อมรับรีโมท' : (pc.status || '🟢 พร้อมรับรีโมท');
+      }
+      if (toggleDlBtn) {
+        toggleDlBtn.innerText = '⚠️ จำลอง Deadlock เครื่องนี้';
+      }
     }
 
     const copyBtnText = document.getElementById('pc-copy-btn-text');
@@ -1030,6 +1069,59 @@
     };
   }
 
+  // Deadlock Banner Actions
+  const dlCopyQueryBtn = document.getElementById('dl-copy-query-btn');
+  if (dlCopyQueryBtn) {
+    dlCopyQueryBtn.onclick = () => {
+      const q = document.getElementById('dl-query-sql')?.innerText || '';
+      if (!q) return;
+      navigator.clipboard.writeText(q).then(() => {
+        showToast('📋 คัดลอกคำสั่ง SQL ที่รอค้างเรียบร้อยแล้ว');
+      });
+    };
+  }
+
+  const dlKillBtn = document.getElementById('dl-kill-btn');
+  if (dlKillBtn) {
+    dlKillBtn.onclick = () => {
+      const cmd = document.getElementById('dl-kill-cmd')?.innerText || 'KILL 84920;';
+      navigator.clipboard.writeText(cmd).then(() => {
+        showToast(`⚡ คัดลอกคำสั่ง MySQL: ${cmd} สำเร็จ (พร้อมรันเพื่อปลด Deadlock)`);
+      });
+    };
+  }
+
+  const dlResolveBtn = document.getElementById('dl-resolve-btn');
+  if (dlResolveBtn) {
+    dlResolveBtn.onclick = () => {
+      if (currentPcIp && K.clearDeadlock) {
+        K.clearDeadlock(currentPcIp);
+        showToast(`✅ ปลดล็อคสถานะ Deadlock สำหรับ IP ${currentPcIp} เรียบร้อยแล้ว`);
+        if (currentPcObject) showPcModal(currentPcObject);
+        refreshCurrentInteriorIfActive();
+        updateDeadlockStatusEverywhere();
+      }
+    };
+  }
+
+  const pcToggleDlBtn = document.getElementById('pc-toggle-deadlock-btn');
+  if (pcToggleDlBtn) {
+    pcToggleDlBtn.onclick = () => {
+      if (!currentPcIp || currentPcIp === '-') return;
+      if (K.toggleDeadlock) {
+        const isNowDl = K.toggleDeadlock(currentPcIp, {
+          pcCode: currentPcObject?.code,
+          pcName: currentPcObject?.name,
+          location: currentPcObject?.role
+        });
+        showToast(isNowDl ? `⚠️ จำลอง Deadlock ที่ IP: ${currentPcIp}` : `✅ เคลียร์ Deadlock ที่ IP: ${currentPcIp}`);
+        if (currentPcObject) showPcModal(currentPcObject);
+        refreshCurrentInteriorIfActive();
+        updateDeadlockStatusEverywhere();
+      }
+    };
+  }
+
   // --- Toast Notification ---
   function showToast(msg) {
     const toast = document.getElementById('toast-notify');
@@ -1069,6 +1161,59 @@
     document.body.removeChild(ta);
   }
 
+  // --- Deadlock Status & Navigation Helpers ---
+  function refreshCurrentInteriorIfActive() {
+    if (state.mode === 'interior' && state.currentBuilding) {
+      enterInterior(state.currentBuilding, true);
+    }
+  }
+
+  function updateDeadlockStatusEverywhere() {
+    const btn = document.getElementById('btn-deadlock-alert');
+    const countEl = document.getElementById('deadlock-count');
+    const list = (K.getAllDeadlocks ? K.getAllDeadlocks() : []);
+    if (btn && countEl) {
+      if (list.length > 0) {
+        btn.classList.remove('hidden');
+        countEl.innerText = list.length;
+        btn.title = `ตรวจพบ ${list.length} เครื่องติด Database Deadlock ใน HOSxP (คลิกเพื่อดูและปลดล็อค)`;
+      } else {
+        btn.classList.add('hidden');
+      }
+    }
+    const serverModal = document.getElementById('server-modal');
+    if (serverModal && !serverModal.classList.contains('hidden')) {
+      renderServerCards();
+    }
+  }
+
+  function inspectDeadlockedPc(dl) {
+    if (!dl) return;
+    const bId = dl.buildingId || 'opd';
+    const b = (K.BUILDINGS || []).find(x => x.id === bId || x.interior === bId);
+    if (b) {
+      selectBuilding(b);
+      enterInterior(b);
+      setTimeout(() => {
+        showPcModal({
+          code: dl.pcCode,
+          name: dl.pcName,
+          ip: dl.ip,
+          role: dl.location,
+          status: '⚠️ DEADLOCK (ติดล็อค DB)'
+        });
+      }, 450);
+    } else {
+      showPcModal({
+        code: dl.pcCode,
+        name: dl.pcName,
+        ip: dl.ip,
+        role: dl.location,
+        status: '⚠️ DEADLOCK (ติดล็อค DB)'
+      });
+    }
+  }
+
   // --- Server & Controller Dashboard Logic ---
   let activeServerFilter = 'all';
   let activeServerSearch = '';
@@ -1102,6 +1247,8 @@
       return;
     }
 
+    const allDls = (K.getAllDeadlocks ? K.getAllDeadlocks() : []);
+
     filtered.forEach(d => {
       const card = document.createElement('div');
       card.className = 'server-card';
@@ -1113,12 +1260,17 @@
 
       const isPassRevealed = revealedPasswords.has(d.id);
       const displayPass = isPassRevealed ? d.password : '••••••••••••';
+      const isDbHost = (d.id === 'proxmox-dell' || d.id === 'proxmox-hpe');
+      const dlBadge = (isDbHost && allDls.length > 0)
+        ? `<span class="sc-deadlock-pill" title="มี ${allDls.length} เครื่องลูกข่ายติดปัญหา Deadlock ในฐานข้อมูล">⚠️ ${allDls.length} Deadlock Conflict</span>`
+        : '';
 
       card.innerHTML = `
         <div class="sc-header">
           <div style="display:flex;align-items:center;gap:6px;">
             <span class="sc-type-pill sc-type-${d.type}">${d.typeName}</span>
             <span class="sc-loc-pill">📍 ${d.location}</span>
+            ${dlBadge}
           </div>
           <span class="sc-status-pill">🟢 Online (${d.ping})</span>
         </div>
@@ -1227,6 +1379,28 @@
 
       container.appendChild(card);
     });
+
+    // Update Deadlock Alert Banner in Server Modal
+    const serverDlBanner = document.getElementById('server-deadlock-banner');
+    if (serverDlBanner) {
+      if (allDls.length > 0) {
+        serverDlBanner.classList.remove('hidden');
+        const firstDl = allDls[0];
+        const descEl = document.getElementById('server-deadlock-desc');
+        if (descEl) {
+          descEl.innerText = `พบเครื่องลูกข่าย ${firstDl.pcCode || ''} (IP: ${firstDl.ip}) กำลังรอแถวข้อมูลตาราง ${firstDl.table || 'ovst'} ที่ติดล็อค (${firstDl.lockTime || '184 วินาที'})`;
+        }
+        const jumpBtn = document.getElementById('server-deadlock-jump-btn');
+        if (jumpBtn) {
+          jumpBtn.onclick = () => {
+            closeServerModal();
+            inspectDeadlockedPc(firstDl);
+          };
+        }
+      } else {
+        serverDlBanner.classList.add('hidden');
+      }
+    }
 
     if (targetServerId) {
       setTimeout(() => {
@@ -2354,7 +2528,18 @@
       const labelDiv = document.createElement('div');
       labelDiv.className = l.cls || 'int-label';
       labelDiv.innerText = l.text;
-      if (l.serverId) {
+
+      // Deadlock Tag Check
+      const dl = (l.pcInfo && K.getDeadlock) ? (K.getDeadlock(l.pcInfo.ip) || K.getDeadlock(l.pcInfo.code)) : null;
+      if (dl) {
+        labelDiv.className += ' deadlock';
+        labelDiv.innerHTML = `⚠️ <strong>DEADLOCK</strong> • ${l.text}`;
+        labelDiv.title = `⚠️ เครื่องนี้ติด Database Deadlock (${dl.table})! คลิกเพื่อดูรายละเอียดและสั่ง Kill Thread`;
+        labelDiv.onclick = (e) => {
+          e.stopPropagation();
+          showPcModal(l.pcInfo);
+        };
+      } else if (l.serverId) {
         labelDiv.title = 'คลิกเพื่อตรวจสอบสถานะ & เข้าสู่ระบบ';
         labelDiv.onclick = (e) => {
           e.stopPropagation();
@@ -2413,6 +2598,13 @@
         toggleId = it.toggleId || it.id || null;
         badgeCls = it.badgeCls || (status.includes('🔴') || status.includes('ไม่ว่าง') || status.includes('ตรวจ') || status.includes('ประชุม') ? 'busy' : 'free');
         pcInfo = it.pcInfo || null;
+      }
+
+      // Deadlock Status Check in Interior Item List
+      const dl = (pcInfo && K.getDeadlock) ? (K.getDeadlock(pcInfo.ip) || K.getDeadlock(pcInfo.code)) : null;
+      if (dl) {
+        badgeCls = 'deadlock';
+        status = `⚠️ Deadlock (${dl.table || 'DB Lock'})`;
       }
 
       if (toggleId) {
@@ -2634,6 +2826,27 @@
     const layer = document.querySelector('.label-layer');
     if (layer) layer.style.display = state.pinsVisible ? 'block' : 'none';
   };
+
+  // Deadlock Toolbar Button Handler & Global Event Listener
+  const btnDlAlert = document.getElementById('btn-deadlock-alert');
+  if (btnDlAlert) {
+    btnDlAlert.onclick = () => {
+      const list = (K.getAllDeadlocks ? K.getAllDeadlocks() : []);
+      if (list.length > 0) {
+        inspectDeadlockedPc(list[0]);
+      } else {
+        showToast('✓ ไม่พบรายการ Deadlock ในระบบ');
+      }
+    };
+  }
+
+  window.addEventListener('kss-deadlock-change', () => {
+    updateDeadlockStatusEverywhere();
+    refreshCurrentInteriorIfActive();
+  });
+
+  // Initial check for active deadlocks on load
+  updateDeadlockStatusEverywhere();
 
   // --- Animation Loop ---
   const clock = new THREE.Clock();
