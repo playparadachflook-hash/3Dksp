@@ -235,7 +235,8 @@
       return sg;
     }
 
-    function makePcSpec(code, name, role, ipSuffix, software) {
+    function makePcSpec(code, name, role, ipSuffix, software, extra = {}) {
+      const isFullIp = String(ipSuffix).includes('.');
       const spec = {
         code,
         name,
@@ -245,13 +246,24 @@
         storage: 'SSD 512 GB NVMe M.2',
         monitor: 'Dell 24" IPS Full HD ถนอมสายตา',
         os: 'Windows 11 Pro 64-bit (Hospital Domain)',
-        ip: `192.168.10.${ipSuffix}`,
+        ip: isFullIp ? ipSuffix : `192.168.10.${ipSuffix}`,
         status: '🟢 ออนไลน์',
         software,
         peripherals: 'เครื่องอ่านบัตรประชาชน Smart Card • เครื่องสแกนบาร์โค้ดผู้ป่วย',
-        user: role
+        user: extra.user || role,
+        hostname: extra.hostname || '',
+        mac: extra.mac || '',
+        switchId: extra.switchId || 'ksp-sw-pcu',
+        switchName: extra.switchName || 'Aruba / HPE 2530 24G (KSP-SW-PCU - ตึก PCU)',
+        switchPort: extra.switchPort || '',
+        wallOutlet: extra.wallOutlet || '',
+        gateway: extra.gateway || '10.10.40.1 (IPD & PCU Gateway)',
+        vlan: extra.vlan || 'VLAN 40 - บริการสุขภาพปฐมภูมิ (PCU)',
+        ...extra
       };
-      pcList.push(spec);
+      if (!pcList.some(p => p.code === code)) {
+        pcList.push(spec);
+      }
       return spec;
     }
 
@@ -481,24 +493,84 @@
 
     workDesk({
       x: -8.95, z: -2.0, w: 1.1, d: 0.62, rotY: -Math.PI / 2,
-      hasPC: true, label: 'โต๊ะคอม',
-      pcInfo: makePcSpec('PC-PCU-03', 'โต๊ะคอมพิวเตอร์โถง PCU (จุดที่ 1)', 'พยาบาลวิชาชีพบันทึกข้อมูลสุขภาพชุมชนและวัคซีน', '103', 'ระบบ HOSxP PCU • ระบบงานสร้างเสริมสุขภาพและภูมิคุ้มกันโรค')
+      hasPC: true, label: '🖳 โถง PCU 1 (PCU-02-PC)',
+      pcInfo: makePcSpec(
+        'PC-PCU-03', 
+        'โต๊ะคอมพิวเตอร์โถง PCU (จุดที่ 1)', 
+        'พยาบาลวิชาชีพบันทึกข้อมูลสุขภาพชุมชนและวัคซีน', 
+        '10.10.40.28', 
+        'ระบบ HOSxP PCU • ระบบงานสร้างเสริมสุขภาพและภูมิคุ้มกันโรค',
+        {
+          hostname: 'PCU-02-PC',
+          mac: '54:BF:64:1C:28:02',
+          switchId: 'ksp-sw-pcu',
+          switchName: 'Aruba / HPE 2530 24G (KSP-SW-PCU - ตึก PCU)',
+          switchPort: 'Port 2 (VLAN 40)',
+          wallOutlet: 'PCU-HALL-01 (เต้ารับ LAN โถง PCU จุดที่ 1)',
+          user: 'กุลยา (พยาบาลวิชาชีพชำนาญการ)'
+        }
+      )
     });
     workDesk({
       x: -8.95, z: 1.4, w: 1.1, d: 0.62, rotY: -Math.PI / 2,
-      hasPC: true, label: 'โต๊ะคอม',
-      pcInfo: makePcSpec('PC-PCU-04', 'โต๊ะคอมพิวเตอร์โถง PCU (จุดที่ 2)', 'พยาบาลวิชาชีพติดตามผู้ป่วยโรคเรื้อรัง (NCDs)', '104', 'ระบบ HOSxP NCDs Clinic • ระบบฐานข้อมูลเบาหวาน-ความดัน')
+      hasPC: true, label: '🖳 โถง PCU 2 (DESKTOP-U2S7HC4)',
+      pcInfo: makePcSpec(
+        'PC-PCU-04', 
+        'โต๊ะคอมพิวเตอร์โถง PCU (จุดที่ 2)', 
+        'พยาบาลวิชาชีพติดตามผู้ป่วยโรคเรื้อรัง (NCDs) และงานห้องยา PCU', 
+        '10.10.40.35', 
+        'ระบบ HOSxP NCDs Clinic • ระบบฐานข้อมูลเบาหวาน-ความดัน',
+        {
+          hostname: 'DESKTOP-U2S7HC4',
+          mac: '54:BF:64:1C:35:C4',
+          switchId: 'ksp-sw-pcu',
+          switchName: 'Aruba / HPE 2530 24G (KSP-SW-PCU - ตึก PCU)',
+          switchPort: 'Port 3 (VLAN 40)',
+          wallOutlet: 'PCU-HALL-02 (เต้ารับ LAN โถง PCU จุดที่ 2)',
+          user: 'สุนภรณ์ ชาญสกุล (พยาบาลวิชาชีพ)'
+        }
+      )
     });
     workDesk({
       x: -8.95, z: 5.4, w: 1.1, d: 0.62, rotY: -Math.PI / 2,
-      hasPC: true, label: 'โต๊ะคอม',
-      pcInfo: makePcSpec('PC-PCU-05', 'โต๊ะคอมพิวเตอร์ลงทะเบียน PCU (จุดที่ 3)', 'เจ้าหน้าที่เวชระเบียนและตรวจสอบสิทธิผู้ป่วย PCU', '105', 'ระบบ HOSxP Registry • ระบบตรวจสอบสิทธิ สปสช. Smart Card')
+      hasPC: true, label: '🖳 ลงทะเบียน PCU (PCU07-PC)',
+      pcInfo: makePcSpec(
+        'PC-PCU-05', 
+        'โต๊ะคอมพิวเตอร์ลงทะเบียน PCU (จุดที่ 3)', 
+        'เจ้าหน้าที่เวชระเบียนและตรวจสอบสิทธิผู้ป่วย PCU', 
+        '10.10.40.29', 
+        'ระบบ HOSxP Registry • ระบบตรวจสอบสิทธิ สปสช. Smart Card',
+        {
+          hostname: 'PCU07-PC',
+          mac: '54:BF:64:1C:29:07',
+          switchId: 'ksp-sw-pcu',
+          switchName: 'Aruba / HPE 2530 24G (KSP-SW-PCU - ตึก PCU)',
+          switchPort: 'Port 4 (VLAN 40)',
+          wallOutlet: 'PCU-REG-03 (เต้ารับ LAN โต๊ะลงทะเบียน PCU จุดที่ 3)',
+          user: 'นางสาวพิชญากร สิงห์/นาง (พยาบาลวิชาชีพ)'
+        }
+      )
     });
 
     workDesk({
       x: -5.35, z: -1.2, w: 1.1, d: 0.62, rotY: Math.PI / 2,
-      hasPC: true, label: 'โต๊ะคอม',
-      pcInfo: makePcSpec('PC-PCU-06', 'โต๊ะคอมพิวเตอร์ประสานงาน PCU', 'พยาบาลประสานงานส่งต่อและเยี่ยมบ้าน', '106', 'ระบบ Thai Refer • ระบบเยี่ยมบ้าน (Home Health Care)')
+      hasPC: true, label: '🖳 ประสานงาน PCU (PCU6)',
+      pcInfo: makePcSpec(
+        'PC-PCU-06', 
+        'โต๊ะคอมพิวเตอร์ประสานงาน PCU', 
+        'พยาบาลประสานงานส่งต่อและเยี่ยมบ้าน', 
+        '10.10.40.27', 
+        'ระบบ Thai Refer • ระบบเยี่ยมบ้าน (Home Health Care)',
+        {
+          hostname: 'PCU6',
+          mac: '54:BF:64:1C:27:06',
+          switchId: 'ksp-sw-pcu',
+          switchName: 'Aruba / HPE 2530 24G (KSP-SW-PCU - ตึก PCU)',
+          switchPort: 'Port 5 (VLAN 40)',
+          wallOutlet: 'PCU-COORD-01 (เต้ารับ LAN โต๊ะประสานงาน PCU)',
+          user: 'นางสุภา พันธุ์พัก (พยาบาลวิชาชีพชำนาญการ)'
+        }
+      )
     });
 
     doorWay(-7.1, 7.0, 0, 1.4);

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * ข้อมูลแผนผังโรงพยาบาลโคกศรีสุพรรณ (ปรับกรอบสี่เหลี่ยมผืนผ้าแนวตรง)
  * ---------------------------------------------------------------
  * px, py  = ตำแหน่งกึ่งกลางอาคาร (พิกเซล) บนกรอบสี่เหลี่ยม (X: 50..910, Y: 50..710)
@@ -1292,6 +1292,84 @@ KSS.MAC_REGISTRY = {
     subnet: '255.255.255.0',
     leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
     lastRenew: '26/10/2026 14:22:00',
+    status: 'online'
+  },
+
+  /* เธเธฅเธธเนเธกเธเธฒเธเธเธฃเธดเธเธฒเธฃเธเธเธกเธ เธนเธกเธดเนเธฅเธฐเธชเธฃเนเธฒเธเน€เธชเธฃเธดเธกเธชเธธเธเธ เธฒเธ (PCU - Primary Care Unit) */
+  '54:BF:64:1C:28:02': {
+    mac: '54:BF:64:1C:28:02',
+    hostname: 'PCU-02-PC',
+    pcCode: 'PC-PCU-03',
+    name: 'เนเธ•เนเธฐเธเธญเธกเธเธดเธงเน€เธ•เธญเธฃเนเนเธ–เธ PCU (เธเธธเธ”เธ—เธตเน 1)',
+    currentIp: '10.10.40.28',
+    switchId: 'ksp-sw-pcu',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-PCU - เธ•เธถเธ PCU)',
+    switchIp: '10.10.100.9',
+    switchPort: 'Port 2 (10/100/1000Base-T / VLAN 40 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: PCU-HALL-01 (เน€เธ•เนเธฒเธฃเธฑเธ LAN เนเธ–เธ PCU เธเธธเธ”เธ—เธตเน 1)',
+    vlan: 'VLAN 40 - เธเธฃเธดเธเธฒเธฃเธชเธธเธเธ เธฒเธเธเธเธกเธ เธนเธกเธด (PCU)',
+    gateway: '10.10.40.1 (IPD & PCU Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '26/10/2026 14:50:00',
+    status: 'online'
+  },
+  '54:BF:64:1C:35:C4': {
+    mac: '54:BF:64:1C:35:C4',
+    hostname: 'DESKTOP-U2S7HC4',
+    pcCode: 'PC-PCU-04',
+    name: 'เนเธ•เนเธฐเธเธญเธกเธเธดเธงเน€เธ•เธญเธฃเนเนเธ–เธ PCU (เธเธธเธ”เธ—เธตเน 2)',
+    currentIp: '10.10.40.35',
+    switchId: 'ksp-sw-pcu',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-PCU - เธ•เธถเธ PCU)',
+    switchIp: '10.10.100.9',
+    switchPort: 'Port 3 (10/100/1000Base-T / VLAN 40 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: PCU-HALL-02 (เน€เธ•เนเธฒเธฃเธฑเธ LAN เนเธ–เธ PCU เธเธธเธ”เธ—เธตเน 2)',
+    vlan: 'VLAN 40 - เธเธฃเธดเธเธฒเธฃเธชเธธเธเธ เธฒเธเธเธเธกเธ เธนเธกเธด (PCU)',
+    gateway: '10.10.40.1 (IPD & PCU Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '26/10/2026 14:50:00',
+    status: 'online'
+  },
+  '54:BF:64:1C:29:07': {
+    mac: '54:BF:64:1C:29:07',
+    hostname: 'PCU07-PC',
+    pcCode: 'PC-PCU-05',
+    name: 'เนเธ•เนเธฐเธเธญเธกเธเธดเธงเน€เธ•เธญเธฃเนเธฅเธเธ—เธฐเน€เธเธตเธขเธ PCU (เธเธธเธ”เธ—เธตเน 3)',
+    currentIp: '10.10.40.29',
+    switchId: 'ksp-sw-pcu',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-PCU - เธ•เธถเธ PCU)',
+    switchIp: '10.10.100.9',
+    switchPort: 'Port 4 (10/100/1000Base-T / VLAN 40 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: PCU-REG-03 (เน€เธ•เนเธฒเธฃเธฑเธ LAN เนเธ•เนเธฐเธฅเธเธ—เธฐเน€เธเธตเธขเธ PCU เธเธธเธ”เธ—เธตเน 3)',
+    vlan: 'VLAN 40 - เธเธฃเธดเธเธฒเธฃเธชเธธเธเธ เธฒเธเธเธเธกเธ เธนเธกเธด (PCU)',
+    gateway: '10.10.40.1 (IPD & PCU Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '26/10/2026 14:50:00',
+    status: 'online'
+  },
+  '54:BF:64:1C:27:06': {
+    mac: '54:BF:64:1C:27:06',
+    hostname: 'PCU6',
+    pcCode: 'PC-PCU-06',
+    name: 'เนเธ•เนเธฐเธเธญเธกเธเธดเธงเน€เธ•เธญเธฃเนเธเธฃเธฐเธชเธฒเธเธเธฒเธ PCU',
+    currentIp: '10.10.40.27',
+    switchId: 'ksp-sw-pcu',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-PCU - เธ•เธถเธ PCU)',
+    switchIp: '10.10.100.9',
+    switchPort: 'Port 5 (10/100/1000Base-T / VLAN 40 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: PCU-COORD-01 (เน€เธ•เนเธฒเธฃเธฑเธ LAN เนเธ•เนเธฐเธเธฃเธฐเธชเธฒเธเธเธฒเธ PCU)',
+    vlan: 'VLAN 40 - เธเธฃเธดเธเธฒเธฃเธชเธธเธเธ เธฒเธเธเธเธกเธ เธนเธกเธด (PCU)',
+    gateway: '10.10.40.1 (IPD & PCU Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '26/10/2026 14:50:00',
     status: 'online'
   }
 };
