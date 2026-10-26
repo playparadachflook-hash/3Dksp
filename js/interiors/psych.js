@@ -249,6 +249,29 @@
     // ห้องที่ 1: ห้องหัวหน้ากลุ่มงานยาเสพติดและจิตเวช (X: -15.0 ถึง -10.0)
     // ผัง: "โต๊ะคอม" ชิดกำแพงขวา
     // -------------------------------------------------------------------------
+    const r1Pc = (K.PSYCH_SPECS && K.PSYCH_SPECS['70:85:C2:58:1A:3B']) || {
+      code: 'PC-PSYCH-01',
+      name: 'คอมหัวหน้ากลุ่มงานจิตเวชและยาเสพติด',
+      hostname: 'CONSULT-PC',
+      ip: '10.10.20.108',
+      mac: '70:85:C2:58:1A:3B',
+      switchId: 'ksp-sw-psych',
+      switchName: 'Aruba / HPE 2530 24G (KSP-SW-PSYCH - ห้องที่ 3)',
+      switchPort: 'Port 1 (VLAN 20)',
+      wallOutlet: 'PSYCH-RM1-01 (ห้องหัวหน้ากลุ่มงานจิตเวชฯ)',
+      vlan: 'VLAN 20 - บริการคลินิกเฉพาะทางและสุขภาพจิต',
+      role: 'บริหารจัดการคลินิกสุขภาพจิต กำกับการบำบัดรักษา และระบบงานยาเสพติด',
+      user: 'หัวหน้ากลุ่มงานจิตเวชและยาเสพติด',
+      os: 'Windows 11 Pro 64-bit',
+      cpu: 'Intel Core i5-12400 (6C/12T, 4.4GHz)',
+      ram: '16 GB DDR4-3200',
+      storage: '512 GB M.2 NVMe SSD',
+      monitor: '23.8" IPS Full HD (1920x1080)',
+      software: 'HOSxP v3.6, Psychiatric SMI-V, Matrix Program, MOPH Claim',
+      peripherals: 'เครื่องอ่านบัตรสมาร์ทการ์ด, Barcode Scanner, UPS 850VA',
+      status: '🟢 ออนไลน์ปกติ'
+    };
+
     workDesk({
       x: -10.55, // ชิดกำแพงขวา (-10.0)
       z: 0.8,
@@ -258,8 +281,8 @@
       hasPC: true,
       isExecutive: true,
       hasVisitor: true,
-      label: '🖳 คอมหัวหน้าจิตเวชฯ',
-      pcInfo: psychPcSpec('PC-PSYCH-01', 'คอมหัวหน้ากลุ่มงานจิตเวชและยาเสพติด', 'บริหารจัดการคลินิกสุขภาพจิต กำกับการบำบัดรักษา และระบบงานยาเสพติด', 'หัวหน้ากลุ่มงานจิตเวชและยาเสพติด', '01')
+      label: '🖳 คอมหัวหน้าจิตเวชฯ (CONSULT-PC)',
+      pcInfo: r1Pc
     });
     // ตู้เก็บเอกสารสำคัญและแฟ้มประวัติผู้ป่วยชิดผนังหลัง
     M.box(g, 2.0, 2.0, 0.5, mSteel, -13.5, 1.0, -3.4);
@@ -279,6 +302,52 @@
     // ห้องที่ 2: ห้องทำงาน (X: -10.0 ถึง -5.0)
     // ผัง: มี "โต๊ะคอม" 2 เครื่อง (ตัวกลาง และ ตัวขวา)
     // -------------------------------------------------------------------------
+    const r2Pc1 = (K.PSYCH_SPECS && K.PSYCH_SPECS['A4:BB:6D:3C:99:1F']) || {
+      code: 'PC-PSYCH-02',
+      name: 'คอมพยาบาลจิตเวช 1',
+      hostname: 'CSPC-PAN',
+      ip: '10.10.20.27',
+      mac: 'A4:BB:6D:3C:99:1F',
+      switchId: 'ksp-sw-psych',
+      switchName: 'Aruba / HPE 2530 24G (KSP-SW-PSYCH - ห้องที่ 3)',
+      switchPort: 'Port 2 (VLAN 20)',
+      wallOutlet: 'PSYCH-RM2-01 (ห้องทำงานกลุ่มงานจิตเวชฯ)',
+      vlan: 'VLAN 20 - บริการคลินิกเฉพาะทางและสุขภาพจิต',
+      role: 'งานซักประวัติ ประเมินสุขภาพจิต คัดกรองภาวะวิกฤต และติดตามผู้ป่วยจิตเวช SMI-V',
+      user: 'พยาบาลวิชาชีพจิตเวช (คุณปาน)',
+      os: 'Windows 11 Pro 64-bit',
+      cpu: 'Intel Core i5-12400 (6C/12T, 4.4GHz)',
+      ram: '16 GB DDR4-3200',
+      storage: '512 GB M.2 NVMe SSD',
+      monitor: '23.8" IPS Full HD (1920x1080)',
+      software: 'HOSxP v3.6, แบบคัดกรอง 2Q/9Q/8Q, Smart Card Agent',
+      peripherals: 'เครื่องอ่านบัตรสมาร์ทการ์ด, Barcode Scanner, UPS 850VA',
+      status: '🟢 ออนไลน์ปกติ'
+    };
+
+    const r2Pc2 = (K.PSYCH_SPECS && K.PSYCH_SPECS['BC:24:11:8E:72:4D']) || {
+      code: 'PC-PSYCH-03',
+      name: 'คอมงานบำบัดยาเสพติด 2',
+      hostname: 'DESKTOP-2JC9KOA',
+      ip: '10.10.20.126',
+      mac: 'BC:24:11:8E:72:4D',
+      switchId: 'ksp-sw-psych',
+      switchName: 'Aruba / HPE 2530 24G (KSP-SW-PSYCH - ห้องที่ 3)',
+      switchPort: 'Port 3 (VLAN 20)',
+      wallOutlet: 'PSYCH-RM2-02 (ห้องทำงานกลุ่มงานจิตเวชฯ)',
+      vlan: 'VLAN 20 - บริการคลินิกเฉพาะทางและสุขภาพจิต',
+      role: 'งานฟื้นฟูสมรรถภาพผู้ติดยาเสพติด ระบบ Matrix Program และคัดกรอง B-Fast',
+      user: 'นักจิตวิทยา / นักวิชาการสาธารณสุข',
+      os: 'Windows 11 Pro 64-bit',
+      cpu: 'Intel Core i5-12400 (6C/12T, 4.4GHz)',
+      ram: '16 GB DDR4-3200',
+      storage: '512 GB M.2 NVMe SSD',
+      monitor: '23.8" IPS Full HD (1920x1080)',
+      software: 'HOSxP v3.6, Matrix Program บำบัดยาเสพติด, B-Fast System',
+      peripherals: 'เครื่องอ่านบัตรสมาร์ทการ์ด, Barcode Scanner, UPS 850VA',
+      status: '🟢 ออนไลน์ปกติ'
+    };
+
     // โต๊ะคอมตัวกลาง (PC-PSYCH-02)
     workDesk({
       x: -7.8,
@@ -286,8 +355,8 @@
       w: 1.25,
       d: 0.65,
       rotY: Math.PI, // หันหน้าไปทางทิศใต้
-      label: '🖳 คอมพยาบาลจิตเวช 1',
-      pcInfo: psychPcSpec('PC-PSYCH-02', 'คอมพยาบาลจิตเวช 1', 'งานซักประวัติ ประเมินสุขภาพจิต คัดกรองภาวะวิกฤต และติดตามผู้ป่วยจิตเวช SMI-V', 'พยาบาลวิชาชีพจิตเวช', '02')
+      label: '🖳 คอมพยาบาลจิตเวช 1 (CSPC-PAN)',
+      pcInfo: r2Pc1
     });
     // โต๊ะคอมตัวขวา (PC-PSYCH-03)
     workDesk({
@@ -296,8 +365,8 @@
       w: 1.25,
       d: 0.65,
       rotY: Math.PI, // หันหน้าไปทางทิศใต้
-      label: '🖳 คอมบำบัดยาเสพติด 2',
-      pcInfo: psychPcSpec('PC-PSYCH-03', 'คอมงานบำบัดยาเสพติด 2', 'งานฟื้นฟูสมรรถภาพผู้ติดยาเสพติด ระบบ Matrix Program และคัดกรอง B-Fast', 'นักจิตวิทยา / นักวิชาการสาธารณสุข', '03')
+      label: '🖳 คอมบำบัดยาเสพติด 2 (DESKTOP-2JC9KOA)',
+      pcInfo: r2Pc2
     });
     // ตู้เก็บแฟ้มเอกสารและตู้เวชระเบียนชิดผนังเหนือ
     M.box(g, 2.6, 2.0, 0.5, mSteel, -7.5, 1.0, -3.4);
@@ -539,9 +608,9 @@
 
     // รายการไอเทมสำหรับ Interior Panel (Array Schema สำหรับ KSS.app.js)
     const itemsList = [
-      ['🚪', 'ห้องที่ 1 ห้องหัวหน้ากลุ่มงานยาเสพติดและจิตเวช (โต๊ะคอมชิดขวา)', psychState.room1Occupied ? '🔴 ปฏิบัติงาน' : '🟢 ว่าง', 'psych-room-1', psychState.room1Occupied ? 'busy' : 'free'],
-      ['💼', 'ห้องที่ 2 ห้องทำงานเจ้าหน้าที่ (โต๊ะคอม 2 เครื่อง)', psychState.room2Occupied ? '🟢 พร้อมบริการ' : '⚪ ว่าง', 'psych-room-2', psychState.room2Occupied ? 'free' : 'busy'],
-      ['🧘', 'ห้องที่ 3 ห้องว่าง (ให้คำปรึกษาและบำบัดกลุ่ม)', psychState.room3Occupied ? '🔴 กำลังใช้งาน' : '🟢 ว่าง', 'psych-room-3', psychState.room3Occupied ? 'busy' : 'free'],
+      ['🚪', 'ห้องที่ 1 ห้องหัวหน้ากลุ่มงาน (CONSULT-PC: 10.10.20.108)', psychState.room1Occupied ? '🔴 ปฏิบัติงาน' : '🟢 ว่าง', 'psych-room-1', psychState.room1Occupied ? 'busy' : 'free'],
+      ['💼', 'ห้องที่ 2 ห้องทำงาน (CSPC-PAN: 10.10.20.27 / DESKTOP-2JC9KOA: 10.10.20.126)', psychState.room2Occupied ? '🟢 พร้อมบริการ' : '⚪ ว่าง', 'psych-room-2', psychState.room2Occupied ? 'free' : 'busy'],
+      ['🧘', 'ห้องที่ 3 ห้องว่าง (ให้คำปรึกษาและบำบัดกลุ่ม • ตู้แร็คสวิตช์)', psychState.room3Occupied ? '🔴 กำลังใช้งาน' : '🟢 ว่าง', 'psych-room-3', psychState.room3Occupied ? 'busy' : 'free'],
       ['🛋️', 'ห้องที่ 4 ห้องว่าง (ห้องพักฟื้นและสงบอารมณ์)', psychState.room4Occupied ? '🔴 มีผู้ป่วยพักฟื้น' : '🟢 ว่าง', 'psych-room-4', psychState.room4Occupied ? 'busy' : 'free'],
       ['📋', 'ห้องที่ 5 ห้องว่าง (จุดประเมินสุขภาพจิต โต๊ะคอมชิดซ้าย)', psychState.room5Occupied ? '🔴 กำลังประเมิน' : '🟢 ว่าง', 'psych-room-5', psychState.room5Occupied ? 'busy' : 'free'],
       ['🎨', 'ห้องที่ 6 ห้องว่าง (ห้องกิจกรรมบำบัด/อเนกประสงค์)', psychState.room6Occupied ? '🔴 กำลังใช้งาน' : '🟢 ว่าง', 'psych-room-6', psychState.room6Occupied ? 'busy' : 'free'],

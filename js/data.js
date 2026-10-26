@@ -456,7 +456,7 @@ KSS.SERVER_DEVICES = [
     location: 'ตึกจิตเวชและยาเสพติด (ห้องที่ 3)',
     username: 'admin',
     password: 'ksp@12345',
-    role: 'สวิตช์ฮับเครือข่ายกลุ่มงานจิตเวชและยาเสพติด ติดตั้งในตู้แร็คแขวนผนังห้องให้คำปรึกษาและบำบัดกลุ่ม (ห้องที่ 3) เชื่อมต่อคอมพิวเตอร์หัวหน้ากลุ่มงาน, คอมพิวเตอร์งานฟื้นฟูสมรรถภาพผู้ติดยาเสพติด Matrix Program, จุดคัดกรอง 2Q/9Q/8Q และ B-Fast, กล้องวงจรปิดห้องสงบอารมณ์ และ Uplink Fiber SFP ไปยัง Data Center',
+    role: 'สวิตช์ฮับเครือข่ายกลุ่มงานจิตเวชและยาเสพติด ติดตั้งในตู้แร็คแขวนผนังห้องให้คำปรึกษาและบำบัดกลุ่ม (ห้องที่ 3) เชื่อมต่อคอมหัวหน้ากลุ่มงาน (CONSULT-PC / Port 1), คอมพยาบาลจิตเวช 1 (CSPC-PAN / Port 2), คอมงานบำบัดยาเสพติด 2 (DESKTOP-2JC9KOA / Port 3), จุดคัดกรอง 2Q/9Q/8Q, กล้องวงจรปิดห้องสงบอารมณ์ และ Uplink Fiber SFP ไปยัง Data Center',
     status: 'online',
     ping: '0.6ms',
     uptime: '172 วัน 19 ชม.',
@@ -933,6 +933,135 @@ KSS.MAC_REGISTRY = {
     leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
     lastRenew: '26/10/2026 11:14:57',
     status: 'online'
+  },
+
+  /* กลุ่มงานจิตเวชและยาเสพติด (Psychiatric & Substance Abuse Department) */
+  '70:85:C2:58:1A:3B': {
+    mac: '70:85:C2:58:1A:3B',
+    hostname: 'CONSULT-PC',
+    pcCode: 'PC-PSYCH-01',
+    name: 'คอมหัวหน้ากลุ่มงานจิตเวชและยาเสพติด',
+    currentIp: '10.10.20.108',
+    switchId: 'ksp-sw-psych',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-PSYCH - ห้องที่ 3)',
+    switchIp: '10.10.100.12',
+    switchPort: 'Port 1 (10/100/1000Base-T / VLAN 20 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: PSYCH-RM1-01 (เต้ารับ LAN ผนังห้องหัวหน้ากลุ่มงานจิตเวชฯ)',
+    vlan: 'VLAN 20 - บริการคลินิกเฉพาะทางและสุขภาพจิต',
+    gateway: '10.10.20.1 (Core Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '26/10/2026 11:58:12',
+    status: 'online'
+  },
+  'A4:BB:6D:3C:99:1F': {
+    mac: 'A4:BB:6D:3C:99:1F',
+    hostname: 'CSPC-PAN',
+    pcCode: 'PC-PSYCH-02',
+    name: 'คอมพยาบาลจิตเวช 1',
+    currentIp: '10.10.20.27',
+    switchId: 'ksp-sw-psych',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-PSYCH - ห้องที่ 3)',
+    switchIp: '10.10.100.12',
+    switchPort: 'Port 2 (10/100/1000Base-T / VLAN 20 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: PSYCH-RM2-01 (เต้ารับ LAN ผนังห้องทำงานกลุ่มงานจิตเวชฯ)',
+    vlan: 'VLAN 20 - บริการคลินิกเฉพาะทางและสุขภาพจิต',
+    gateway: '10.10.20.1 (Core Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '26/10/2026 11:58:12',
+    status: 'online'
+  },
+  'BC:24:11:8E:72:4D': {
+    mac: 'BC:24:11:8E:72:4D',
+    hostname: 'DESKTOP-2JC9KOA',
+    pcCode: 'PC-PSYCH-03',
+    name: 'คอมงานบำบัดยาเสพติด 2',
+    currentIp: '10.10.20.126',
+    switchId: 'ksp-sw-psych',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-PSYCH - ห้องที่ 3)',
+    switchIp: '10.10.100.12',
+    switchPort: 'Port 3 (10/100/1000Base-T / VLAN 20 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: PSYCH-RM2-02 (เต้ารับ LAN ผนังห้องทำงานกลุ่มงานจิตเวชฯ)',
+    vlan: 'VLAN 20 - บริการคลินิกเฉพาะทางและสุขภาพจิต',
+    gateway: '10.10.20.1 (Core Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '26/10/2026 11:58:12',
+    status: 'online'
+  }
+};
+
+/* Specifications Registry สำหรับคอมพิวเตอร์กลุ่มงานจิตเวชและยาเสพติด */
+KSS.PSYCH_SPECS = {
+  '70:85:C2:58:1A:3B': {
+    code: 'PC-PSYCH-01',
+    name: 'คอมหัวหน้ากลุ่มงานจิตเวชและยาเสพติด',
+    hostname: 'CONSULT-PC',
+    ip: '10.10.20.108',
+    mac: '70:85:C2:58:1A:3B',
+    switchId: 'ksp-sw-psych',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-PSYCH - ห้องที่ 3)',
+    switchPort: 'Port 1 (VLAN 20)',
+    wallOutlet: 'PSYCH-RM1-01 (ห้องหัวหน้ากลุ่มงานจิตเวชฯ)',
+    vlan: 'VLAN 20 - บริการคลินิกเฉพาะทางและสุขภาพจิต',
+    role: 'บริหารจัดการคลินิกสุขภาพจิต กำกับการบำบัดรักษา และระบบงานยาเสพติด',
+    user: 'หัวหน้ากลุ่มงานจิตเวชและยาเสพติด',
+    os: 'Windows 11 Pro 64-bit',
+    cpu: 'Intel Core i5-12400 (6C/12T, 4.4GHz)',
+    ram: '16 GB DDR4-3200',
+    storage: '512 GB M.2 NVMe SSD',
+    monitor: '23.8" IPS Full HD (1920x1080)',
+    software: 'HOSxP v3.6, Psychiatric SMI-V, Matrix Program, MOPH Claim',
+    peripherals: 'เครื่องอ่านบัตรสมาร์ทการ์ด, Barcode Scanner, UPS 850VA',
+    status: '🟢 ออนไลน์ปกติ'
+  },
+  'A4:BB:6D:3C:99:1F': {
+    code: 'PC-PSYCH-02',
+    name: 'คอมพยาบาลจิตเวช 1',
+    hostname: 'CSPC-PAN',
+    ip: '10.10.20.27',
+    mac: 'A4:BB:6D:3C:99:1F',
+    switchId: 'ksp-sw-psych',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-PSYCH - ห้องที่ 3)',
+    switchPort: 'Port 2 (VLAN 20)',
+    wallOutlet: 'PSYCH-RM2-01 (ห้องทำงานกลุ่มงานจิตเวชฯ)',
+    vlan: 'VLAN 20 - บริการคลินิกเฉพาะทางและสุขภาพจิต',
+    role: 'งานซักประวัติ ประเมินสุขภาพจิต คัดกรองภาวะวิกฤต และติดตามผู้ป่วยจิตเวช SMI-V',
+    user: 'พยาบาลวิชาชีพจิตเวช (คุณปาน)',
+    os: 'Windows 11 Pro 64-bit',
+    cpu: 'Intel Core i5-12400 (6C/12T, 4.4GHz)',
+    ram: '16 GB DDR4-3200',
+    storage: '512 GB M.2 NVMe SSD',
+    monitor: '23.8" IPS Full HD (1920x1080)',
+    software: 'HOSxP v3.6, แบบคัดกรอง 2Q/9Q/8Q, Smart Card Agent',
+    peripherals: 'เครื่องอ่านบัตรสมาร์ทการ์ด, Barcode Scanner, UPS 850VA',
+    status: '🟢 ออนไลน์ปกติ'
+  },
+  'BC:24:11:8E:72:4D': {
+    code: 'PC-PSYCH-03',
+    name: 'คอมงานบำบัดยาเสพติด 2',
+    hostname: 'DESKTOP-2JC9KOA',
+    ip: '10.10.20.126',
+    mac: 'BC:24:11:8E:72:4D',
+    switchId: 'ksp-sw-psych',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-PSYCH - ห้องที่ 3)',
+    switchPort: 'Port 3 (VLAN 20)',
+    wallOutlet: 'PSYCH-RM2-02 (ห้องทำงานกลุ่มงานจิตเวชฯ)',
+    vlan: 'VLAN 20 - บริการคลินิกเฉพาะทางและสุขภาพจิต',
+    role: 'งานฟื้นฟูสมรรถภาพผู้ติดยาเสพติด ระบบ Matrix Program และคัดกรอง B-Fast',
+    user: 'นักจิตวิทยา / นักวิชาการสาธารณสุข',
+    os: 'Windows 11 Pro 64-bit',
+    cpu: 'Intel Core i5-12400 (6C/12T, 4.4GHz)',
+    ram: '16 GB DDR4-3200',
+    storage: '512 GB M.2 NVMe SSD',
+    monitor: '23.8" IPS Full HD (1920x1080)',
+    software: 'HOSxP v3.6, Matrix Program บำบัดยาเสพติด, B-Fast System',
+    peripherals: 'เครื่องอ่านบัตรสมาร์ทการ์ด, Barcode Scanner, UPS 850VA',
+    status: '🟢 ออนไลน์ปกติ'
   }
 };
 
@@ -966,6 +1095,9 @@ KSS.updatePcIpByMac = function(mac, newIp) {
   // Update live specs if registered
   if (KSS.INSURANCE_SPECS && KSS.INSURANCE_SPECS[cleanMac]) {
     KSS.INSURANCE_SPECS[cleanMac].ip = cleanIp;
+  }
+  if (KSS.PSYCH_SPECS && KSS.PSYCH_SPECS[cleanMac]) {
+    KSS.PSYCH_SPECS[cleanMac].ip = cleanIp;
   }
   if (KSS.TONOLI_PC_SPEC && (KSS.TONOLI_PC_SPEC.mac === cleanMac || cleanMac === 'D8:5E:D3:4A:2C:9B')) {
     KSS.TONOLI_PC_SPEC.ip = cleanIp;

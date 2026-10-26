@@ -954,7 +954,7 @@
     if (gwEl) gwEl.innerText = netInfo.gateway;
 
     const vlanEl = document.getElementById('pc-vlan-text');
-    if (vlanEl) vlanEl.innerText = netInfo.extra || 'VLAN มาตรฐานโรงพยาบาล';
+    if (vlanEl) vlanEl.innerText = pc.vlan || (macRecord && macRecord.vlan) || netInfo.extra || 'VLAN มาตรฐานโรงพยาบาล';
 
     const rdpSpan = document.getElementById('pc-rdp-cmd');
     if (rdpSpan) rdpSpan.innerText = `mstsc /v:${netInfo.cleanIp}`;
@@ -2310,17 +2310,67 @@
             </div>
           </div>
 
+          <!-- Psychiatric & Substance Clinic (VLAN 20) Switch Port Table -->
+          <div style="background:#022c22;border:1.5px solid #22c55e;border-radius:8px;padding:12px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="background:#22c55e;color:#052e16;padding:2px 8px;border-radius:6px;font-weight:800;font-size:11px;">VLAN 20 • ACTIVE PORTS</span>
+                <strong style="color:#86efac;font-size:13px;">กลุ่มคอมพิวเตอร์ตึกจิตเวชและยาเสพติด (3 เครื่อง)</strong>
+              </div>
+              <span style="font-size:11px;color:#a7f3d0;font-weight:600;">⚡ 1000 Mbps Full Duplex (Links Up 🟢)</span>
+            </div>
+            
+            <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;font-size:11px;">
+              <div style="background:rgba(0,0,0,0.35);padding:8px 10px;border-radius:6px;border:1px solid #166534;">
+                <div style="display:flex;justify-content:space-between;color:#86efac;font-weight:700;margin-bottom:3px;">
+                  <span>🔌 Port 1: คอมหัวหน้ากลุ่มงานฯ</span>
+                  <span style="color:#fef08a;">CONSULT-PC</span>
+                </div>
+                <div style="color:#cbd5e1;display:flex;flex-direction:column;gap:2px;">
+                  <div>IP: <strong style="color:#38bdf8;">10.10.20.108</strong></div>
+                  <div>MAC: <strong style="color:#fbbf24;font-family:monospace;">70:85:C2:58:1A:3B</strong></div>
+                  <div>เต้ารับ: <strong style="color:#f8fafc;">PSYCH-RM1-01</strong></div>
+                </div>
+              </div>
+
+              <div style="background:rgba(0,0,0,0.35);padding:8px 10px;border-radius:6px;border:1px solid #166534;">
+                <div style="display:flex;justify-content:space-between;color:#86efac;font-weight:700;margin-bottom:3px;">
+                  <span>🔌 Port 2: คอมพยาบาลจิตเวช 1</span>
+                  <span style="color:#fef08a;">CSPC-PAN</span>
+                </div>
+                <div style="color:#cbd5e1;display:flex;flex-direction:column;gap:2px;">
+                  <div>IP: <strong style="color:#38bdf8;">10.10.20.27</strong></div>
+                  <div>MAC: <strong style="color:#fbbf24;font-family:monospace;">A4:BB:6D:3C:99:1F</strong></div>
+                  <div>เต้ารับ: <strong style="color:#f8fafc;">PSYCH-RM2-01</strong></div>
+                </div>
+              </div>
+
+              <div style="background:rgba(0,0,0,0.35);padding:8px 10px;border-radius:6px;border:1px solid #166534;">
+                <div style="display:flex;justify-content:space-between;color:#86efac;font-weight:700;margin-bottom:3px;">
+                  <span>🔌 Port 3: คอมบำบัดยาเสพติด 2</span>
+                  <span style="color:#fef08a;">DESKTOP-2JC9KOA</span>
+                </div>
+                <div style="color:#cbd5e1;display:flex;flex-direction:column;gap:2px;">
+                  <div>IP: <strong style="color:#38bdf8;">10.10.20.126</strong></div>
+                  <div>MAC: <strong style="color:#fbbf24;font-family:monospace;">BC:24:11:8E:72:4D</strong></div>
+                  <div>เต้ารับ: <strong style="color:#f8fafc;">PSYCH-RM2-02</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div style="background:#0f172a;border-radius:8px;padding:12px;margin-bottom:12px;">
             <div style="font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:8px;">🔌 แผงพอร์ตสวิตช์ฮับตึกจิตเวชและยาเสพติด (Switch Port Matrix 1–24):</div>
             <div style="display:grid;grid-template-columns:repeat(12, 1fr);gap:6px;font-size:10px;text-align:center;">
               ${Array.from({length: 24}, (_, i) => {
                 const pNum = i + 1;
+                const isPsychMapped = (pNum >= 1 && pNum <= 3);
                 const isConnected = pNum <= 13 || pNum === 24;
                 let desc = `Port ${pNum}`;
-                if (pNum === 1) desc = 'PC ห้องหัวหน้า (PC-01)';
-                else if (pNum === 2) desc = 'PC บำบัดยาเสพติด 1 (PC-02)';
-                else if (pNum === 3) desc = 'PC บำบัดยาเสพติด 2 (PC-03)';
-                else if (pNum === 4) desc = 'PC คัดกรองสุขภาพจิต (PC-04)';
+                if (pNum === 1) desc = 'CONSULT-PC';
+                else if (pNum === 2) desc = 'CSPC-PAN';
+                else if (pNum === 3) desc = 'DESKTOP-2JC9KOA';
+                else if (pNum === 4) desc = 'PC คัดกรองสุขภาพจิต';
                 else if (pNum === 5) desc = 'Printer เวชระเบียนจิตเวช';
                 else if (pNum === 6) desc = 'Printer ฉลากยาเมทาโดน';
                 else if (pNum === 7) desc = 'CCTV ทางเดินหน้าห้อง';
@@ -2331,10 +2381,13 @@
                 else if (pNum === 12) desc = 'IP Phone ห้องบำบัดกลุ่ม';
                 else if (pNum === 13) desc = 'Smart TV สื่อกิจกรรมบำบัด';
                 else if (pNum === 24) desc = 'Uplink Core SFP';
+
+                const borderCol = isPsychMapped ? '#4ade80' : (isConnected ? '#22c55e' : '#475569');
+                const bgCol = isPsychMapped ? 'rgba(34,197,94,0.35)' : (isConnected ? 'rgba(34,197,94,0.15)' : 'rgba(51,65,85,0.4)');
                 return `
-                  <div style="background:${isConnected ? 'rgba(34,197,94,0.15)' : 'rgba(51,65,85,0.4)'};border:1px solid ${isConnected ? '#22c55e' : '#475569'};border-radius:5px;padding:4px 2px;">
-                    <div style="color:${isConnected ? '#4ade80' : '#64748b'};font-weight:700;">#${pNum}</div>
-                    <div style="color:#94a3b8;font-size:8.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${desc}">${desc}</div>
+                  <div style="background:${bgCol};border:1.5px solid ${borderCol};border-radius:5px;padding:4px 2px;${isPsychMapped ? 'box-shadow:0 0 10px rgba(74,222,128,0.5);' : ''}">
+                    <div style="color:${isPsychMapped ? '#86efac' : (isConnected ? '#4ade80' : '#64748b')};font-weight:700;">#${pNum}</div>
+                    <div style="color:${isPsychMapped ? '#fef08a' : '#94a3b8'};font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${desc}">${desc}</div>
                   </div>
                 `;
               }).join('')}
