@@ -992,19 +992,19 @@
     L.push({ text: '🗂️ ชั้นเก็บ OPD card (คู่กลาง)', pos: rV(37.95, 1.8, 2.15), cls: 'int-label sub-tag' });
     L.push({ text: '🗂️ ชั้นเก็บ OPD card', pos: rV(40.1, 1.8, 2.15), cls: 'int-label sub-tag' });
 
-        const cardPc1Spec = makePcSpec(
+            const cardPc1Spec = makePcSpec(
       'PC-CARD-01',
-      'โต๊ะคอมพิวเตอร์ 1 (เคาน์เตอร์ลงทะเบียนผู้มารับบริการ)',
-      'เจ้าหน้าที่เวชระเบียนรับลงทะเบียนผู้มารับบริการ ค้นหา OPD Card และออกคิวตรวจ (ช่อง 1)',
+      'โต๊ะคอมพิวเตอร์ 1 (ห้องบัตร/เวชระเบียน)',
+      'เจ้าหน้าที่เวชระเบียนค้นหา OPD Card คัดกรองและจัดเก็บเวชระเบียน (จุดที่ 1)',
       '10.10.20.21',
-      'ระบบ HOSxP Front-Desk Registration • ระบบอ่านบัตรประชาชน Smart Card & คิวอัตโนมัติ',
+      'ระบบ HOSxP Front-Desk Registration • ระบบอ่านบัตรประชาชน Smart Card & คลังเวชระเบียน',
       {
         hostname: 'CARD-DESK-01',
         mac: '00:1E:67:D8:1A:01',
         switchId: 'ksp-sw-xray',
         switchName: 'Aruba / HPE 2530 24G (KSP-SW-XRAY - ตึก X-Ray/ห้องบัตร)',
         switchPort: 'Port 7 (10/100/1000Base-T / VLAN 20 Untagged)',
-        wallOutlet: 'Outlet ID: CARD-CTR-01 (เคาน์เตอร์ลงทะเบียนห้องบัตร ช่อง 1)',
+        wallOutlet: 'Outlet ID: CARD-CTR-01 (ห้องบัตร จุดที่ 1)',
         gateway: '10.10.20.1 (Core Gateway)',
         vlan: 'VLAN 20 - งานเวชระเบียนและสารสนเทศยุทธศาสตร์',
         printer: 'Zebra ZD230 Barcode Sticker Printer + Epson Dot Matrix LQ-310'
@@ -1012,15 +1012,15 @@
     );
 
     rDesk({
-      x: 39.4, z: 6.25, w: 1.4, d: 0.64, rotY: 0,
-      hasPC: true, label: 'โต๊ะคอม 1 (ห้องบัตร)', staffRole: 'nurse',
+      x: 39.2, z: 5.8, w: 1.4, d: 0.64, rotY: 0,
+      hasPC: true, label: 'โต๊ะคอม 1 (ห้องบัตร/เวชระเบียน)', staffRole: 'nurse',
       pcInfo: cardPc1Spec
     });
 
     const cardPc2Spec = makePcSpec(
       'PC-CARD-03',
-      'โต๊ะคอมพิวเตอร์ 2 (เคาน์เตอร์ลงทะเบียนห้องบัตร)',
-      'เจ้าหน้าที่เวชระเบียนรับลงทะเบียนผู้มารับบริการ ช่อง 2 (ALL-IN-ONE-ADMI)',
+      'โต๊ะคอมพิวเตอร์ 2 (เคาน์เตอร์ด้านหน้าห้องบัตร)',
+      'เจ้าหน้าที่เวชระเบียนรับลงทะเบียนผู้มารับบริการ เคาน์เตอร์ด้านหน้า ช่อง 2 (ALL-IN-ONE-ADMI)',
       '10.10.20.42',
       'ระบบ HOSxP Front-Desk Registration • ระบบอ่านบัตรประชาชน Smart Card & คิวอัตโนมัติ Q-Online',
       {
@@ -1030,7 +1030,7 @@
         switchName: 'Aruba / HPE 2530 24G (KSP-SW-XRAY - ตึก X-Ray/ห้องบัตร)',
         switchIp: '10.10.100.7',
         switchPort: 'Port 8 (10/100/1000Base-T / VLAN 20 Untagged)',
-        wallOutlet: 'Outlet ID: CARD-CTR-02 (เคาน์เตอร์ลงทะเบียนห้องบัตร ช่อง 2)',
+        wallOutlet: 'Outlet ID: CARD-CTR-02 (เคาน์เตอร์ด้านหน้าห้องบัตร ช่อง 2)',
         gateway: '10.10.20.1 (Core Gateway)',
         vlan: 'VLAN 20 - งานเวชระเบียนและสารสนเทศยุทธศาสตร์',
         cpu: 'Intel Core i5-10400 (6 Cores / 12 Threads, 2.90GHz - 4.30GHz)',
@@ -1041,29 +1041,80 @@
       }
     );
 
-    rDesk({
-      x: 36.8, z: 6.25, w: 1.4, d: 0.64, rotY: 0,
-      hasPC: true, label: 'โต๊ะคอม 2 (ห้องบัตร)', staffRole: 'nurse',
-      pcInfo: cardPc2Spec
-    });
-
+    // เคาน์เตอร์รับลงทะเบียนด้านหน้า (Front Registration Counter หันหน้าไปทาง ER)
     const frontRegCounter = rBox(4.8, 0.88, 0.78, M.mat(0xfef08a), 38.4, 0.44, 7.65);
     addEdges(frontRegCounter, 0xca8a04);
     rBox(4.9, 0.05, 0.86, M.mat(0xffffff), 38.4, 0.9, 7.65);
     rBox(4.6, 0.42, 0.04, M.glass(0xdbeafe, 0.35), 38.4, 1.13, 7.98);
 
+    // --- ติดตั้งชุดคอมพิวเตอร์โต๊ะ 2 ไว้บนเคาน์เตอร์ด้านหน้า (Front Counter Workstation) ---
+    function createCounterWorkstation(cx, cz, pcSpec, labelText) {
+      // เก้าอี้สำนักงานพร้อมพนักพิงสำหรับเจ้าหน้าที่
+      M.box(g, 0.45 * SX, 0.06, 0.45 * SZ, M.mat(0x1e293b), WX(cx, cz - 0.55), 0.25, WZ(cx));
+      M.box(g, 0.44 * SX, 0.08, 0.44 * SZ, M.mat(0x0284c7), WX(cx, cz - 0.55), 0.46, WZ(cx));
+      M.box(g, 0.06 * SX, 0.44, 0.42 * SZ, M.mat(0x0284c7), WX(cx, cz - 0.72), 0.70, WZ(cx));
+
+      // เจ้าหน้าที่เวชระเบียนนั่งประจำเคาน์เตอร์ด้านหน้า หันหน้าออกหาผู้รับบริการ (+Z ในห้อง)
+      const staff = makePerson({ role: 'nurse', pose: 'sit', rotY: 0 });
+      staff.position.set(WX(cx, cz - 0.55), 0, WZ(cx));
+      g.add(staff);
+
+      // 1. ฐานจอ All-in-One และเสาขาตั้ง วางบนเคาน์เตอร์ความสูง y = 0.90
+      const pcStand = rBox(0.24, 0.02, 0.18, M.mat(0x334155), cx, 0.91, cz);
+      const pcPillar = rBox(0.06, 0.14, 0.04, M.mat(0x475569), cx, 0.98, cz + 0.02);
+
+      // 2. จอภาพ All-in-One ขนาด 23.8 นิ้ว ขอบบาง หันจอเรืองแสงสีฟ้าหาเจ้าหน้าที่ (-Z ในห้อง)
+      const monBody = rBox(0.54, 0.34, 0.03, M.mat(0x0f172a), cx, 1.15, cz);
+      addEdges(monBody, 0x38bdf8);
+      const monScreen = rBox(0.50, 0.30, 0.01, M.mat(0x0284c7, { emissive: 0x0284c7, emissiveIntensity: 0.45 }), cx, 1.15, cz - 0.016);
+
+      // 3. แป้นพิมพ์และเมาส์วางบนหน้าโต๊ะเคาน์เตอร์
+      const kbd = rBox(0.40, 0.015, 0.13, M.mat(0x1e293b), cx, 0.91, cz - 0.22);
+      const mousePad = rBox(0.18, 0.005, 0.18, M.mat(0x0f172a), cx + 0.30, 0.905, cz - 0.22);
+      const mouse = rBox(0.06, 0.02, 0.09, M.mat(0x334155), cx + 0.30, 0.915, cz - 0.22);
+
+      // 4. เครื่องอ่านบัตรประชาชน Smart Card ThaiID Reader เรืองแสงสีเขียว
+      const smartCardReader = rBox(0.11, 0.025, 0.08, M.mat(0x10b981), cx - 0.28, 0.915, cz - 0.15);
+      const cardSlotTrim = rBox(0.08, 0.008, 0.02, M.mat(0xffffff), cx - 0.28, 0.93, cz - 0.13);
+
+      // 5. เครื่องพิมพ์บาร์โค้ด / สติกเกอร์ OPD (Zebra ZD230)
+      const printer = rBox(0.18, 0.14, 0.20, M.mat(0x334155), cx - 0.32, 0.97, cz + 0.08);
+      const printerSlot = rBox(0.12, 0.015, 0.02, M.mat(0x10b981), cx - 0.32, 0.99, cz - 0.02);
+
+      // 6. ถาดเอกสารและแฟ้ม OPD Card
+      const docTray = rBox(0.24, 0.06, 0.30, M.mat(0x94a3b8), cx + 0.34, 0.93, cz + 0.06);
+
+      // ผูก pcInfo กับชิ้นส่วน 3D ทั้งหมด
+      [pcStand, pcPillar, monBody, monScreen, kbd, mousePad, mouse, smartCardReader, cardSlotTrim, printer, printerSlot, docTray].forEach((mesh) => {
+        mesh.userData = { clickable: true, type: 'pc', pcInfo: pcSpec };
+      });
+
+      // ป้าย 3D คลิกได้สำหรับคอมพิวเตอร์เคาน์เตอร์ด้านหน้า
+      L.push({
+        text: '🖥️ ' + labelText,
+        pos: rV(cx, 1.65, cz),
+        cls: 'int-label pc-tag',
+        clickable: true,
+        pcInfo: pcSpec
+      });
+    }
+
+    // วางชุดคอมพิวเตอร์โต๊ะ 2 บนเคาน์เตอร์ด้านหน้า ช่องที่ 2
+    createCounterWorkstation(36.8, 7.55, cardPc2Spec, 'โต๊ะคอม 2 (เคาน์เตอร์ด้านหน้า)');
+
     // ป้ายบอกช่องบริการ 1 และ 2 บนหน้าต่างกระจก
     L.push({
-      text: '🪪 ช่อง 1: ลงทะเบียนผู้ป่วยใหม่/สิทธิ',
+      text: '🪪 ช่อง 1: ค้นหา OPD Card/เวชระเบียน',
       pos: rV(39.4, 1.35, 7.98),
       cls: 'int-label sub-tag'
     });
     L.push({
-      text: '🪪 ช่อง 2: ออกบัตรคิว/ตรวจสอบประวัติ',
+      text: '🪪 ช่อง 2: ลงทะเบียนผู้มารับบริการ (เคาน์เตอร์ด้านหน้า)',
       pos: rV(36.8, 1.35, 7.98),
       cls: 'int-label sub-tag'
     });
 
+    // ผู้รับบริการยืนติดต่อที่เคาน์เตอร์ด้านหน้า ช่อง 2
     const visitor1 = makePerson({ role: 'patient', pose: 'stand', rotY: Math.PI / 2 });
     visitor1.position.set(WX(36.8, 8.35), 0, WZ(36.8));
     g.add(visitor1);
