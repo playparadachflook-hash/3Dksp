@@ -354,8 +354,29 @@
       maintAt(maintWall(wThick, WH, 2.2, 0x1e293b), 5.2, WH / 2, 0.1),
       maintAt(maintWall(1.8, WH, wThick, 0x1e293b), 4.3, WH / 2, 1.2)
     );
-    const pcSpec1 = makeThaiPcSpec('PC-THAI-01', 'โต๊ะคอมแพทย์แผนไทย 1', 'ตรวจวินิจฉัยธาตุเจ้าเรือน แมะจับชีพจร และสั่งการรักษาทางหัตถการ', 10);
-    createThaiPcDesk(3.6, 0.0, 0, pcSpec1, 'โต๊ะคอม แพทย์แผนไทย 1', { role: 'doctor', shirtColor: 0x15803d, pose: 'sit', rotY: 0 });
+    const pcSpec1 = (K.THAIMED_SPECS && K.THAIMED_SPECS['44:8A:5B:91:D2:13']) || {
+      code: 'PC-THAI-01',
+      name: 'โต๊ะคอมแพทย์แผนไทย 1',
+      hostname: 'PAN21',
+      ip: '10.10.20.13',
+      mac: '44:8A:5B:91:D2:13',
+      switchId: 'cisco-sg250',
+      switchName: 'Cisco SG250-26 (Core Managed Switch - Computer Room)',
+      switchPort: 'Port GE11 (VLAN 20)',
+      wallOutlet: 'THAI-MED-01 (เต้ารับ LAN ผนังห้องทำงานแพทย์แผนไทย)',
+      vlan: 'VLAN 20 - บริการคลินิกเฉพาะทางและสุขภาพจิต',
+      role: 'ตรวจวินิจฉัยธาตุเจ้าเรือน แมะจับชีพจร บันทึกเวชระเบียน และสั่งการรักษาทางหัตถการ',
+      user: 'นางสาวรัตติยากร สมอดง (แพทย์แผนไทย)',
+      os: 'Windows 11 Pro 64-bit',
+      cpu: 'Intel Core i5-12400 (6C/12T @ 4.4GHz)',
+      ram: '16 GB DDR4 3200MHz',
+      storage: 'SSD NVMe 512 GB',
+      monitor: '24" FHD IPS Display',
+      software: 'ระบบแพทย์แผนไทย HOSxP Traditional Thai Medicine, บันทึกเวชระเบียนธาตุเจ้าเรือน, ระบบคลังยาสมุนไพร, e-Prescription',
+      peripherals: 'เครื่องอ่าน Smart Card, เครื่องพิมพ์ใบสั่งยาสมุนไพร, เครื่องสแกนบาร์โค้ด, เครื่องสำรองไฟ UPS 1000VA',
+      status: '🟢 ออนไลน์ปกติ'
+    };
+    createThaiPcDesk(3.6, 0.0, 0, pcSpec1, 'โต๊ะคอม แพทย์แผนไทย 1 (PAN21)', { role: 'doctor', shirtColor: 0x15803d, pose: 'sit', rotY: 0 });
 
     const pcSpec2 = makeThaiPcSpec('PC-THAI-02', 'โต๊ะคอมแพทย์แผนไทย 2', 'จ่ายยาสมุนไพร บันทึกผลการรักษา และนัดหมายผู้ป่วย', 11);
     createThaiPcDesk(9.4, 2.0, -Math.PI / 2, pcSpec2, 'โต๊ะคอม แพทย์แผนไทย 2', { role: 'nurse', shirtColor: 0xca8a04, pose: 'sit', rotY: 0 });
@@ -389,7 +410,7 @@
       ['📦', 'ห้องเก็บอุปกรณ์สมุนไพร (ซ้ายบน) & ห้องเก็บของ (ขวาบน)', '2 ห้อง', null, 'free'],
       ['🚻', 'ห้องน้ำชายและหญิง (โถงบน)', 'พร้อมใช้งาน', null, 'free'],
       ['🏛️', 'โถงทางเข้าด้านหน้า & ม้านั่งพักคอย', '2 ม้านั่ง', null, 'free'],
-      ['🖥️', 'PC-THAI-01: โต๊ะคอมแพทย์แผนไทย 1 (จุดตรวจวินิจฉัย)', 'ดูสเปก', null, 'free', pcSpec1],
+      ['🖥️', 'PC-THAI-01: โต๊ะคอมแพทย์แผนไทย 1 (PAN21: 10.10.20.13)', 'ดูสเปก', null, 'free', pcSpec1],
       ['🖥️', 'PC-THAI-02: โต๊ะคอมแพทย์แผนไทย 2 (จ่ายยาสมุนไพร)', 'ดูสเปก', null, 'free', pcSpec2],
       ['🪑', 'โต๊ะทำงานแพทย์แผนไทย', '6 ตัว'],
       ['🚪', 'ประตูทางเข้าหลักและประตูห้องภายใน', '7 บาน']

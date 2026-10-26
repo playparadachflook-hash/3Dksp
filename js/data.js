@@ -1013,6 +1013,53 @@ KSS.MAC_REGISTRY = {
     leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
     lastRenew: '26/10/2026 12:30:00',
     status: 'online'
+  },
+
+  /* งานแพทย์แผนไทยและการแพทย์ทางเลือก (Thai Traditional Medicine) */
+  '44:8A:5B:91:D2:13': {
+    mac: '44:8A:5B:91:D2:13',
+    hostname: 'PAN21',
+    pcCode: 'PC-THAI-01',
+    name: 'โต๊ะคอมแพทย์แผนไทย 1',
+    currentIp: '10.10.20.13',
+    switchId: 'cisco-sg250',
+    switchName: 'Cisco SG250-26 (Core Managed Switch - Computer Room)',
+    switchIp: '10.10.100.2',
+    switchPort: 'Port GE11 (GigabitEthernet 11 / VLAN 20 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: THAI-MED-01 (เต้ารับ LAN ผนังห้องทำงานแพทย์แผนไทย)',
+    vlan: 'VLAN 20 - บริการคลินิกเฉพาะทางและสุขภาพจิต',
+    gateway: '10.10.20.1 (Core Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '26/10/2026 13:28:45',
+    status: 'online'
+  }
+};
+
+/* Specifications Registry สำหรับคอมพิวเตอร์ตึกแพทย์แผนไทย */
+KSS.THAIMED_SPECS = {
+  '44:8A:5B:91:D2:13': {
+    code: 'PC-THAI-01',
+    name: 'โต๊ะคอมแพทย์แผนไทย 1',
+    hostname: 'PAN21',
+    ip: '10.10.20.13',
+    mac: '44:8A:5B:91:D2:13',
+    switchId: 'cisco-sg250',
+    switchName: 'Cisco SG250-26 (Core Managed Switch - Computer Room)',
+    switchPort: 'Port GE11 (VLAN 20)',
+    wallOutlet: 'THAI-MED-01 (เต้ารับ LAN ผนังห้องทำงานแพทย์แผนไทย)',
+    vlan: 'VLAN 20 - บริการคลินิกเฉพาะทางและสุขภาพจิต',
+    role: 'ตรวจวินิจฉัยธาตุเจ้าเรือน แมะจับชีพจร บันทึกเวชระเบียน และสั่งการรักษาทางหัตถการ',
+    user: 'นางสาวรัตติยากร สมอดง (แพทย์แผนไทย)',
+    os: 'Windows 11 Pro 64-bit',
+    cpu: 'Intel Core i5-12400 (6C/12T @ 4.4GHz)',
+    ram: '16 GB DDR4 3200MHz',
+    storage: 'SSD NVMe 512 GB',
+    monitor: '24" FHD IPS Display',
+    software: 'ระบบแพทย์แผนไทย HOSxP Traditional Thai Medicine, บันทึกเวชระเบียนธาตุเจ้าเรือน, ระบบคลังยาสมุนไพร, e-Prescription',
+    peripherals: 'เครื่องอ่าน Smart Card, เครื่องพิมพ์ใบสั่งยาสมุนไพร, เครื่องสแกนบาร์โค้ด, เครื่องสำรองไฟ UPS 1000VA',
+    status: '🟢 ออนไลน์ปกติ'
   }
 };
 
@@ -1148,6 +1195,9 @@ KSS.updatePcIpByMac = function(mac, newIp) {
   }
   if (KSS.ROMPHO_SPECS && KSS.ROMPHO_SPECS[cleanMac]) {
     KSS.ROMPHO_SPECS[cleanMac].ip = cleanIp;
+  }
+  if (KSS.THAIMED_SPECS && KSS.THAIMED_SPECS[cleanMac]) {
+    KSS.THAIMED_SPECS[cleanMac].ip = cleanIp;
   }
   if (KSS.TONOLI_PC_SPEC && (KSS.TONOLI_PC_SPEC.mac === cleanMac || cleanMac === 'D8:5E:D3:4A:2C:9B')) {
     KSS.TONOLI_PC_SPEC.ip = cleanIp;

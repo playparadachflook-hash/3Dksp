@@ -1861,6 +1861,18 @@
                   <span>เต้ารับ: <strong style="color:#f8fafc;">OPD-ADM-04</strong></span>
                 </div>
               </div>
+
+              <div style="background:rgba(0,0,0,0.35);padding:8px 10px;border-radius:6px;border:1px solid #166534;">
+                <div style="display:flex;justify-content:space-between;color:#86efac;font-weight:700;margin-bottom:3px;">
+                  <span>🔌 Port GE11: โต๊ะคอมแพทย์แผนไทย 1</span>
+                  <span style="color:#fef08a;">PAN21</span>
+                </div>
+                <div style="color:#cbd5e1;display:flex;gap:12px;">
+                  <span>IP: <strong style="color:#38bdf8;">10.10.20.13</strong></span>
+                  <span>MAC: <strong style="color:#fbbf24;font-family:monospace;">44:8A:5B:91:D2:13</strong></span>
+                  <span>เต้ารับ: <strong style="color:#f8fafc;">THAI-MED-01</strong></span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1869,7 +1881,7 @@
             <div style="display:grid;grid-template-columns:repeat(13, 1fr);gap:6px;font-size:10px;text-align:center;">
               ${Array.from({length: 26}, (_, i) => {
                 const pNum = i + 1;
-                const isInsurancePort = (pNum >= 7 && pNum <= 10);
+                const isInsurancePort = (pNum >= 7 && pNum <= 11);
                 const isConnected = pNum <= 22;
                 let desc = `GE${pNum}`;
                 if (pNum === 1) desc = 'Fortigate';
@@ -1882,7 +1894,8 @@
                 else if (pNum === 8) desc = 'TONOLI-PC';
                 else if (pNum === 9) desc = 'พี่ติ๊ก';
                 else if (pNum === 10) desc = 'HOGODQJ';
-                else if (pNum >= 11 && pNum <= 22) desc = `Dist ${pNum}`;
+                else if (pNum === 11) desc = 'PAN21 (แผนไทย)';
+                else if (pNum >= 12 && pNum <= 22) desc = `Dist ${pNum}`;
                 else if (pNum >= 25) desc = 'SFP Fiber';
 
                 const borderCol = isInsurancePort ? '#4ade80' : (isConnected ? '#22c55e' : '#475569');
