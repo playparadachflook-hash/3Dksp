@@ -176,21 +176,30 @@
     makePharDoor(9.5, 1.8, 0.45, 1.5, -0.38);
     L.push(maintTag('🚪 ประตูห้องพักเจ้าหน้าที่', V(9.5, 1.45, 1.8), 'sub', null, 'ประตูเข้าห้องพักเจ้าหน้าที่ห้องยา'));
 
-    function makePharPcSpec(num, stationName, roleDesc) {
+    function makePharPcSpec(num, stationName, roleDesc, extra = {}) {
       return {
         code: `PC-PHAR-0${num}`,
         name: `โต๊ะคอมจ่ายยา ${num} (${stationName})`,
         role: roleDesc,
-        user: 'เภสัชกร / เจ้าพนักงานเภสัชกรรม โรงพยาบาลโคกศรีสุพรรณ',
+        user: extra.user || 'เภสัชกร / เจ้าพนักงานเภสัชกรรม โรงพยาบาลโคกศรีสุพรรณ',
         os: 'Windows 11 Pro 64-bit',
         cpu: 'Intel Core i5-12400 (6C/12T @ 4.4GHz)',
         ram: '16 GB DDR4 3200MHz',
         storage: 'SSD NVMe 512 GB',
         monitor: '24" FHD IPS Monitor',
-        ip: `192.168.14.${10 + num}`,
+        ip: extra.ip || `192.168.14.${10 + num}`,
+        hostname: extra.hostname || '',
+        mac: extra.mac || '',
+        switchId: extra.switchId || 'ksp-sw-opd',
+        switchName: extra.switchName || 'Aruba / HPE 2530 24G (KSP-SW-OPD - ห้องยา)',
+        switchPort: extra.switchPort || `Port ${10 + num} (VLAN 20)`,
+        wallOutlet: extra.wallOutlet || `PHAR-DISP-0${num} (เคาน์เตอร์จ่ายยาช่อง ${num})`,
+        gateway: '10.10.20.1 (Core Gateway)',
+        vlan: 'VLAN 20 - งานบริการเภสัชกรรมและสารสนเทศยุทธศาสตร์',
         software: 'ระบบห้องยาโรงพยาบาล (HOSxP Pharmacy) • ระบบตรวจสอบอันตรกิริยาระหว่างยา (Drug Interaction) • ระบบ e-Prescription',
         peripherals: 'เครื่องพิมพ์สติกเกอร์ฉลากยาความเร็วสูง TSC • เครื่องสแกนบาร์โค้ดยา • เครื่องสำรองไฟ UPS 1000VA',
-        status: '🟢 ออนไลน์ปกติ'
+        status: '🟢 ออนไลน์ปกติ',
+        ...extra
       };
     }
 
@@ -289,8 +298,26 @@
       )
     );
 
-    const pcSpec1 = makePharPcSpec(1, 'เคาน์เตอร์ช่อง 1', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก');
-    const pcSpec2 = makePharPcSpec(2, 'เคาน์เตอร์ช่อง 2', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก');
+    const pcSpec1 = makePharPcSpec(1, 'เคาน์เตอร์ช่อง 1', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก', {
+      hostname: 'DRUG001-PC',
+      ip: '10.10.20.25',
+      mac: '00:2B:67:8A:11:25',
+      switchId: 'ksp-sw-opd',
+      switchName: 'Aruba / HPE 2530 24G (KSP-SW-OPD - ห้องยา)',
+      switchPort: 'Port 11 (VLAN 20)',
+      wallOutlet: 'PHAR-DISP-01 (เคาน์เตอร์จ่ายยาช่อง 1)',
+      user: 'ภ.ญ.ภานุชนาถ วันสังข์ (เภสัชกร)'
+    });
+    const pcSpec2 = makePharPcSpec(2, 'เคาน์เตอร์ช่อง 2', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก', {
+      hostname: 'DRUG004-PC',
+      ip: '10.10.20.105',
+      mac: '00:2B:67:8A:11:05',
+      switchId: 'ksp-sw-opd',
+      switchName: 'Aruba / HPE 2530 24G (KSP-SW-OPD - ห้องยา)',
+      switchPort: 'Port 12 (VLAN 20)',
+      wallOutlet: 'PHAR-DISP-02 (เคาน์เตอร์จ่ายยาช่อง 2)',
+      user: 'นางสาวเก็จวรินทร์ พันธัง (เจ้าพนักงานเภสัชกรรม)'
+    });
     const pcSpec3 = makePharPcSpec(3, 'เคาน์เตอร์ช่อง 3', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก');
     const pcSpec4 = makePharPcSpec(4, 'เคาน์เตอร์ช่อง 4', 'ตรวจสอบใบสั่งยาและส่งมอบยาผู้ป่วยนอก');
 
@@ -383,8 +410,17 @@
       );
     });
 
-    const pcSpec5 = makePharPcSpec(5, 'จุดตรวจสอบและจ่ายยาช่อง 5', 'ตรวจสอบความถูกต้องและพิมพ์ฉลากยา');
-    createPharPcDesk(-5.1, 7.55, Math.PI, pcSpec5, 'โต๊ะคอมจ่ายยา 5', { role: 'nurse', shirtColor: 0x0d9488, pose: 'sit', rotY: 0 });
+    const pcSpec5 = makePharPcSpec(5, 'จุดตรวจสอบและจ่ายยาช่อง 5', 'ตรวจสอบความถูกต้องและพิมพ์ฉลากยา', {
+      hostname: 'DRUGNEW-PC',
+      ip: '10.10.20.140',
+      mac: '00:2B:67:8A:11:40',
+      switchId: 'ksp-sw-opd',
+      switchName: 'Aruba / HPE 2530 24G (KSP-SW-OPD - ห้องยา)',
+      switchPort: 'Port 15 (VLAN 20)',
+      wallOutlet: 'PHAR-DISP-05 (โต๊ะตรวจสอบและจ่ายยาช่อง 5)',
+      user: 'นางสาวนุชวราภรณ์ มาทองคำ (เภสัชกรปฏิบัติการ)'
+    });
+    createPharPcDesk(-5.1, 7.55, Math.PI, pcSpec5, 'โต๊ะคอมจ่ายยา 5 (DRUGNEW-PC)', { role: 'nurse', shirtColor: 0x0d9488, pose: 'sit', rotY: 0 });
 
     const pcSpec7 = makePharPcSpec(7, 'จุดให้คำปรึกษาด้านยาช่อง 7', 'ให้คำแนะนำการใช้ยาเฉพาะโรคและยาเทคนิคพิเศษ');
     createPharPcDesk(5.8, 7.55, Math.PI, pcSpec7, 'โต๊ะคอมจ่ายยา 7', { role: 'nurse', shirtColor: 0xca8a04, pose: 'sit', rotY: 0 });
@@ -719,11 +755,11 @@
         'pharmacy-cold-store',
         pharmacyState.coldStoreActive ? 'free' : 'busy'
       ],
-      ['🖥️', 'PC-PHAR-01: โต๊ะคอมจ่ายยา 1 (หันซ้ายเข้าช่องจ่ายยา 1)', 'ดูสเปก', null, 'free', pcSpec1],
-      ['🖥️', 'PC-PHAR-02: โต๊ะคอมจ่ายยา 2 (หันซ้ายเข้าช่องจ่ายยา 2)', 'ดูสเปก', null, 'free', pcSpec2],
+      ['🖥️', 'PC-PHAR-01: โต๊ะคอมจ่ายยา 1 (DRUG001-PC: 10.10.20.25 - ช่อง 1)', 'ดูสเปก', null, 'free', pcSpec1],
+      ['🖥️', 'PC-PHAR-02: โต๊ะคอมจ่ายยา 2 (DRUG004-PC: 10.10.20.105 - ช่อง 2)', 'ดูสเปก', null, 'free', pcSpec2],
       ['🖥️', 'PC-PHAR-03: โต๊ะคอมจ่ายยา 3 (หันซ้ายเข้าช่องจ่ายยา 3)', 'ดูสเปก', null, 'free', pcSpec3],
       ['🖥️', 'PC-PHAR-04: โต๊ะคอมจ่ายยา 4 (หันซ้ายเข้าช่องจ่ายยา 4)', 'ดูสเปก', null, 'free', pcSpec4],
-      ['🖥️', 'PC-PHAR-05: โต๊ะคอมจ่ายยา 5 (หันเข้ากำแพงล่าง)', 'ดูสเปก', null, 'free', pcSpec5],
+      ['🖥️', 'PC-PHAR-05: โต๊ะคอมจ่ายยา 5 (DRUGNEW-PC: 10.10.20.140)', 'ดูสเปก', null, 'free', pcSpec5],
       ['🖥️', 'PC-PHAR-06: โต๊ะคอมจ่ายยา 6 (หันเข้ากำแพงล่าง)', 'ดูสเปก', null, 'free', pcSpec6],
       ['🖥️', 'PC-PHAR-07: โต๊ะคอมจ่ายยา 7 (หันเข้ากำแพงล่าง)', 'ดูสเปก', null, 'free', pcSpec7],
       ['🔀', 'KSP-SW-OPD: สวิตช์ฮับห้องเภสัช (10.10.100.6)', '🟢 ออนไลน์ (SN: CN31LB20R3)', 'server-ksp-sw-opd', 'free'],

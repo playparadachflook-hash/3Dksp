@@ -696,7 +696,13 @@
     const hallDesks = [
       { x: -22.0, z: -2.8, num: 6, code: 'PC-OPD-06', ip: '46' },
       { x: -18.1, z: -2.8, num: 5, code: 'PC-OPD-05', ip: '45' },
-      { x: -14.2, z: -2.8, num: 4, code: 'PC-OPD-04', ip: '44' },
+      { 
+        x: -14.2, z: -2.8, num: 4, code: 'PC-OPD-04', 
+        ip: '10.10.20.129', hostname: 'OPD4-PC', mac: '90:1B:0E:3C:44:29',
+        switchId: 'ksp-sw-opd', switchName: 'Aruba / HPE 2530 24G (KSP-SW-OPD - ตึกผู้ป่วยนอก)',
+        switchPort: 'Port 14 (VLAN 20)', wallOutlet: 'OPD-NURSE-04 (โต๊ะซักประวัติหน้าห้องตรวจ 4)',
+        user: 'นางสาวจรัญญา วรรณกาฬ/หญ (พยาบาลวิชาชีพ)'
+      },
       { x: -10.3, z: -2.8, num: 3, code: 'PC-OPD-03', ip: '43' },
       { x:  -6.4, z: -2.8, num: 2, code: 'PC-OPD-02', ip: '42' },
       { x:  -2.5, z: -2.8, num: 1, code: 'PC-OPD-01', ip: '41' }
@@ -708,8 +714,25 @@
         w: 1.25,
         d: 0.65,
         rotY: Math.PI, // หันหน้าไปทางทิศใต้ (South)
-        label: `🖳 คอม OPD ${hd.num}`,
-        pcInfo: pcSpec(hd.code, `คอม OPD ${hd.num}`, `จุดบริการซักประวัติและเรียกคิวหน้าห้องตรวจ ${hd.num}`, `พยาบาลวิชาชีพ/ผู้ช่วยพยาบาล`, hd.ip, 'HOSxP Queue & OPD Station')
+        label: `🖳 คอม OPD ${hd.num}${hd.hostname ? ' (' + hd.hostname + ')' : ''}`,
+        pcInfo: pcSpec(
+          hd.code, 
+          `คอม OPD ${hd.num}`, 
+          `จุดบริการซักประวัติและเรียกคิวหน้าห้องตรวจ ${hd.num}`, 
+          hd.user || `พยาบาลวิชาชีพ/ผู้ช่วยพยาบาล`, 
+          hd.ip, 
+          'HOSxP Queue & OPD Station',
+          {
+            hostname: hd.hostname,
+            mac: hd.mac,
+            switchId: hd.switchId,
+            switchName: hd.switchName,
+            switchPort: hd.switchPort,
+            wallOutlet: hd.wallOutlet,
+            gateway: '10.10.20.1 (Core Gateway)',
+            vlan: 'VLAN 20 - งานการพยาบาลและสารสนเทศยุทธศาสตร์'
+          }
+        )
       });
     });
 
@@ -759,10 +782,27 @@
       w: 1.5,
       d: 0.75,
       rotY: Math.PI, // หันหน้าไปทางทิศใต้
-      label: '🖳 คอม OPD 8 (คัดกรอง 2)',
-      pcInfo: pcSpec('PC-OPD-08', 'คอม OPD 8', 'ระบบคัดกรอง ประเมินสัญญาณชีพ และบันทึกประวัติแรกรับ', 'พยาบาลคัดกรอง', '48', 'HOSxP Triage & Vital Signs')
+      label: '🖳 คอม OPD 8 (OPD-BP)',
+      pcInfo: pcSpec(
+        'PC-OPD-08', 
+        'คอม OPD 8', 
+        'ระบบคัดกรอง ประเมินสัญญาณชีพ และบันทึกประวัติแรกรับ', 
+        'นางสมรักษ์ ไชยนา (พยาบาลวิชาชีพชำนาญการ)', 
+        '10.10.20.76', 
+        'HOSxP Triage & Vital Signs',
+        {
+          hostname: 'OPD-BP',
+          mac: '90:1B:0E:3C:44:76',
+          switchId: 'ksp-sw-opd',
+          switchName: 'Aruba / HPE 2530 24G (KSP-SW-OPD - ตึกผู้ป่วยนอก)',
+          switchPort: 'Port 18 (VLAN 20)',
+          wallOutlet: 'OPD-BP-02 (จุดวัดความดันและคัดกรอง 2)',
+          gateway: '10.10.20.1 (Core Gateway)',
+          vlan: 'VLAN 20 - งานการพยาบาลและสารสนเทศยุทธศาสตร์'
+        }
+      )
     });
-    L.push({ text: '🩺 จุดคัดกรอง 2 (คอม OPD 8)', pos: V(-17.5, 1.8, 3.8), cls: 'int-label room-title' });
+    L.push({ text: '🩺 จุดคัดกรอง 2 (คอม OPD 8: OPD-BP)', pos: V(-17.5, 1.8, 3.8), cls: 'int-label room-title' });
 
     // 6 Blood Pressure Kiosks (BP 1 to BP 6)
     const bpPositions = [-14.5, -12.3, -10.1, -7.9, -5.7, -3.5];
@@ -829,9 +869,21 @@
 
     // 4 Nurse PCs: คอม 1, 2, 3, 4
     const nurseDesks = [
-      { x: 9.0,  z: -10.5, num: 1, ip: '81' },
+      { 
+        x: 9.0,  z: -10.5, num: 1, 
+        ip: '10.10.20.163', hostname: 'KIANG', mac: 'B4:2E:99:A1:7B:63',
+        switchId: 'ksp-sw-opd', switchName: 'Aruba / HPE 2530 24G (KSP-SW-OPD - ตึกผู้ป่วยนอก)',
+        switchPort: 'Port 21 (VLAN 20)', wallOutlet: 'OPD-NS-01 (ห้องกลุ่มงานการพยาบาล โต๊ะ 1)',
+        user: 'นายคำพัน ศรีทองแท้ (พยาบาลวิชาชีพชำนาญการ)'
+      },
       { x: 9.0,  z:  -8.0, num: 2, ip: '82' },
-      { x: 12.0, z: -10.5, num: 3, ip: '83' },
+      { 
+        x: 12.0, z: -10.5, num: 3, 
+        ip: '10.10.20.159', hostname: 'เหมียว', mac: 'B4:2E:99:A1:7B:59',
+        switchId: 'ksp-sw-opd', switchName: 'Aruba / HPE 2530 24G (KSP-SW-OPD - ตึกผู้ป่วยนอก)',
+        switchPort: 'Port 23 (VLAN 20)', wallOutlet: 'OPD-NS-03 (ห้องกลุ่มงานการพยาบาล โต๊ะ 3)',
+        user: 'นางสาวปัณฑิกา ภักดีมวล (พยาบาลวิชาชีพชำนาญการ)'
+      },
       { x: 12.0, z:  -8.0, num: 4, ip: '84' }
     ];
     nurseDesks.forEach((nd) => {
@@ -841,8 +893,25 @@
         w: 1.2,
         d: 0.65,
         rotY: 0,
-        label: `🖳 คอมพยาบาล ${nd.num}`,
-        pcInfo: pcSpec(`PC-NURSE-0${nd.num}`, `คอมพยาบาล ${nd.num}`, `งานบริหารการพยาบาลและตารางปฏิบัติงาน`, `กลุ่มงานการพยาบาล`, nd.ip)
+        label: `🖳 คอมพยาบาล ${nd.num}${nd.hostname ? ' (' + nd.hostname + ')' : ''}`,
+        pcInfo: pcSpec(
+          `PC-NURSE-0${nd.num}`, 
+          `คอมพยาบาล ${nd.num}`, 
+          `งานบริหารการพยาบาลและตารางปฏิบัติงาน`, 
+          nd.user || `กลุ่มงานการพยาบาล`, 
+          nd.ip,
+          'HOSxP Nursing System / Staff Scheduling',
+          {
+            hostname: nd.hostname,
+            mac: nd.mac,
+            switchId: nd.switchId,
+            switchName: nd.switchName,
+            switchPort: nd.switchPort,
+            wallOutlet: nd.wallOutlet,
+            gateway: '10.10.20.1 (Core Gateway)',
+            vlan: 'VLAN 20 - งานการพยาบาลและสารสนเทศยุทธศาสตร์'
+          }
+        )
       });
     });
     L.push({
