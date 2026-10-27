@@ -1582,21 +1582,6 @@
     makeChair(g, 19.0, 9.9, 0, 0x334155);
     makeChair(g, 20.6, 9.9, 0, 0x334155);
 
-    // Director's PC
-    const dirPC = pcSpec('PC-DIR-01', 'คอมผู้อำนวยการ', 'ระบบบริหารจัดการโรงพยาบาลและสารสนเทศผู้บริหาร (EIS)', 'ผู้อำนวยการโรงพยาบาล', '01', 'Hospital Executive Information System (EIS) / Digital Signature');
-    const dMon = M.box(g, 0.54, 0.35, 0.03, mDark, 19.8, 0.98, 10.6);
-    addEdges(dMon, 0xf59e0b);
-    M.box(g, 0.5, 0.29, 0.01, M.mat(0x0284c7, { emissive: 0x0284c7, emissiveIntensity: 0.5 }), 19.8, 0.98, 10.62);
-    dirDesk.userData.pcInfo = dirPC;
-    dMon.userData.pcInfo = dirPC;
-
-    L.push({
-      text: '🖳 คอมผู้อำนวยการ',
-      pos: V(19.8, 1.5, 10.7),
-      cls: 'int-label pc-tag',
-      pcInfo: dirPC
-    });
-
     // Executive credenza behind director
     M.box(g, 2.6, 1.9, 0.5, mTeak, 19.8, 0.95, 12.3);
     // National flag & Royal portrait

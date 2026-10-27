@@ -1596,8 +1596,7 @@
     // 1) โต๊ะหัวหน้า (มุมบนซ้ายของห้องขวา ให้หัวหน้าหันหน้ามาทางประตูด้านล่าง rotY: 0)
     workDesk({
       x: 1.65, z: -8.1, w: 1.45, d: 0.7, rotY: 0,
-      hasPC: true, label: 'โต๊ะหัวหน้า', staffRole: 'doctor',
-      pcInfo: makePcSpec('PC-PT-03', 'โต๊ะคอมหัวหน้างานกายภาพบำบัด (โต๊ะหัวหน้า)', 'นักกายภาพบำบัดชำนาญการ (หัวหน้างาน) บริหารจัดการและวางแผนฟื้นฟูผู้ป่วย', '103', 'ระบบ HOSxP Rehab Management • ระบบรายงานตัวชี้วัดฟื้นฟูสมรรถภาพ (KPI)')
+      hasPC: false, label: 'โต๊ะหัวหน้า', staffRole: 'doctor'
     });
 
     // 2) โต๊ะ (แนวตั้ง หันหน้ามาทางซ้าย rotY: -Math.PI / 2)
@@ -9745,21 +9744,6 @@ function buildOpdInterior(b) {
     makeExecutiveChair(g, 19.8, 11.7, Math.PI);
     makeChair(g, 19.0, 9.9, 0, 0x334155);
     makeChair(g, 20.6, 9.9, 0, 0x334155);
-
-    // Director's PC
-    const dirPC = pcSpec('PC-DIR-01', 'คอมผู้อำนวยการ', 'ระบบบริหารจัดการโรงพยาบาลและสารสนเทศผู้บริหาร (EIS)', 'ผู้อำนวยการโรงพยาบาล', '01', 'Hospital Executive Information System (EIS) / Digital Signature');
-    const dMon = M.box(g, 0.54, 0.35, 0.03, mDark, 19.8, 0.98, 10.6);
-    addEdges(dMon, 0xf59e0b);
-    M.box(g, 0.5, 0.29, 0.01, M.mat(0x0284c7, { emissive: 0x0284c7, emissiveIntensity: 0.5 }), 19.8, 0.98, 10.62);
-    dirDesk.userData.pcInfo = dirPC;
-    dMon.userData.pcInfo = dirPC;
-
-    L.push({
-      text: '🖳 คอมผู้อำนวยการ',
-      pos: V(19.8, 1.5, 10.7),
-      cls: 'int-label pc-tag',
-      pcInfo: dirPC
-    });
 
     // Executive credenza behind director
     M.box(g, 2.6, 1.9, 0.5, mTeak, 19.8, 0.95, 12.3);

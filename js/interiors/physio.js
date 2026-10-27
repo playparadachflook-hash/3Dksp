@@ -227,8 +227,7 @@
 
     workDesk({
       x: 1.65, z: -8.1, w: 1.45, d: 0.7, rotY: 0,
-      hasPC: true, label: 'โต๊ะหัวหน้า', staffRole: 'doctor',
-      pcInfo: makePcSpec('PC-PT-03', 'โต๊ะคอมหัวหน้างานกายภาพบำบัด (โต๊ะหัวหน้า)', 'นักกายภาพบำบัดชำนาญการ (หัวหน้างาน) บริหารจัดการและวางแผนฟื้นฟูผู้ป่วย', '103', 'ระบบ HOSxP Rehab Management • ระบบรายงานตัวชี้วัดฟื้นฟูสมรรถภาพ (KPI)')
+      hasPC: false, label: 'โต๊ะหัวหน้า', staffRole: 'doctor'
     });
 
     workDesk({
