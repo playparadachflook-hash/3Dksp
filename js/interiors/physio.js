@@ -236,6 +236,7 @@
     wall(-4.3, -2.8, -4.3, -0.4, 0.14, WH);
     wall(-7.5, 0.4, -4.3, 0.4, 0.14, WH);
     wall(-7.5, -2.8, -4.3, -2.8, 0.14, WH);
+    const ptRoom = physioState.rooms[0] || { id: 'pt-room-1', occupied: true };
     physioBed({
       x: -5.9, z: -1.2, rotY: Math.PI / 2,
       occupied: ptRoom.occupied,
