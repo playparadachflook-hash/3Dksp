@@ -1396,6 +1396,45 @@ KSS.MAC_REGISTRY = {
   },
 
   /* กลุ่มงานเภสัชกรรม (Pharmacy - บริการจ่ายยาผู้ป่วยนอก) */
+  /* แผนกกายภาพบำบัด (Physical Therapy - ตึกกายภาพ) */
+  'D4:5D:64:8B:20:91': {
+    mac: 'D4:5D:64:8B:20:91',
+    hostname: 'KAYAPAP-PC',
+    pcCode: 'PC-PT-01',
+    name: 'โต๊ะคอมพิวเตอร์ กายภาพ 1',
+    currentIp: '10.10.20.91',
+    switchId: 'ksp-sw-rompho1',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - สวิตช์ตึกร่มโพธิ์/กายภาพ)',
+    switchIp: '10.10.100.14',
+    switchPort: 'Port 7 (10/100/1000Base-T / VLAN 20 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: PT-ADM-01 (เต้ารับ LAN จุดลงทะเบียน/คัดกรองกายภาพ)',
+    vlan: 'VLAN 20 - งานการพยาบาล กายภาพบำบัดและสารสนเทศยุทธศาสตร์',
+    gateway: '10.10.20.1 (Core Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '27/10/2026 10:05:00',
+    status: 'online'
+  },
+  'D4:5D:64:8B:20:31': {
+    mac: 'D4:5D:64:8B:20:31',
+    hostname: 'กายภาพ',
+    pcCode: 'PC-PT-02',
+    name: 'โต๊ะคอมพิวเตอร์ กายภาพ 2',
+    currentIp: '10.10.20.131',
+    switchId: 'ksp-sw-rompho1',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - สวิตช์ตึกร่มโพธิ์/กายภาพ)',
+    switchIp: '10.10.100.14',
+    switchPort: 'Port 8 (10/100/1000Base-T / VLAN 20 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: PT-TREAT-02 (เต้ารับ LAN โต๊ะบันทึกการรักษาและนัดหมายกายภาพ)',
+    vlan: 'VLAN 20 - งานการพยาบาล กายภาพบำบัดและสารสนเทศยุทธศาสตร์',
+    gateway: '10.10.20.1 (Core Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '27/10/2026 10:05:00',
+    status: 'online'
+  },
   '00:2B:67:8A:11:25': {
     mac: '00:2B:67:8A:11:25',
     hostname: 'DRUG001-PC',

@@ -58,7 +58,8 @@
       }
     }
 
-    function makePcSpec(code, name, role, ipSuffix, software, isNotebook = false) {
+    function makePcSpec(code, name, role, ipOrSuffix, software, isNotebook = false, extra = {}) {
+      const ip = String(ipOrSuffix).indexOf('.') !== -1 ? ipOrSuffix : `192.168.30.${ipOrSuffix}`;
       const spec = {
         code,
         name,
@@ -68,11 +69,19 @@
         storage: 'NVMe M.2 SSD 512 GB',
         monitor: isNotebook ? '15.6" FHD IPS Anti-Glare (Built-in)' : 'Dell 24" IPS Full HD (Eye-Care)',
         os: 'Windows 11 Pro 64-bit (Hospital Domain)',
-        ip: `192.168.30.${ipSuffix}`,
+        ip,
         status: '🟢 ออนไลน์ (เชื่อมต่อระบบ HOSxP Rehab)',
         software,
         peripherals: isNotebook ? 'เมาส์ไร้สาย • เครื่องอ่านบัตรประชาชน Smart Card พกพา' : 'เครื่องอ่านบัตรประชาชน Smart Card • เครื่องพิมพ์ใบนัดกายภาพ',
-        user: role
+        user: role,
+        hostname: extra.hostname,
+        mac: extra.mac,
+        switchId: extra.switchId,
+        switchName: extra.switchName,
+        switchPort: extra.switchPort,
+        wallOutlet: extra.wallOutlet,
+        gateway: extra.gateway || '10.10.20.1 (Core Gateway)',
+        vlan: extra.vlan || 'VLAN 20 - งานการพยาบาล กายภาพบำบัดและสารสนเทศยุทธศาสตร์'
       };
       pcList.push(spec);
       return spec;
@@ -269,8 +278,25 @@
 
     workDesk({
       x: -2.8, z: 4.2, w: 1.65, d: 0.7, rotY: Math.PI / 2,
-      hasPC: true, label: 'โต๊ะคอม กายภาพ 2', staffRole: 'nurse',
-      pcInfo: makePcSpec('PC-PT-02', 'โต๊ะคอมพิวเตอร์ กายภาพ 2 (บันทึกการรักษา)', 'นักกายภาพบำบัดบันทึกผลการทำหัตถการและประเมินสมรรถภาพกล้ามเนื้อ', '102', 'ระบบ HOSxP Physical Therapy Note • ระบบนัดหมายผู้ป่วยกายภาพบำบัด')
+      hasPC: true, label: 'โต๊ะคอม กายภาพ 2 (กายภาพ)', staffRole: 'nurse',
+      pcInfo: makePcSpec(
+        'PC-PT-02',
+        'โต๊ะคอมพิวเตอร์ กายภาพ 2',
+        'นักกายภาพบำบัดบันทึกผลการทำหัตถการและประเมินสมรรถภาพกล้ามเนื้อ',
+        '10.10.20.131',
+        'ระบบ HOSxP Physical Therapy Note • ระบบนัดหมายผู้ป่วยกายภาพบำบัด',
+        false,
+        {
+          hostname: 'กายภาพ',
+          mac: 'D4:5D:64:8B:20:31',
+          switchId: 'ksp-sw-rompho1',
+          switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - สวิตช์ตึกร่มโพธิ์/กายภาพ)',
+          switchPort: 'Port 8 (10/100/1000Base-T / VLAN 20 Untagged)',
+          wallOutlet: 'Outlet ID: PT-TREAT-02 (เต้ารับ LAN โต๊ะบันทึกการรักษาและนัดหมายกายภาพ)',
+          vlan: 'VLAN 20 - งานการพยาบาล กายภาพบำบัดและสารสนเทศยุทธศาสตร์',
+          gateway: '10.10.20.1 (Core Gateway)'
+        }
+      )
     });
 
     const triageCounter = M.box(g, 0.85, 0.88, 2.1, M.mat(0xfef08a), -2.8, 0.44, 6.8);
@@ -286,8 +312,25 @@
 
     workDesk({
       x: -5.3, z: 8.85, w: 1.75, d: 0.7, rotY: 0,
-      hasPC: true, label: 'โต๊ะคอม กายภาพ 1', staffRole: 'nurse',
-      pcInfo: makePcSpec('PC-PT-01', 'โต๊ะคอมพิวเตอร์ กายภาพ 1 (ลงทะเบียน/คัดกรอง)', 'เจ้าหน้าที่/นักกายภาพบำบัดรับบัตรคิว ตรวจสอบสิทธิ และลงทะเบียนผู้ป่วย', '101', 'ระบบ HOSxP Rehab Queue • ระบบตรวจสอบสิทธิ สปสช. Smart Card')
+      hasPC: true, label: 'โต๊ะคอม กายภาพ 1 (KAYAPAP-PC)', staffRole: 'nurse',
+      pcInfo: makePcSpec(
+        'PC-PT-01',
+        'โต๊ะคอมพิวเตอร์ กายภาพ 1',
+        'เจ้าหน้าที่/นักกายภาพบำบัดรับบัตรคิว ตรวจสอบสิทธิ และลงทะเบียนผู้ป่วย',
+        '10.10.20.91',
+        'ระบบ HOSxP Rehab Queue • ระบบตรวจสอบสิทธิ สปสช. Smart Card',
+        false,
+        {
+          hostname: 'KAYAPAP-PC',
+          mac: 'D4:5D:64:8B:20:91',
+          switchId: 'ksp-sw-rompho1',
+          switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - สวิตช์ตึกร่มโพธิ์/กายภาพ)',
+          switchPort: 'Port 7 (10/100/1000Base-T / VLAN 20 Untagged)',
+          wallOutlet: 'Outlet ID: PT-ADM-01 (เต้ารับ LAN จุดลงทะเบียน/คัดกรองกายภาพ)',
+          vlan: 'VLAN 20 - งานการพยาบาล กายภาพบำบัดและสารสนเทศยุทธศาสตร์',
+          gateway: '10.10.20.1 (Core Gateway)'
+        }
+      )
     });
 
     physioState.beds.forEach((bed) => {
