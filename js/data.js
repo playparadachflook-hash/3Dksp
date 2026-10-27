@@ -735,28 +735,7 @@ KSS.SERVER_DEVICES = [
  * พร้อมคำสั่ง SQL, Thread ID, Locked Tables และคำแนะนำในการแก้ไข (KILL / Remote)
  */
 KSS.DEADLOCKS = {
-  '10.10.30.28': {
-    ip: '10.10.30.28',
-    pcCode: 'PC-OPD-03',
-    pcName: 'คอม OPD 3 (IT-1)',
-    buildingId: 'opd',
-    buildingName: 'อาคารผู้ป่วยนอก (OPD)',
-    location: 'โถงคัดกรองผู้ป่วยนอก OPD โต๊ะที่ 3 (IT-1)',
-    dbServer: '10.10.10.251:3306 (MariaDB Primary Master - DELL T440)',
-    database: 'hos',
-    table: 'ovst, vn_stat, opdscreen',
-    threadId: '84920',
-    lockTime: '184 วินาที',
-    lockSeconds: 184,
-    lockType: 'InnoDB Row Lock Contention (Deadlock Detected)',
-    waitingQuery: "UPDATE ovst SET oq_status = '2', cur_dep = '018', last_dep = '011' WHERE vn = '671026084922';",
-    blockingIp: '10.10.30.40',
-    blockingPc: 'PC-EXAM-03 (ห้องตรวจ 3 - DOCTOR-OPD3)',
-    blockingQuery: "UPDATE vn_stat SET pttype = 'UCS', inc_dru = inc_dru + 150 WHERE vn = '671026084922';",
-    state: 'Waiting for table metadata lock / Row Lock on vn=671026084922',
-    timeDetected: '10:14:02 น.',
-    status: 'DEADLOCK'
-  }
+  // เริ่มต้นเป็นว่างเปล่า (ไม่มีเครื่องติด Deadlock) — สามารถจำลองได้โดยคลิกปุ่มทดสอบในหน้าต่างสเปกคอมพิวเตอร์
 };
 
 // Helper: ทำความสะอาด IP string ให้เหลือเฉพาะ IPv4
