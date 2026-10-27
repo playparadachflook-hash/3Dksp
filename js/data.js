@@ -1,4 +1,4 @@
-﻿/*
+/*
  * ข้อมูลแผนผังโรงพยาบาลโคกศรีสุพรรณ (ปรับกรอบสี่เหลี่ยมผืนผ้าแนวตรง)
  * ---------------------------------------------------------------
  * px, py  = ตำแหน่งกึ่งกลางอาคาร (พิกเซล) บนกรอบสี่เหลี่ยม (X: 50..910, Y: 50..710)
@@ -735,13 +735,13 @@ KSS.SERVER_DEVICES = [
  * พร้อมคำสั่ง SQL, Thread ID, Locked Tables และคำแนะนำในการแก้ไข (KILL / Remote)
  */
 KSS.DEADLOCKS = {
-  '192.168.10.43': {
-    ip: '192.168.10.43',
+  '10.10.30.28': {
+    ip: '10.10.30.28',
     pcCode: 'PC-OPD-03',
-    pcName: 'โต๊ะคอมพิวเตอร์ OPD 3 (จุดคัดกรอง)',
+    pcName: 'คอม OPD 3 (IT-1)',
     buildingId: 'opd',
     buildingName: 'อาคารผู้ป่วยนอก (OPD)',
-    location: 'โถงคัดกรองผู้ป่วยนอก OPD โต๊ะที่ 3',
+    location: 'โถงคัดกรองผู้ป่วยนอก OPD โต๊ะที่ 3 (IT-1)',
     dbServer: '10.10.10.251:3306 (MariaDB Primary Master - DELL T440)',
     database: 'hos',
     table: 'ovst, vn_stat, opdscreen',
@@ -750,8 +750,8 @@ KSS.DEADLOCKS = {
     lockSeconds: 184,
     lockType: 'InnoDB Row Lock Contention (Deadlock Detected)',
     waitingQuery: "UPDATE ovst SET oq_status = '2', cur_dep = '018', last_dep = '011' WHERE vn = '671026084922';",
-    blockingIp: '192.168.10.63',
-    blockingPc: 'PC-EXAM-03 (ห้องตรวจ 3 - นพ.วิทวัส)',
+    blockingIp: '10.10.30.40',
+    blockingPc: 'PC-EXAM-03 (ห้องตรวจ 3 - DOCTOR-OPD3)',
     blockingQuery: "UPDATE vn_stat SET pttype = 'UCS', inc_dru = inc_dru + 150 WHERE vn = '671026084922';",
     state: 'Waiting for table metadata lock / Row Lock on vn=671026084922',
     timeDetected: '10:14:02 น.',
@@ -1358,6 +1358,25 @@ KSS.MAC_REGISTRY = {
   },
 
   /* จุดบริการซักประวัติ คัดกรอง และวัดความดัน (OPD Screening & Triage) */
+  '90:1B:0E:3C:30:28': {
+    mac: '90:1B:0E:3C:30:28',
+    hostname: 'IT-1',
+    pcCode: 'PC-OPD-03',
+    name: 'คอม OPD 3',
+    currentIp: '10.10.30.28',
+    switchId: 'ksp-sw-opd',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-OPD - ตึกผู้ป่วยนอก)',
+    switchIp: '10.10.100.6',
+    switchPort: 'Port 13 (10/100/1000Base-T / VLAN 30 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: OPD-NURSE-03 (เต้ารับ LAN โต๊ะซักประวัติหน้าห้องตรวจ 3)',
+    vlan: 'VLAN 30 - ห้องตรวจแพทย์และบริการผู้ป่วยนอก (OPD)',
+    gateway: '10.10.30.1 (OPD Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '27/10/2026 09:30:00',
+    status: 'online'
+  },
   '90:1B:0E:3C:44:29': {
     mac: '90:1B:0E:3C:44:29',
     hostname: 'OPD4-PC',

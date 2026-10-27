@@ -701,9 +701,17 @@
         ip: '10.10.20.129', hostname: 'OPD4-PC', mac: '90:1B:0E:3C:44:29',
         switchId: 'ksp-sw-opd', switchName: 'Aruba / HPE 2530 24G (KSP-SW-OPD - ตึกผู้ป่วยนอก)',
         switchPort: 'Port 14 (VLAN 20)', wallOutlet: 'OPD-NURSE-04 (โต๊ะซักประวัติหน้าห้องตรวจ 4)',
+        gateway: '10.10.20.1 (Core Gateway)', vlan: 'VLAN 20 - งานการพยาบาลและสารสนเทศยุทธศาสตร์',
         user: 'นางสาวจรัญญา วรรณกาฬ/หญ (พยาบาลวิชาชีพ)'
       },
-      { x: -10.3, z: -2.8, num: 3, code: 'PC-OPD-03', ip: '43' },
+      { 
+        x: -10.3, z: -2.8, num: 3, code: 'PC-OPD-03', 
+        ip: '10.10.30.28', hostname: 'IT-1', mac: '90:1B:0E:3C:30:28',
+        switchId: 'ksp-sw-opd', switchName: 'Aruba / HPE 2530 24G (KSP-SW-OPD - ตึกผู้ป่วยนอก)',
+        switchPort: 'Port 13 (VLAN 30)', wallOutlet: 'OPD-NURSE-03 (โต๊ะซักประวัติหน้าห้องตรวจ 3)',
+        gateway: '10.10.30.1 (OPD Gateway)', vlan: 'VLAN 30 - ห้องตรวจแพทย์และบริการผู้ป่วยนอก (OPD)',
+        user: 'เจ้าหน้าที่ประจำจุดคัดกรอง/ห้องตรวจ 3'
+      },
       { x:  -6.4, z: -2.8, num: 2, code: 'PC-OPD-02', ip: '42' },
       { x:  -2.5, z: -2.8, num: 1, code: 'PC-OPD-01', ip: '41' }
     ];
@@ -729,8 +737,8 @@
             switchName: hd.switchName,
             switchPort: hd.switchPort,
             wallOutlet: hd.wallOutlet,
-            gateway: '10.10.20.1 (Core Gateway)',
-            vlan: 'VLAN 20 - งานการพยาบาลและสารสนเทศยุทธศาสตร์'
+            gateway: hd.gateway || (hd.ip && String(hd.ip).startsWith('10.10.30') ? '10.10.30.1 (OPD Gateway)' : '10.10.20.1 (Core Gateway)'),
+            vlan: hd.vlan || (hd.ip && String(hd.ip).startsWith('10.10.30') ? 'VLAN 30 - ห้องตรวจแพทย์และบริการผู้ป่วยนอก (OPD)' : 'VLAN 20 - งานการพยาบาลและสารสนเทศยุทธศาสตร์')
           }
         )
       });
