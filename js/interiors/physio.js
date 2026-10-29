@@ -287,7 +287,7 @@
         false,
         {
           hostname: 'กายภาพ',
-          mac: 'D4:5D:64:8B:20:31',
+          mac: '8C:EC:4B:D1:95:2F',
           switchId: 'ksp-sw-rompho1',
           switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - สวิตช์ตึกร่มโพธิ์/กายภาพ)',
           switchPort: 'Port 8 (10/100/1000Base-T / VLAN 20 Untagged)',
@@ -316,12 +316,12 @@
         'PC-PT-01',
         'โต๊ะคอมพิวเตอร์ กายภาพ 1',
         'เจ้าหน้าที่/นักกายภาพบำบัดรับบัตรคิว ตรวจสอบสิทธิ และลงทะเบียนผู้ป่วย',
-        '10.10.20.91',
+        '10.10.20.92',
         'ระบบ HOSxP Rehab Queue • ระบบตรวจสอบสิทธิ สปสช. Smart Card',
         false,
         {
           hostname: 'KAYAPAP-PC',
-          mac: 'D4:5D:64:8B:20:91',
+          mac: '88:AE:DD:8A:45:E7',
           switchId: 'ksp-sw-rompho1',
           switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - สวิตช์ตึกร่มโพธิ์/กายภาพ)',
           switchPort: 'Port 7 (10/100/1000Base-T / VLAN 20 Untagged)',

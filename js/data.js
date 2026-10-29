@@ -1397,12 +1397,13 @@ KSS.MAC_REGISTRY = {
 
   /* กลุ่มงานเภสัชกรรม (Pharmacy - บริการจ่ายยาผู้ป่วยนอก) */
   /* แผนกกายภาพบำบัด (Physical Therapy - ตึกกายภาพ) */
-  'D4:5D:64:8B:20:91': {
-    mac: 'D4:5D:64:8B:20:91',
+  '88:AE:DD:8A:45:E7': {
+    mac: '88:AE:DD:8A:45:E7',
     hostname: 'KAYAPAP-PC',
     pcCode: 'PC-PT-01',
     name: 'โต๊ะคอมพิวเตอร์ กายภาพ 1',
-    currentIp: '10.10.20.91',
+    currentIp: '10.10.20.92',
+    user: 'นางสาวสุภัชฌา สุภาทอง (นักกายภาพบำบัด)',
     switchId: 'ksp-sw-rompho1',
     switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - สวิตช์ตึกร่มโพธิ์/กายภาพ)',
     switchIp: '10.10.100.14',
@@ -1413,15 +1414,16 @@ KSS.MAC_REGISTRY = {
     gateway: '10.10.20.1 (Core Gateway)',
     subnet: '255.255.255.0',
     leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
-    lastRenew: '27/10/2026 10:05:00',
+    lastRenew: '29/10/2026 15:07:44',
     status: 'online'
   },
-  'D4:5D:64:8B:20:31': {
-    mac: 'D4:5D:64:8B:20:31',
+  '8C:EC:4B:D1:95:2F': {
+    mac: '8C:EC:4B:D1:95:2F',
     hostname: 'กายภาพ',
     pcCode: 'PC-PT-02',
     name: 'โต๊ะคอมพิวเตอร์ กายภาพ 2',
     currentIp: '10.10.20.131',
+    user: 'นายสรรพสิทธิ์ ศรีโพธิ์ (นักกายภาพบำบัด)',
     switchId: 'ksp-sw-rompho1',
     switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - สวิตช์ตึกร่มโพธิ์/กายภาพ)',
     switchIp: '10.10.100.14',
@@ -1432,7 +1434,7 @@ KSS.MAC_REGISTRY = {
     gateway: '10.10.20.1 (Core Gateway)',
     subnet: '255.255.255.0',
     leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
-    lastRenew: '27/10/2026 10:05:00',
+    lastRenew: '29/10/2026 10:40:16',
     status: 'online'
   },
   '00:2B:67:8A:11:25': {
@@ -1809,6 +1811,65 @@ KSS.updatePcIpByMac = function(mac, newIp) {
     }));
   }
   return true;
+};
+
+KSS.syncLiveHosxpData = function(records) {
+  if (!Array.isArray(records)) return 0;
+  let updatedCount = 0;
+  records.forEach((rec) => {
+    if (!rec || !rec.IP) return;
+    const cleanIp = KSS.cleanIp(rec.IP);
+    if (!cleanIp) return;
+    const hostname = (rec.Computer || '').trim();
+    const mac = (rec.MAC || '').trim().toUpperCase();
+
+    let target = null;
+    if (mac && KSS.MAC_REGISTRY[mac]) {
+      target = KSS.MAC_REGISTRY[mac];
+    } else if (hostname && KSS.getPcByHostname) {
+      target = KSS.getPcByHostname(hostname);
+    } else if (cleanIp && KSS.getPcByIp) {
+      target = KSS.getPcByIp(cleanIp);
+    }
+
+    if (target) {
+      if (target.currentIp !== cleanIp) {
+        target.currentIp = cleanIp;
+        updatedCount++;
+      }
+      if (mac && !target.mac) target.mac = mac;
+      if (hostname && !target.hostname) target.hostname = hostname;
+      if (rec.FullName) target.user = `${rec.FullName} (${rec.Position || rec.GroupName || rec.Department || ''})`;
+      target.status = 'online';
+      if (rec.LoginTime) target.lastRenew = rec.LoginTime;
+    } else if (mac) {
+      KSS.MAC_REGISTRY[mac] = {
+        mac,
+        hostname: hostname || `PC-${cleanIp}`,
+        pcCode: `PC-${cleanIp.split('.').slice(-2).join('-')}`,
+        name: `คอมพิวเตอร์ ${hostname || cleanIp}`,
+        currentIp: cleanIp,
+        user: rec.FullName ? `${rec.FullName} (${rec.Position || rec.GroupName || rec.Department || ''})` : '-',
+        switchName: cleanIp.startsWith('10.10.20.') ? 'Aruba / HPE 2530 24G (VLAN 20)' : 'Aruba / Core Switch',
+        switchPort: 'DHCP Dynamic',
+        wallOutlet: rec.Department || '-',
+        vlan: `VLAN ${cleanIp.split('.')[2] || '20'}`,
+        gateway: `10.10.${cleanIp.split('.')[2] || '20'}.1 (Core Gateway)`,
+        subnet: '255.255.255.0',
+        leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+        status: 'online',
+        lastRenew: rec.LoginTime || ''
+      };
+      updatedCount++;
+    }
+  });
+
+  if (updatedCount > 0 && window.dispatchEvent) {
+    window.dispatchEvent(new CustomEvent('kss-network-synced', {
+      detail: { updatedCount, timestamp: Date.now() }
+    }));
+  }
+  return updatedCount;
 };
 
 

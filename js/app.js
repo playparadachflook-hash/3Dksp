@@ -3478,6 +3478,36 @@
   initSidebar();
   animate();
 
+  // --- Live Network & IP Auto-Sync Engine ---
+  async function syncLiveNetworkData(silent = true) {
+    try {
+      const res = await fetch(`hosxp_data.json?v=${Date.now()}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0 && K.syncLiveHosxpData) {
+        const updated = K.syncLiveHosxpData(data);
+        if (updated > 0 && !silent && typeof showToast === 'function') {
+          showToast(`🔄 ซิงก์ IP และสถานะเครื่องคอมพิวเตอร์ล่าสุดแล้ว (${updated} เครื่อง)`);
+        }
+        // Update currently open PC modal if active
+        if (currentPcObject && typeof showPcModal === 'function') {
+          const matched = (currentPcObject.hostname && K.getPcByHostname ? K.getPcByHostname(currentPcObject.hostname) : null) ||
+                          (currentPcObject.mac && K.getPcByMac ? K.getPcByMac(currentPcObject.mac) : null);
+          if (matched && matched.currentIp && matched.currentIp !== currentPcIp) {
+            currentPcObject.ip = matched.currentIp;
+            showPcModal(currentPcObject);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Live IP Auto-Sync notice:', err.message);
+    }
+  }
+
+  // Initial sync & periodic background sync every 30 seconds
+  setTimeout(() => syncLiveNetworkData(true), 1200);
+  setInterval(() => syncLiveNetworkData(false), 30000);
+
   // Hide Loading Screen
   const loading = document.getElementById('loading');
   if (loading) {
