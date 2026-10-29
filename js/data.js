@@ -1767,6 +1767,53 @@ KSS.getPcByHostname = function(hostname) {
   return null;
 };
 
+KSS.getPcByCode = function(code) {
+  if (!code) return null;
+  const clean = String(code).trim().toUpperCase();
+  for (const mac in KSS.MAC_REGISTRY) {
+    const item = KSS.MAC_REGISTRY[mac];
+    if (item.pcCode && item.pcCode.toUpperCase() === clean) {
+      return item;
+    }
+  }
+  return null;
+};
+
+KSS.getPcByName = function(name) {
+  if (!name) return null;
+  const clean = String(name).trim().toLowerCase();
+  for (const mac in KSS.MAC_REGISTRY) {
+    const item = KSS.MAC_REGISTRY[mac];
+    if (item.name && item.name.toLowerCase().includes(clean)) {
+      return item;
+    }
+  }
+  return null;
+};
+
+KSS.resolvePc = function(pc) {
+  if (!pc) return null;
+  const match = (pc.mac && KSS.getPcByMac ? KSS.getPcByMac(pc.mac) : null) ||
+                (pc.hostname && KSS.getPcByHostname ? KSS.getPcByHostname(pc.hostname) : null) ||
+                (pc.code && KSS.getPcByCode ? KSS.getPcByCode(pc.code) : null) ||
+                (pc.name && KSS.getPcByName ? KSS.getPcByName(pc.name) : null) ||
+                (pc.ip && KSS.getPcByIp ? KSS.getPcByIp(pc.ip) : null);
+  if (match) {
+    if (match.currentIp) pc.ip = match.currentIp;
+    if (match.hostname) pc.hostname = match.hostname;
+    if (match.mac) pc.mac = match.mac;
+    if (match.switchName) pc.switchName = match.switchName;
+    if (match.switchPort) pc.switchPort = match.switchPort;
+    if (match.wallOutlet) pc.wallOutlet = match.wallOutlet;
+    if (match.vlan) pc.vlan = match.vlan;
+    if (match.gateway) pc.gateway = match.gateway;
+    if (match.user) pc.user = match.user;
+    if (match.status) pc.status = match.status;
+    return match;
+  }
+  return null;
+};
+
 KSS.updatePcIpByMac = function(mac, newIp) {
   if (!mac || !newIp) return false;
   const cleanMac = String(mac).trim().toUpperCase();

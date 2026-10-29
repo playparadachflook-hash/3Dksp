@@ -936,13 +936,18 @@
     document.getElementById('pc-code').innerText = `รหัสครุภัณฑ์: ${pc.code || '-'}`;
     document.getElementById('pc-role').innerText = pc.role || '-';
 
-    // 2. Dedicated IP & Remote Connection Box
-    const netInfo = parseIpInfo(pc.ip);
-    currentPcIp = netInfo.cleanIp;
+    // 2. Dedicated IP & Remote Connection Box (Resolved with Live IP)
+    const macRecord = (K.resolvePc ? K.resolvePc(pc) : null) ||
+                      (pc.mac && K.getPcByMac ? K.getPcByMac(pc.mac) : null) || 
+                      (pc.hostname && K.getPcByHostname ? K.getPcByHostname(pc.hostname) : null) ||
+                      (pc.code && K.getPcByCode ? K.getPcByCode(pc.code) : null) ||
+                      (pc.name && K.getPcByName ? K.getPcByName(pc.name) : null) ||
+                      (pc.ip && K.getPcByIp ? K.getPcByIp(pc.ip) : null);
 
-    const macRecord = (pc.mac && K.getPcByMac ? K.getPcByMac(pc.mac) : null) || 
-                      (netInfo.cleanIp && K.getPcByIp ? K.getPcByIp(netInfo.cleanIp) : null) ||
-                      (pc.hostname && K.getPcByHostname ? K.getPcByHostname(pc.hostname) : null);
+    const activeIp = macRecord?.currentIp || macRecord?.ip || pc.ip;
+    const netInfo = parseIpInfo(activeIp);
+    currentPcIp = netInfo.cleanIp;
+    pc.ip = netInfo.cleanIp;
     const macVal = pc.mac || macRecord?.mac || '';
 
     const hostEl = document.getElementById('pc-hostname');
@@ -963,7 +968,7 @@
     if (gwEl) gwEl.innerText = (macRecord && macRecord.gateway) || netInfo.gateway;
 
     const vlanEl = document.getElementById('pc-vlan-text');
-    if (vlanEl) vlanEl.innerText = pc.vlan || (macRecord && macRecord.vlan) || netInfo.extra || 'VLAN มาตรฐานโรงพยาบาล';
+    if (vlanEl) vlanEl.innerText = (macRecord && macRecord.vlan) || pc.vlan || netInfo.extra || 'VLAN มาตรฐานโรงพยาบาล';
 
     const rdpSpan = document.getElementById('pc-rdp-cmd');
     if (rdpSpan) rdpSpan.innerText = `mstsc /v:${netInfo.cleanIp}`;
@@ -1363,6 +1368,7 @@
     interiorGroup.traverse(function(child) {
       if (child.isCSS2DObject && child.element && child.element._pcInfo) {
         const pcInfo = child.element._pcInfo;
+        if (K.resolvePc) K.resolvePc(pcInfo);
         const dl = (pcInfo && K.getDeadlock) ? (K.getDeadlock(pcInfo.ip) || K.getDeadlock(pcInfo.code)) : null;
         const isLan = K.isLanConnected ? K.isLanConnected(pcInfo) : true;
         const isOnline = K.isPcOnline ? K.isPcOnline(pcInfo) : true;
@@ -3486,12 +3492,16 @@
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0 && K.syncLiveHosxpData) {
         const updated = K.syncLiveHosxpData(data);
+        if (typeof refreshInteriorPcStatus === 'function') {
+          refreshInteriorPcStatus();
+        }
         if (updated > 0 && !silent && typeof showToast === 'function') {
           showToast(`🔄 ซิงก์ IP และสถานะเครื่องคอมพิวเตอร์ล่าสุดแล้ว (${updated} เครื่อง)`);
         }
         // Update currently open PC modal if active
         if (currentPcObject && typeof showPcModal === 'function') {
-          const matched = (currentPcObject.hostname && K.getPcByHostname ? K.getPcByHostname(currentPcObject.hostname) : null) ||
+          const matched = (K.resolvePc ? K.resolvePc(currentPcObject) : null) ||
+                          (currentPcObject.hostname && K.getPcByHostname ? K.getPcByHostname(currentPcObject.hostname) : null) ||
                           (currentPcObject.mac && K.getPcByMac ? K.getPcByMac(currentPcObject.mac) : null);
           if (matched && matched.currentIp && matched.currentIp !== currentPcIp) {
             currentPcObject.ip = matched.currentIp;
