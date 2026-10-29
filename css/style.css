@@ -357,3 +357,55 @@ body.mode-interior #info { display: none !important; }
   background: #22c55e;
   color: #ffffff;
 }
+
+/* ===== GitHub Auto-Update Button (สีแดง = ปัจจุบัน, สีเขียว = อัปเดต) ===== */
+.git-update-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px !important;
+  border-radius: 10px;
+  font-size: 12px !important;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent !important;
+  transition: all .2s ease;
+}
+
+/* สีแดง: เวอร์ชันปัจจุบัน */
+.git-update-btn.status-current {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #f87171 !important;
+}
+.git-update-btn.status-current:hover {
+  background: #fecaca !important;
+  color: #991b1b !important;
+}
+
+/* สีเขียว: มีอัปเดตใหม่พร้อมให้คลิกอัปเดต */
+.git-update-btn.status-has-update {
+  background: #16a34a !important;
+  color: #ffffff !important;
+  border: 1px solid #15803d !important;
+  animation: pulse-green 1.5s infinite;
+  box-shadow: 0 0 10px rgba(22, 163, 74, 0.4);
+}
+.git-update-btn.status-has-update:hover {
+  background: #15803d !important;
+  transform: translateY(-1px);
+}
+
+/* สถานะกำลังอัปเดต */
+.git-update-btn.status-updating {
+  background: #fef08a !important;
+  color: #854d0e !important;
+  border: 1px solid #facc15 !important;
+  cursor: wait;
+}
+
+@keyframes pulse-green {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7); }
+  70% { transform: scale(1.03); box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+}

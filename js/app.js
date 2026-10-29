@@ -3445,6 +3445,99 @@
   // Initial check for active deadlocks on load
   updateDeadlockStatusEverywhere();
 
+  // ===== GitHub Auto-Update Button Logic (สีแดง = ปัจจุบัน, สีเขียว = อัปเดต) =====
+  const btnGitUpdate = document.getElementById('btn-git-update');
+  const gitIcon = document.getElementById('git-status-icon');
+  const gitText = document.getElementById('git-status-text');
+  let currentGitState = { hasUpdate: false, localCommit: '', remoteCommit: '' };
+
+  async function checkGitUpdateStatus(isManual = false) {
+    if (!btnGitUpdate) return;
+    try {
+      const res = await fetch('/api/git-status', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+      currentGitState = data;
+
+      if (data.hasUpdate) {
+        // สีเขียว: มีอัปเดตใหม่
+        btnGitUpdate.className = 'git-update-btn status-has-update';
+        if (gitIcon) gitIcon.innerText = '🟢';
+        if (gitText) gitText.innerText = `อัปเดต (${data.remoteCommit})`;
+        btnGitUpdate.title = `มีเวอร์ชันใหม่บน GitHub (${data.localCommit} ➜ ${data.remoteCommit})\nคลิกเพื่อดึงข้อมูลและอัปเดตระบบทันที`;
+        if (isManual) {
+          showToast(`🟢 พบเวอร์ชันใหม่บน GitHub: ${data.remoteCommit}`);
+        }
+      } else {
+        // สีแดง: เวอร์ชันปัจจุบัน
+        btnGitUpdate.className = 'git-update-btn status-current';
+        if (gitIcon) gitIcon.innerText = '🔴';
+        if (gitText) gitText.innerText = `ปัจจุบัน (${data.localCommit})`;
+        btnGitUpdate.title = `ระบบเป็นเวอร์ชันปัจจุบันแล้ว (${data.localCommit})\n${data.localMsg || ''}\nคลิกเพื่อตรวจสอบการอัปเดตจาก GitHub ซ้ำ`;
+        if (isManual) {
+          showToast(`🔴 ระบบเป็นเวอร์ชันปัจจุบันแล้ว (${data.localCommit})`);
+        }
+      }
+    } catch (e) {
+      console.warn('Git status check skipped:', e.message);
+    }
+  }
+
+  async function triggerGitUpdate() {
+    if (!btnGitUpdate) return;
+    if (!currentGitState.hasUpdate) {
+      showToast('🔍 กำลังตรวจสอบการเปลี่ยนแปลงบน GitHub...');
+      await checkGitUpdateStatus(true);
+      return;
+    }
+
+    const confirmUpdate = confirm(
+      `พบการเปลี่ยนแปลงบน GitHub!\n\n` +
+      `เวอร์ชันปัจจุบัน: ${currentGitState.localCommit}\n` +
+      `เวอร์ชันใหม่: ${currentGitState.remoteCommit}\n\n` +
+      `ต้องการอัปเดตโปรแกรมที่ Server เดี๋ยวนี้หรือไม่?`
+    );
+
+    if (!confirmUpdate) return;
+
+    btnGitUpdate.className = 'git-update-btn status-updating';
+    if (gitIcon) gitIcon.innerText = '⏳';
+    if (gitText) gitText.innerText = 'กำลังอัปเดต...';
+    btnGitUpdate.disabled = true;
+    showToast('🚀 กำลังดึงโค้ดล่าสุดจาก GitHub และอัปเดตระบบ...');
+
+    try {
+      const res = await fetch('/api/git-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('✓ อัปเดตโปรแกรมที่ Server สำเร็จแล้ว! กำลังรีโหลดใน 3 วินาที...');
+        setTimeout(() => {
+          window.location.reload(true);
+        }, 3000);
+      } else {
+        alert('เกิดข้อผิดพลาดในการอัปเดต: ' + (data.error || 'Unknown error'));
+        checkGitUpdateStatus();
+      }
+    } catch (err) {
+      showToast('⚠️ เซิร์ฟเวอร์กำลังรีสตาร์ท... กำลังรีโหลดหน้าจอใหม่ใน 4 วินาที');
+      setTimeout(() => {
+        window.location.reload(true);
+      }, 4000);
+    } finally {
+      btnGitUpdate.disabled = false;
+    }
+  }
+
+  if (btnGitUpdate) {
+    btnGitUpdate.onclick = () => triggerGitUpdate();
+    checkGitUpdateStatus();
+    // ตรวจสอบ GitHub อัตโนมัติทุกๆ 30 วินาที
+    setInterval(() => checkGitUpdateStatus(), 30000);
+  }
+
   // --- Animation Loop ---
   const clock = new THREE.Clock();
 
