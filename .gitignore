@@ -15,4 +15,7 @@ Khoksisuphan-Morniter/
 
 ~$*
 scratch/
+scripts/push_git.ps1
+scripts/ssh_cmd.ps1
+
 
