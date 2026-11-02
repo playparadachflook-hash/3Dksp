@@ -3646,6 +3646,176 @@
   setTimeout(() => syncLiveNetworkData(true), 1200);
   setInterval(() => syncLiveNetworkData(false), 30000);
 
+  // =========================================================================
+  // ThaiD (DOPA Digital ID) Authentication Client Logic
+  // =========================================================================
+  let currentThaiDUser = null;
+
+  function setThaiDUser(user) {
+    currentThaiDUser = user;
+    const btnLogin = document.getElementById('btn-thaid-login');
+    const userBadge = document.getElementById('thaid-user-badge');
+    const userNameSpan = document.getElementById('thaid-user-name');
+    const viewUnauth = document.getElementById('thaid-view-unauth');
+    const viewAuth = document.getElementById('thaid-view-auth');
+
+    if (user) {
+      if (btnLogin) btnLogin.classList.add('hidden');
+      if (userBadge) {
+        userBadge.classList.remove('hidden');
+        if (userNameSpan) {
+          userNameSpan.textContent = user.name ? `คุณ${user.name.split(' ')[0] || user.name}` : 'ผู้ใช้งาน ThaID';
+        }
+      }
+
+      // Populate ID Card modal fields
+      const cardPid = document.getElementById('thaid-card-pid');
+      const cardName = document.getElementById('thaid-card-name');
+      const cardIal = document.getElementById('thaid-card-ial');
+      const cardTime = document.getElementById('thaid-card-time');
+
+      if (cardPid) cardPid.textContent = user.pid || '-';
+      if (cardName) cardName.textContent = user.name || '-';
+      if (cardIal) cardIal.textContent = `Level ${user.ial || '2.3'} (Verified)`;
+      if (cardTime) {
+        const d = user.verifiedAt ? new Date(user.verifiedAt) : new Date();
+        cardTime.textContent = d.toLocaleString('th-TH');
+      }
+
+      if (viewUnauth) viewUnauth.classList.add('hidden');
+      if (viewAuth) viewAuth.classList.remove('hidden');
+    } else {
+      if (btnLogin) btnLogin.classList.remove('hidden');
+      if (userBadge) userBadge.classList.add('hidden');
+      if (viewUnauth) viewUnauth.classList.remove('hidden');
+      if (viewAuth) viewAuth.classList.add('hidden');
+    }
+  }
+
+  function openThaiDModal() {
+    const modal = document.getElementById('thaid-modal');
+    if (modal) modal.classList.remove('hidden');
+  }
+
+  function closeThaiDModal() {
+    const modal = document.getElementById('thaid-modal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  function initThaiDAuth() {
+    const btnLogin = document.getElementById('btn-thaid-login');
+    const userBadge = document.getElementById('thaid-user-badge');
+    const btnClose = document.getElementById('thaid-close-btn');
+    const btnStartLogin = document.getElementById('thaid-start-login-btn');
+    const btnDemoLogin = document.getElementById('thaid-demo-login-btn');
+    const btnLogout = document.getElementById('thaid-logout-btn');
+
+    if (btnLogin) btnLogin.addEventListener('click', openThaiDModal);
+    if (userBadge) userBadge.addEventListener('click', openThaiDModal);
+    if (btnClose) btnClose.addEventListener('click', closeThaiDModal);
+
+    // Click to start real ThaID Login flow
+    if (btnStartLogin) {
+      btnStartLogin.addEventListener('click', async () => {
+        try {
+          btnStartLogin.disabled = true;
+          btnStartLogin.innerHTML = '<span>⏳</span><span>กำลังเชื่อมต่อกรมการปกครอง...</span>';
+          const res = await fetch('/api/auth/thaid/login-url');
+          const data = await res.json();
+          if (data.authUrl) {
+            window.location.href = data.authUrl;
+          } else {
+            alert('ไม่สามารถสร้าง URL เข้าสู่ระบบ ThaID ได้');
+            btnStartLogin.disabled = false;
+            btnStartLogin.innerHTML = '<span>🇹🇭</span><strong>เข้าสู่ระบบด้วย ThaID (สแกน QR Code)</strong>';
+          }
+        } catch (e) {
+          alert('เชื่อมต่อเซิร์ฟเวอร์ขัดข้อง: ' + e.message);
+          btnStartLogin.disabled = false;
+          btnStartLogin.innerHTML = '<span>🇹🇭</span><strong>เข้าสู่ระบบด้วย ThaID (สแกน QR Code)</strong>';
+        }
+      });
+    }
+
+    // Demo / IT Staff Login simulation
+    if (btnDemoLogin) {
+      btnDemoLogin.addEventListener('click', async () => {
+        try {
+          const res = await fetch('/api/auth/thaid/demo-login', { method: 'POST' });
+          const data = await res.json();
+          if (data.success && data.user) {
+            setThaiDUser(data.user);
+            showToast('🎉 เข้าสู่ระบบทดสอบสำหรับเจ้าหน้าที่ IT สำเร็จ!');
+          }
+        } catch (e) {
+          showToast('⚠️ เข้าสู่ระบบจำลองไม่สำเร็จ: ' + e.message);
+        }
+      });
+    }
+
+    // Logout
+    if (btnLogout) {
+      btnLogout.addEventListener('click', async () => {
+        try {
+          await fetch('/api/auth/thaid/logout', { method: 'POST' });
+          setThaiDUser(null);
+          closeThaiDModal();
+          showToast('👋 ออกจากระบบ ThaID สำเร็จ');
+        } catch (e) {
+          setThaiDUser(null);
+          closeThaiDModal();
+        }
+      });
+    }
+
+    // Handle OAuth Callback in URL (code & state)
+    const urlParams = new URLSearchParams(window.location.search);
+    const authCode = urlParams.get('code');
+    const authState = urlParams.get('state');
+    const authError = urlParams.get('error');
+    const authErrorDesc = urlParams.get('error_description');
+
+    if (authError) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      showToast(`⚠️ ThaID เข้าสู่ระบบไม่สำเร็จ: ${authErrorDesc || authError}`);
+    } else if (authCode) {
+      showToast('🔄 กำลังตรวจสอบและแลกเปลี่ยน Token กับ ThaID (กรมการปกครอง)...');
+      fetch('/api/auth/thaid/callback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: authCode, state: authState })
+      })
+      .then(r => r.json())
+      .then(res => {
+        window.history.replaceState({}, document.title, window.location.pathname);
+        if (res.success && res.user) {
+          setThaiDUser(res.user);
+          openThaiDModal();
+          showToast(`🎉 ยืนยันตัวตนสำเร็จ! ยินดีต้อนรับ คุณ${res.user.name}`);
+        } else {
+          showToast(`⚠️ ยืนยันตัวตนขัดข้อง: ${res.error || 'การยืนยันตัวตนไม่ผ่าน'}`);
+        }
+      })
+      .catch(err => {
+        window.history.replaceState({}, document.title, window.location.pathname);
+        showToast('⚠️ เชื่อมต่อระบบ ThaID ขัดข้อง');
+      });
+    } else {
+      // Check existing session
+      fetch('/api/auth/thaid/me')
+        .then(r => r.json())
+        .then(res => {
+          if (res.authenticated && res.user) {
+            setThaiDUser(res.user);
+          }
+        })
+        .catch(() => {});
+    }
+  }
+
+  // Initialize ThaiD
+  initThaiDAuth();
+
   // Hide Loading Screen
   const loading = document.getElementById('loading');
   if (loading) {

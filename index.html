@@ -6,7 +6,7 @@
   <title>แผนผัง 3D Isometric - โรงพยาบาลโคกศรีสุพรรณ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261026o">
+  <link rel="stylesheet" href="css/style.css?v=20261102thaid">
   <!-- Modular Building Stylesheets (เชื่อมต่อไฟล์ CSS แยกตามแต่ละอาคาร) -->
   <link rel="stylesheet" href="css/buildings/opd.css?v=20261026o">
   <link rel="stylesheet" href="css/buildings/server.css?v=20261026o">
@@ -55,6 +55,16 @@
       <span id="git-status-icon">🔴</span>
       <span id="git-status-text">ปัจจุบัน</span>
     </button>
+    <!-- ThaiD (DOPA Digital ID) Authentication Control -->
+    <button id="btn-thaid-login" class="thaid-btn" title="เข้าสู่ระบบด้วยบัตรประชาชนดิจิทัล ThaID (กรมการปกครอง)">
+      <span class="thaid-flag">🇹🇭</span>
+      <span id="thaid-btn-text">เข้าสู่ระบบ ThaID</span>
+    </button>
+    <div id="thaid-user-badge" class="thaid-user-pill hidden" title="คลิกเพื่อดูข้อมูลการยืนยันตัวตน ThaID">
+      <span class="thaid-dot">🟢</span>
+      <span id="thaid-user-name">คุณ...</span>
+      <span class="thaid-tag">ThaID</span>
+    </div>
   </div>
 
   <aside class="panel sidebar" id="sidebar">
@@ -343,6 +353,115 @@
     </div>
   </div>
 
+  <!-- ===== ThaiD Digital ID Authentication Modal ===== -->
+  <div class="panel thaid-modal hidden" id="thaid-modal">
+    <div class="thaid-modal-head">
+      <div class="thaid-brand">
+        <div class="thaid-logo-box">🇹🇭</div>
+        <div>
+          <h3>ระบบยืนยันตัวตนดิจิทัล ThaID</h3>
+          <p>สำนักบริหารการทะเบียน กรมการปกครอง (DOPA Digital ID)</p>
+        </div>
+      </div>
+      <button id="thaid-close-btn" class="icon-btn" type="button">✕</button>
+    </div>
+
+    <!-- View When NOT Logged In -->
+    <div id="thaid-view-unauth" class="thaid-modal-body">
+      <div class="thaid-hero-card">
+        <div class="thaid-emblem">🇹🇭</div>
+        <h4>เข้าสู่ระบบด้วยบัตรประจำตัวประชาชนดิจิทัล (ThaID)</h4>
+        <p>เชื่อมต่อระบบยืนยันตัวตนดิจิทัลมาตรฐาน OpenID Connect / OAuth 2.0 ร่วมกับแอปพลิเคชัน ThaID ของกรมการปกครอง กระทรวงมหาดไทย</p>
+      </div>
+
+      <div class="thaid-feature-list">
+        <div class="thaid-feat-item">
+          <span class="tf-icon">🛡️</span>
+          <div>
+            <strong>ความปลอดภัยระดับชาติ (IAL 2.3)</strong>
+            <small>พิสูจน์และยืนยันตัวตนผ่านฐานข้อมูลทะเบียนราษฎร กรมการปกครอง</small>
+          </div>
+        </div>
+        <div class="thaid-feat-item">
+          <span class="tf-icon">📱</span>
+          <div>
+            <strong>สแกน QR Code ผ่านแอปพลิเคชัน ThaID</strong>
+            <small>เปิดแอป ThaID บนสมาร์ตโฟนแล้วสแกนเพื่อยืนยันตัวตนได้ทันที</small>
+          </div>
+        </div>
+        <div class="thaid-feat-item">
+          <span class="tf-icon">🔐</span>
+          <div>
+            <strong>คุ้มครองข้อมูลส่วนบุคคล (PDPA Compliant)</strong>
+            <small>เข้ารหัสข้อมูลแบบ End-to-End ปลอดภัยสูงสุด</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="thaid-actions">
+        <button id="thaid-start-login-btn" class="thaid-action-primary" type="button">
+          <span>🇹🇭</span>
+          <strong>เข้าสู่ระบบด้วย ThaID (สแกน QR Code)</strong>
+        </button>
+        <button id="thaid-demo-login-btn" class="thaid-action-demo" type="button" title="ทดสอบระบบสำหรับผู้ดูแลระบบ IT">
+          <span>🧪</span>
+          <span>ทดสอบเข้าสู่ระบบ (Demo IT Staff)</span>
+        </button>
+      </div>
+
+      <div class="thaid-meta-footer">
+        <span>Callback Endpoint: http://147.50.107.211:3080/</span>
+      </div>
+    </div>
+
+    <!-- View When LOGGED IN -->
+    <div id="thaid-view-auth" class="thaid-modal-body hidden">
+      <div class="thaid-id-card">
+        <div class="id-card-header">
+          <div class="id-card-title">
+            <span class="id-badge-verified">✓ ยืนยันตัวตนแล้ว</span>
+            <span>บัตรประจำตัวประชาชนดิจิทัล (Digital ID)</span>
+          </div>
+          <span class="dopa-label">DOPA THAILAND</span>
+        </div>
+        <div class="id-card-content">
+          <div class="id-card-avatar">👤</div>
+          <div class="id-card-details">
+            <div class="id-field-group">
+              <span class="id-field-lbl">เลขประจำตัวประชาชน (National ID)</span>
+              <strong id="thaid-card-pid" class="id-field-val">1-4799-00128-49-1</strong>
+            </div>
+            <div class="id-field-group">
+              <span class="id-field-lbl">ชื่อ - สกุล (Full Name)</span>
+              <strong id="thaid-card-name" class="id-field-val">นายภาณุเดช เพียรชนะ</strong>
+            </div>
+            <div class="id-grid-2col">
+              <div class="id-field-group">
+                <span class="id-field-lbl">ระดับความน่าเชื่อถือ (IAL)</span>
+                <span id="thaid-card-ial" class="id-field-chip">Level 2.3 (Verified)</span>
+              </div>
+              <div class="id-field-group">
+                <span class="id-field-lbl">ระบบยืนยันสิทธิ์</span>
+                <span class="id-field-chip green">เจ้าหน้าที่ รพ.โคกศรีสุพรรณ</span>
+              </div>
+            </div>
+            <div class="id-field-group">
+              <span class="id-field-lbl">เวลาที่เข้าสู่ระบบ</span>
+              <small id="thaid-card-time" class="id-field-time">-</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="thaid-auth-actions">
+        <button id="thaid-logout-btn" class="thaid-action-logout" type="button">
+          <span>🚪</span>
+          <strong>ออกจากระบบ (Logout)</strong>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification for clipboard / status -->
   <div id="toast-notify" class="toast-notify hidden">✓ คัดลอกสำเร็จ</div>
 
@@ -353,31 +472,31 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <!-- App -->
-  <script src="js/data.js?v=20261102roadunified"></script>
-  <script src="js/models.js?v=20261102roadunified"></script>
+  <script src="js/data.js?v=20261102thaid"></script>
+  <script src="js/models.js?v=20261102thaid"></script>
   <!-- Modular Interiors -->
-  <script src="js/interiors/common.js?v=20261102roadunified"></script>
-  <script src="js/interiors/guard.js?v=20261102roadunified"></script>
-  <script src="js/interiors/shop.js?v=20261102roadunified"></script>
-  <script src="js/interiors/parking.js?v=20261102roadunified"></script>
-  <script src="js/interiors/er.js?v=20261102roadunified"></script>
-  <script src="js/interiors/physio.js?v=20261102roadunified"></script>
-  <script src="js/interiors/ipd.js?v=20261102roadunified"></script>
-  <script src="js/interiors/power.js?v=20261102roadunified"></script>
-  <script src="js/interiors/hall.js?v=20261102roadunified"></script>
-  <script src="js/interiors/maint.js?v=20261102roadunified"></script>
-  <script src="js/interiors/finance.js?v=20261102roadunified"></script>
-  <script src="js/interiors/kitchen.js?v=20261102roadunified"></script>
-  <script src="js/interiors/pharmacy.js?v=20261102roadunified"></script>
-  <script src="js/interiors/dental.js?v=20261102roadunified"></script>
-  <script src="js/interiors/thaimed.js?v=20261102roadunified"></script>
-  <script src="js/interiors/rompho.js?v=20261102roadunified"></script>
-  <script src="js/interiors/store.js?v=20261102roadunified"></script>
-  <script src="js/interiors/supply.js?v=20261102roadunified"></script>
-  <script src="js/interiors/opd.js?v=20261102roadunified"></script>
-  <script src="js/interiors/psych.js?v=20261102roadunified"></script>
-  <script src="js/interiors/drivers.js?v=20261102roadunified"></script>
-  <script src="js/app.js?v=20261102roadunified"></script>
+  <script src="js/interiors/common.js?v=20261102thaid"></script>
+  <script src="js/interiors/guard.js?v=20261102thaid"></script>
+  <script src="js/interiors/shop.js?v=20261102thaid"></script>
+  <script src="js/interiors/parking.js?v=20261102thaid"></script>
+  <script src="js/interiors/er.js?v=20261102thaid"></script>
+  <script src="js/interiors/physio.js?v=20261102thaid"></script>
+  <script src="js/interiors/ipd.js?v=20261102thaid"></script>
+  <script src="js/interiors/power.js?v=20261102thaid"></script>
+  <script src="js/interiors/hall.js?v=20261102thaid"></script>
+  <script src="js/interiors/maint.js?v=20261102thaid"></script>
+  <script src="js/interiors/finance.js?v=20261102thaid"></script>
+  <script src="js/interiors/kitchen.js?v=20261102thaid"></script>
+  <script src="js/interiors/pharmacy.js?v=20261102thaid"></script>
+  <script src="js/interiors/dental.js?v=20261102thaid"></script>
+  <script src="js/interiors/thaimed.js?v=20261102thaid"></script>
+  <script src="js/interiors/rompho.js?v=20261102thaid"></script>
+  <script src="js/interiors/store.js?v=20261102thaid"></script>
+  <script src="js/interiors/supply.js?v=20261102thaid"></script>
+  <script src="js/interiors/opd.js?v=20261102thaid"></script>
+  <script src="js/interiors/psych.js?v=20261102thaid"></script>
+  <script src="js/interiors/drivers.js?v=20261102thaid"></script>
+  <script src="js/app.js?v=20261102thaid"></script>
 </body>
 </html>
 
