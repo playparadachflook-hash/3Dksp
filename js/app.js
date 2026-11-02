@@ -183,13 +183,16 @@
     const bBot4 = M.box(exteriorGroup, 84.2, bHeight, bThick, borderMat, 23.1, bHeight / 2 - 0.1, zBottom);
     [bLeft, bRight, bTopLeft, bTopRight, bBot1, bBot2, bBot3, bBot4].forEach(m => addSharpEdges(m, 0x1e293b));
 
-    // 3. Main Access Roads (Straight Orthogonal Roads with Crisp Curbs & Seamless Junctions)
+    // 3. Main Access Roads (High-Contrast Bold Black Asphalt Roads with Crisp Borders)
+    const roadMat = M.mat(0x18181b, { roughness: 0.85 }); // Deep dark asphalt black
+    const roadEdgeColor = 0x000000;
+
     K.ROADS.forEach(road => {
       // Junction caps at bends and intersection nodes
       road.pts.forEach(pt => {
         const p = toWorld(pt[0], pt[1]);
-        const cap = M.box(exteriorGroup, road.w, 0.06, road.w, 0xcbd5e1, p.x, 0.04, p.z);
-        addSharpEdges(cap, 0x64748b);
+        const cap = M.box(exteriorGroup, road.w, 0.08, road.w, roadMat, p.x, 0.05, p.z);
+        addSharpEdges(cap, roadEdgeColor);
       });
 
       for (let i = 0; i < road.pts.length - 1; i++) {
@@ -202,12 +205,30 @@
 
         const roadMesh = M.box(
           exteriorGroup,
-          road.w, 0.06, len,
-          0xcbd5e1,
-          (p1.x + p2.x) / 2, 0.04, (p1.z + p2.z) / 2
+          road.w, 0.08, len,
+          roadMat,
+          (p1.x + p2.x) / 2, 0.05, (p1.z + p2.z) / 2
         );
         roadMesh.rotation.y = ang;
-        addSharpEdges(roadMesh, 0x64748b);
+        addSharpEdges(roadMesh, roadEdgeColor);
+
+        // White dashed center line markings for realistic contrast & road definition
+        if (len > 3.5 && road.w >= 5.0) {
+          const numDashes = Math.max(1, Math.floor(len / 4.2));
+          const dashLen = Math.min(1.8, (len / numDashes) * 0.45);
+          for (let d = 0; d < numDashes; d++) {
+            const t = (d + 0.5) / numDashes;
+            const cx = p1.x + dx * t;
+            const cz = p1.z + dz * t;
+            const dashMesh = M.box(
+              exteriorGroup,
+              0.32, 0.082, dashLen,
+              0xffffff,
+              cx, 0.052, cz
+            );
+            dashMesh.rotation.y = ang;
+          }
+        }
       }
     });
 
