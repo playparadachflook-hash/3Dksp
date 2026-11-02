@@ -741,20 +741,6 @@ const server = http.createServer(async (req, res) => {
     res.end(JSON.stringify({ success: true, message: 'ลบผู้ใช้งานออกจากระบบเรียบร้อยแล้ว' }));
     return;
   }
-      provider: 'ThaID (DOPA - กรมการปกครอง)',
-      verifiedAt: new Date().toISOString()
-    };
-    const sessionId = crypto.randomUUID();
-    sessions[sessionId] = { user, createdAt: Date.now() };
-    saveSessions();
-
-    res.writeHead(200, {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Set-Cookie': `thaid_session=${sessionId}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`
-    });
-    res.end(JSON.stringify({ success: true, user, isDemo: true }));
-    return;
-  }
 
   // API: Check GitHub git status
   if (pathname === '/api/git-status' && req.method === 'GET') {
