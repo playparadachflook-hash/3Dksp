@@ -183,16 +183,18 @@
     const bBot4 = M.box(exteriorGroup, 84.2, bHeight, bThick, borderMat, 23.1, bHeight / 2 - 0.1, zBottom);
     [bLeft, bRight, bTopLeft, bTopRight, bBot1, bBot2, bBot3, bBot4].forEach(m => addSharpEdges(m, 0x1e293b));
 
-    // 3. Main Access Roads (High-Contrast Bold Black Asphalt Roads with Crisp Borders)
-    const roadMat = M.mat(0x18181b, { roughness: 0.85 }); // Deep dark asphalt black
-    const roadEdgeColor = 0x000000;
+    // 3. Main Access Roads (Seamless Unified Bold Black Roads - เชื่อมเป็นแนวเส้นเดียวกันเพื่อความสวยงาม)
+    const roadMat = M.mat(0x18181b, { roughness: 0.82 }); // Deep dark asphalt black
+    const curbLineMat = new THREE.LineBasicMaterial({ color: 0x09090b, transparent: true, opacity: 0.95 });
+    const curbPositions = [];
 
     K.ROADS.forEach(road => {
-      // Junction caps at bends and intersection nodes
+      const hw = (road.w / 2);
+
+      // Junction caps at bends and intersection nodes (seamlessly bridging corners without cut lines)
       road.pts.forEach(pt => {
         const p = toWorld(pt[0], pt[1]);
-        const cap = M.box(exteriorGroup, road.w, 0.08, road.w, roadMat, p.x, 0.05, p.z);
-        addSharpEdges(cap, roadEdgeColor);
+        M.box(exteriorGroup, road.w, 0.08, road.w, roadMat, p.x, 0.05, p.z);
       });
 
       for (let i = 0; i < road.pts.length - 1; i++) {
@@ -203,6 +205,7 @@
         const len = Math.hypot(dx, dz);
         const ang = Math.atan2(dx, dz);
 
+        // Road surface body (continuous black asphalt)
         const roadMesh = M.box(
           exteriorGroup,
           road.w, 0.08, len,
@@ -210,9 +213,17 @@
           (p1.x + p2.x) / 2, 0.05, (p1.z + p2.z) / 2
         );
         roadMesh.rotation.y = ang;
-        addSharpEdges(roadMesh, roadEdgeColor);
 
-        // White dashed center line markings for realistic contrast & road definition
+        // Outer Curb Lines along the sides of the road (NO transverse cross lines cutting the road!)
+        if (len > 0.001) {
+          const nx = (dz / len) * hw;
+          const nz = -(dx / len) * hw;
+          const yTop = 0.091;
+          curbPositions.push(p1.x + nx, yTop, p1.z + nz, p2.x + nx, yTop, p2.z + nz);
+          curbPositions.push(p1.x - nx, yTop, p1.z - nz, p2.x - nx, yTop, p2.z - nz);
+        }
+
+        // Crisp white dashed center lines for road lane continuity
         if (len > 3.5 && road.w >= 5.0) {
           const numDashes = Math.max(1, Math.floor(len / 4.2));
           const dashLen = Math.min(1.8, (len / numDashes) * 0.45);
@@ -231,6 +242,13 @@
         }
       }
     });
+
+    if (curbPositions.length > 0) {
+      const curbGeo = new THREE.BufferGeometry();
+      curbGeo.setAttribute('position', new THREE.Float32BufferAttribute(curbPositions, 3));
+      const curbLines = new THREE.LineSegments(curbGeo, curbLineMat);
+      exteriorGroup.add(curbLines);
+    }
 
     // 4. Construct Buildings & Features from KSS.BUILDINGS
     K.BUILDINGS.forEach(b => {
