@@ -39,6 +39,79 @@ function saveSessions() {
   }
 }
 
+// =========================================================================
+// Authorized Users Management (ระบบจัดการผู้ใช้งานหลังบ้าน)
+// กำหนด นายภราเดช สุจริต (2470400018287) เป็น Super Admin
+// =========================================================================
+const USERS_FILE = path.join(__dirname, 'users.json');
+const SUPER_ADMIN_PID = '2470400018287';
+const SUPER_ADMIN_NAME = 'นายภราเดช สุจริต';
+
+function cleanPid(pid) {
+  return String(pid || '').replace(/[^0-9]/g, '');
+}
+
+function formatPid(pid) {
+  const p = cleanPid(pid);
+  if (p.length !== 13) return pid || '';
+  return `${p[0]}-${p.slice(1, 5)}-${p.slice(5, 10)}-${p.slice(10, 12)}-${p[12]}`;
+}
+
+function loadUsers() {
+  let users = [];
+  try {
+    if (fs.existsSync(USERS_FILE)) {
+      users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
+    }
+  } catch (e) {
+    users = [];
+  }
+
+  // Ensure Super Admin is always present, active, and has admin role
+  let superAdmin = users.find(u => cleanPid(u.pid) === SUPER_ADMIN_PID);
+  if (!superAdmin) {
+    superAdmin = {
+      pid: SUPER_ADMIN_PID,
+      name: SUPER_ADMIN_NAME,
+      role: 'admin',
+      isSuperAdmin: true,
+      status: 'active',
+      department: 'ศูนย์คอมพิวเตอร์ / กลุ่มงานสารสนเทศทางการแพทย์',
+      position: 'ผู้ดูแลระบบสูงสุด (Super Administrator)',
+      addedBy: 'ระบบเริ่มต้น (System Root)',
+      createdAt: new Date().toISOString(),
+      lastLogin: null
+    };
+    users.unshift(superAdmin);
+    saveUsers(users);
+  } else {
+    superAdmin.isSuperAdmin = true;
+    superAdmin.role = 'admin';
+    superAdmin.status = 'active';
+  }
+  return users;
+}
+
+function saveUsers(users) {
+  try {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+  } catch (e) {
+    console.error('[Users Save Error]', e.message);
+  }
+}
+
+function getAdminUser(req) {
+  const cookies = parseCookies(req);
+  const sid = cookies.thaid_session;
+  if (!sid || !sessions[sid]) return null;
+  const u = sessions[sid].user;
+  if (!u) return null;
+  if (cleanPid(u.pid) === SUPER_ADMIN_PID || u.role === 'admin') {
+    return u;
+  }
+  return null;
+}
+
 function parseCookies(req) {
   const list = {};
   const rc = req.headers.cookie;
@@ -260,15 +333,77 @@ const server = http.createServer(async (req, res) => {
           console.warn('[ThaID Auth] Userinfo endpoint call warning:', uiErr.message);
         }
 
-        // Construct User Identity Record
-        const pid = userInfo.pid || idPayload.pid || '1-4799-00000-00-0';
-        const name = userInfo.name || idPayload.name || `${userInfo.given_name || ''} ${userInfo.family_name || ''}`.trim() || 'ผู้ใช้งาน ThaID';
+        // Access Control Gate: Verify against Authorized Whitelist
+        const rawPid = cleanPid(userInfo.pid || idPayload.pid || '');
+        const displayName = userInfo.name || idPayload.name || `${userInfo.given_name || ''} ${userInfo.family_name || ''}`.trim() || 'ผู้ใช้งาน ThaID';
+        const allUsers = loadUsers();
+        let userRecord = allUsers.find(u => cleanPid(u.pid) === rawPid);
+
+        if (rawPid === SUPER_ADMIN_PID) {
+          // Super Admin is always granted full access
+          if (!userRecord) {
+            userRecord = {
+              pid: SUPER_ADMIN_PID,
+              name: SUPER_ADMIN_NAME,
+              role: 'admin',
+              isSuperAdmin: true,
+              status: 'active',
+              department: 'ศูนย์คอมพิวเตอร์ / กลุ่มงานสารสนเทศทางการแพทย์',
+              position: 'ผู้ดูแลระบบสูงสุด (Super Administrator)',
+              addedBy: 'ระบบเริ่มต้น (System Root)',
+              createdAt: new Date().toISOString(),
+              lastLogin: new Date().toISOString()
+            };
+            allUsers.unshift(userRecord);
+          } else {
+            userRecord.lastLogin = new Date().toISOString();
+            userRecord.role = 'admin';
+            userRecord.status = 'active';
+            userRecord.isSuperAdmin = true;
+          }
+          saveUsers(allUsers);
+        } else {
+          // Strict Whitelist Check: Must be added by นายภราเดช สุจริต and set to active
+          if (!userRecord) {
+            console.warn(`[ThaID Auth Denied] PID ${rawPid} (${displayName}) is not on the authorized user list.`);
+            res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify({
+              success: false,
+              accessDenied: true,
+              error: `ไม่สามารถเข้าสู่ระบบได้: เลขประจำตัวประชาชน (${formatPid(rawPid)}) ยังไม่ได้รับการเพิ่มสิทธิ์ในระบบ กรุณาติดต่อผู้ดูแลระบบ (${SUPER_ADMIN_NAME}) เพื่อขอเปิดสิทธิ์การใช้งาน`,
+              pid: formatPid(rawPid),
+              name: displayName
+            }));
+            return;
+          }
+
+          if (userRecord.status !== 'active') {
+            console.warn(`[ThaID Auth Denied] PID ${rawPid} (${displayName}) is disabled.`);
+            res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify({
+              success: false,
+              accessDenied: true,
+              error: `ไม่สามารถเข้าสู่ระบบได้: บัญชีผู้ใช้งานของท่านถูกปิดการใช้งาน กรุณาติดต่อผู้ดูแลระบบ (${SUPER_ADMIN_NAME})`,
+              pid: formatPid(rawPid),
+              name: displayName
+            }));
+            return;
+          }
+
+          userRecord.lastLogin = new Date().toISOString();
+          saveUsers(allUsers);
+        }
+
         const user = {
-          pid,
-          name,
+          pid: userRecord.pid,
+          formattedPid: formatPid(userRecord.pid),
+          name: userRecord.name || displayName,
+          role: userRecord.role || 'user',
+          isSuperAdmin: cleanPid(userRecord.pid) === SUPER_ADMIN_PID,
+          department: userRecord.department || 'โรงพยาบาลโคกศรีสุพรรณ',
+          position: userRecord.position || (userRecord.role === 'admin' ? 'ผู้ดูแลระบบ' : 'เจ้าหน้าที่ผู้ใช้งาน'),
+          status: userRecord.status,
           title: userInfo.title || idPayload.title || '',
-          given_name: userInfo.given_name || idPayload.given_name || '',
-          family_name: userInfo.family_name || idPayload.family_name || '',
           birthdate: userInfo.birthdate || idPayload.birthdate || '',
           gender: userInfo.gender || idPayload.gender || '',
           ial: userInfo.ial || idPayload.ial || '2.3',
@@ -336,18 +471,276 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // API: ThaiD Demo / Simulation Mode (สำหรับเจ้าหน้าที่ IT ทดสอบระบบการแสดงผลก่อนการเชื่อมต่อจริง)
+  // API: ThaiD Demo Login (จำลองการยืนยันตัวตน ThaiD สำหรับทดสอบสิทธิ์ผู้ดูแลระบบ นายภราเดช สุจริต หรือสิทธิ์อื่นๆ)
   if (pathname === '/api/auth/thaid/demo-login' && req.method === 'POST') {
+    const body = await readBody(req);
+    const targetPid = cleanPid(body.pid || SUPER_ADMIN_PID);
+    const allUsers = loadUsers();
+    let userRecord = allUsers.find(u => cleanPid(u.pid) === targetPid);
+
+    if (targetPid === SUPER_ADMIN_PID) {
+      if (!userRecord) {
+        userRecord = {
+          pid: SUPER_ADMIN_PID,
+          name: SUPER_ADMIN_NAME,
+          role: 'admin',
+          isSuperAdmin: true,
+          status: 'active',
+          department: 'ศูนย์คอมพิวเตอร์ / กลุ่มงานสารสนเทศทางการแพทย์',
+          position: 'ผู้ดูแลระบบสูงสุด (Super Administrator)',
+          addedBy: 'ระบบเริ่มต้น',
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString()
+        };
+        allUsers.unshift(userRecord);
+      } else {
+        userRecord.lastLogin = new Date().toISOString();
+      }
+      saveUsers(allUsers);
+    } else {
+      if (!userRecord) {
+        res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({
+          success: false,
+          accessDenied: true,
+          error: `ไม่สามารถเข้าสู่ระบบได้: เลขประจำตัวประชาชน (${formatPid(targetPid)}) ยังไม่ได้รับการเพิ่มสิทธิ์ในระบบ กรุณาติดต่อผู้ดูแลระบบ (${SUPER_ADMIN_NAME}) เพื่อขอเปิดสิทธิ์การใช้งาน`
+        }));
+        return;
+      }
+      if (userRecord.status !== 'active') {
+        res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({
+          success: false,
+          accessDenied: true,
+          error: `ไม่สามารถเข้าสู่ระบบได้: บัญชีผู้ใช้งานของท่านถูกปิดการใช้งาน กรุณาติดต่อผู้ดูแลระบบ (${SUPER_ADMIN_NAME})`
+        }));
+        return;
+      }
+      userRecord.lastLogin = new Date().toISOString();
+      saveUsers(allUsers);
+    }
+
     const user = {
-      pid: '1-4799-00128-49-1',
-      name: 'นายภาณุเดช เพียรชนะ',
-      title: 'นาย',
-      given_name: 'ภาณุเดช',
-      family_name: 'เพียรชนะ',
-      birthdate: '2540-08-15',
-      gender: 'ชาย',
-      role: 'นักวิชาการคอมพิวเตอร์ (IT รพ.โคกศรีสุพรรณ)',
+      pid: userRecord.pid,
+      formattedPid: formatPid(userRecord.pid),
+      name: userRecord.name,
+      role: userRecord.role,
+      isSuperAdmin: cleanPid(userRecord.pid) === SUPER_ADMIN_PID,
+      department: userRecord.department,
+      position: userRecord.position,
+      status: userRecord.status,
       ial: '2.3 (Verified Level)',
+      provider: 'ThaID (DOPA - กรมการปกครอง)',
+      verifiedAt: new Date().toISOString()
+    };
+
+    const sessionId = crypto.randomUUID();
+    sessions[sessionId] = { user, createdAt: Date.now() };
+    saveSessions();
+
+    res.writeHead(200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Set-Cookie': `thaid_session=${sessionId}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`
+    });
+    res.end(JSON.stringify({ success: true, user, isDemo: true }));
+    return;
+  }
+
+  // =========================================================================
+  // Backend User Management APIs (ระบบจัดการผู้ใช้งานหลังบ้าน - เฉพาะ Admin)
+  // =========================================================================
+
+  // 1. Get All Users (เฉพาะแอดมิน)
+  if (pathname === '/api/admin/users' && req.method === 'GET') {
+    const adminUser = getAdminUser(req);
+    if (!adminUser) {
+      res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({
+        success: false,
+        error: `ปฏิเสธการเข้าถึง: เฉพาะผู้ดูแลระบบ (${SUPER_ADMIN_NAME}) ที่เข้าสู่ระบบด้วย ThaID เท่านั้นที่สามารถจัดการระบบหลังบ้านนี้ได้`
+      }));
+      return;
+    }
+
+    const users = loadUsers();
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({
+      success: true,
+      users: users.map(u => Object.assign({}, u, { formattedPid: formatPid(u.pid) })),
+      superAdminPid: SUPER_ADMIN_PID,
+      currentAdmin: adminUser
+    }));
+    return;
+  }
+
+  // 2. Add User (เพิ่มผู้ใช้งานใหม่)
+  if (pathname === '/api/admin/users' && req.method === 'POST') {
+    const adminUser = getAdminUser(req);
+    if (!adminUser) {
+      res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: false, error: 'ปฏิเสธการเข้าถึง: ต้องเข้าสู่ระบบด้วยสิทธิ์ผู้ดูแลระบบ' }));
+      return;
+    }
+
+    const body = await readBody(req);
+    const rawPid = cleanPid(body.pid);
+
+    if (rawPid.length !== 13) {
+      res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: false, error: 'เลขประจำตัวประชาชนต้องเป็นตัวเลข 13 หลักที่ถูกต้อง' }));
+      return;
+    }
+
+    if (!body.name || !body.name.trim()) {
+      res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: false, error: 'กรุณาระบุชื่อ-นามสกุลของผู้ใช้งาน' }));
+      return;
+    }
+
+    const users = loadUsers();
+    if (users.some(u => cleanPid(u.pid) === rawPid)) {
+      res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: false, error: `เลขประจำตัวประชาชน ${formatPid(rawPid)} มีอยู่ในระบบแล้ว` }));
+      return;
+    }
+
+    const newUser = {
+      pid: rawPid,
+      name: body.name.trim(),
+      role: body.role === 'admin' ? 'admin' : 'user',
+      isSuperAdmin: false,
+      status: body.status === 'disabled' ? 'disabled' : 'active',
+      department: (body.department || 'โรงพยาบาลโคกศรีสุพรรณ').trim(),
+      position: (body.position || (body.role === 'admin' ? 'ผู้ดูแลระบบ' : 'เจ้าหน้าที่ผู้ใช้งาน')).trim(),
+      addedBy: adminUser.name || SUPER_ADMIN_NAME,
+      createdAt: new Date().toISOString(),
+      lastLogin: null
+    };
+
+    users.push(newUser);
+    saveUsers(users);
+
+    console.log(`[Admin Action] User added: ${newUser.name} (${formatPid(newUser.pid)}) by ${adminUser.name}`);
+
+    res.writeHead(201, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({
+      success: true,
+      message: `เพิ่มผู้ใช้งาน ${newUser.name} สำเร็จแล้ว`,
+      user: Object.assign({}, newUser, { formattedPid: formatPid(newUser.pid) })
+    }));
+    return;
+  }
+
+  // 3. Update User (แก้ไขบทบาท User/Admin หรือสลับเปิด/ปิดการใช้งาน)
+  if (pathname === '/api/admin/users' && req.method === 'PUT') {
+    const adminUser = getAdminUser(req);
+    if (!adminUser) {
+      res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: false, error: 'ปฏิเสธการเข้าถึง: ต้องเข้าสู่ระบบด้วยสิทธิ์ผู้ดูแลระบบ' }));
+      return;
+    }
+
+    const body = await readBody(req);
+    const rawPid = cleanPid(body.pid);
+    const users = loadUsers();
+    const user = users.find(u => cleanPid(u.pid) === rawPid);
+
+    if (!user) {
+      res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: false, error: 'ไม่พบผู้ใช้งานนี้ในระบบ' }));
+      return;
+    }
+
+    // Protection rule for Super Admin
+    if (rawPid === SUPER_ADMIN_PID) {
+      if (body.role && body.role !== 'admin') {
+        res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ success: false, error: `ไม่สามารถเปลี่ยนบทบาทของผู้ดูแลระบบสูงสุด (${SUPER_ADMIN_NAME}) ได้` }));
+        return;
+      }
+      if (body.status && body.status !== 'active') {
+        res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ success: false, error: `ไม่สามารถปิดการใช้งานของผู้ดูแลระบบสูงสุด (${SUPER_ADMIN_NAME}) ได้` }));
+        return;
+      }
+    }
+
+    if (body.name) user.name = body.name.trim();
+    if (body.role && rawPid !== SUPER_ADMIN_PID) {
+      user.role = body.role === 'admin' ? 'admin' : 'user';
+    }
+    if (body.status && rawPid !== SUPER_ADMIN_PID) {
+      user.status = body.status === 'disabled' ? 'disabled' : 'active';
+      // Invalidate active sessions immediately if user is disabled
+      if (user.status === 'disabled') {
+        for (const sid in sessions) {
+          if (sessions[sid].user && cleanPid(sessions[sid].user.pid) === rawPid) {
+            delete sessions[sid];
+          }
+        }
+        saveSessions();
+      }
+    }
+    if (body.department !== undefined) user.department = body.department.trim();
+    if (body.position !== undefined) user.position = body.position.trim();
+
+    saveUsers(users);
+
+    console.log(`[Admin Action] User updated: ${user.name} (${formatPid(user.pid)}) - Status: ${user.status}, Role: ${user.role} by ${adminUser.name}`);
+
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({
+      success: true,
+      message: `อัปเดตข้อมูลผู้ใช้งาน ${user.name} สำเร็จแล้ว`,
+      user: Object.assign({}, user, { formattedPid: formatPid(user.pid) })
+    }));
+    return;
+  }
+
+  // 4. Delete User (ลบผู้ใช้งานออกจากระบบ Whitelist)
+  if (pathname === '/api/admin/users' && req.method === 'DELETE') {
+    const adminUser = getAdminUser(req);
+    if (!adminUser) {
+      res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: false, error: 'ปฏิเสธการเข้าถึง: ต้องเข้าสู่ระบบด้วยสิทธิ์ผู้ดูแลระบบ' }));
+      return;
+    }
+
+    const body = await readBody(req);
+    const rawPid = cleanPid(body.pid || parsedUrl.searchParams.get('pid'));
+
+    if (rawPid === SUPER_ADMIN_PID) {
+      res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: false, error: `ไม่สามารถลบผู้ดูแลระบบสูงสุด (${SUPER_ADMIN_NAME}) ออกจากระบบได้` }));
+      return;
+    }
+
+    let users = loadUsers();
+    const initialLen = users.length;
+    users = users.filter(u => cleanPid(u.pid) !== rawPid);
+
+    if (users.length === initialLen) {
+      res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: false, error: 'ไม่พบผู้ใช้งานนี้ในระบบ' }));
+      return;
+    }
+
+    saveUsers(users);
+
+    // Invalidate active session for deleted user
+    for (const sid in sessions) {
+      if (sessions[sid].user && cleanPid(sessions[sid].user.pid) === rawPid) {
+        delete sessions[sid];
+      }
+    }
+    saveSessions();
+
+    console.log(`[Admin Action] User deleted: ${rawPid} by ${adminUser.name}`);
+
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ success: true, message: 'ลบผู้ใช้งานออกจากระบบเรียบร้อยแล้ว' }));
+    return;
+  }
       provider: 'ThaID (DOPA - กรมการปกครอง)',
       verifiedAt: new Date().toISOString()
     };

@@ -65,6 +65,11 @@
       <span id="thaid-user-name">คุณ...</span>
       <span class="thaid-tag">ThaID</span>
     </div>
+    <!-- ปุ่มระบบจัดการผู้ใช้งานหลังบ้าน (เฉพาะนายภราเดช สุจริต / Admin) -->
+    <button id="btn-admin-panel" class="admin-panel-btn hidden" title="ระบบจัดการผู้ใช้งานหลังบ้าน (User Management) สำหรับแอดมิน">
+      <span>🛡️</span>
+      <span id="admin-btn-text">จัดการผู้ใช้ (หลังบ้าน)</span>
+    </button>
   </div>
 
   <aside class="panel sidebar" id="sidebar">
@@ -459,6 +464,135 @@
           <strong>ออกจากระบบ (Logout)</strong>
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ===== Backend Admin User Management Modal (ระบบจัดการผู้ใช้งานหลังบ้าน) ===== -->
+  <div class="panel admin-modal hidden" id="admin-users-modal">
+    <div class="admin-modal-head">
+      <div class="admin-brand">
+        <span class="admin-shield-icon">🛡️</span>
+        <div>
+          <h3>ระบบจัดการผู้ใช้งานหลังบ้าน (Admin Whitelist)</h3>
+          <p>ผู้ดูแลระบบสูงสุด: <strong>นายภราเดช สุจริต</strong> (2-4704-00018-28-7)</p>
+        </div>
+      </div>
+      <button id="admin-close-btn" class="icon-btn" type="button">✕</button>
+    </div>
+
+    <!-- Security Policy Notice -->
+    <div class="admin-security-banner">
+      <span>🔒</span>
+      <span><strong>เงื่อนไขความปลอดภัย:</strong> เฉพาะผู้ที่ Login ผ่าน <strong>ThaID</strong> และได้รับการเพิ่มชื่อโดย <strong>นายภราเดช สุจริต</strong> เท่านั้น จึงจะสามารถเข้าสู่ระบบและใช้งานได้</span>
+    </div>
+
+    <!-- Controls: Search, Filter, Add User Button -->
+    <div class="admin-toolbar">
+      <div class="admin-search-box">
+        <span class="search-ico">🔍</span>
+        <input type="text" id="admin-search-input" placeholder="ค้นหาตามชื่อ, เลขบัตรประชาชน 13 หลัก, แผนก หรือตำแหน่ง...">
+      </div>
+      <div class="admin-filter-group">
+        <button class="admin-filter-pill active" data-filter="all">ทั้งหมด (<span id="cnt-all">0</span>)</button>
+        <button class="admin-filter-pill" data-filter="admin">🛡️ Admin (<span id="cnt-admin">0</span>)</button>
+        <button class="admin-filter-pill" data-filter="user">👤 User (<span id="cnt-user">0</span>)</button>
+        <button class="admin-filter-pill" data-filter="disabled">🔴 ปิดใช้งาน (<span id="cnt-disabled">0</span>)</button>
+      </div>
+      <button id="admin-add-user-btn" class="admin-btn-add" type="button">
+        <span>➕</span>
+        <span>เพิ่มผู้ใช้งานใหม่</span>
+      </button>
+    </div>
+
+    <!-- Add/Edit User Form Drawer (Collapsible) -->
+    <div id="admin-form-drawer" class="admin-form-drawer hidden">
+      <div class="admin-form-head">
+        <strong id="admin-form-title">➕ เพิ่มผู้ใช้งานใหม่</strong>
+        <button id="admin-form-close-btn" class="icon-btn-sm" type="button">✕</button>
+      </div>
+      <form id="admin-user-form" class="admin-form-grid" onsubmit="return false;">
+        <div class="form-group">
+          <label>เลขประจำตัวประชาชน 13 หลัก <span class="req">*</span></label>
+          <input type="text" id="form-user-pid" maxlength="13" placeholder="ระบุเลขบัตรประชาชน 13 หลัก เช่น 1479900123456" required>
+        </div>
+        <div class="form-group">
+          <label>ชื่อ - นามสกุล <span class="req">*</span></label>
+          <input type="text" id="form-user-name" placeholder="เช่น นายสมชาย ใจดี" required>
+        </div>
+        <div class="form-group">
+          <label>กลุ่มงาน / แผนก</label>
+          <input type="text" id="form-user-dept" placeholder="เช่น ศูนย์คอมพิวเตอร์, หอผู้ป่วยใน (IPD), งานเภสัชกรรม">
+        </div>
+        <div class="form-group">
+          <label>ตำแหน่ง</label>
+          <input type="text" id="form-user-pos" placeholder="เช่น พยาบาลวิชาชีพ, นักวิชาการคอมพิวเตอร์, เภสัชกร">
+        </div>
+        <div class="form-group">
+          <label>บทบาท (Role) <span class="req">*</span></label>
+          <select id="form-user-role">
+            <option value="user" selected>👤 User (ผู้ใช้งานทั่วไป)</option>
+            <option value="admin">🛡️ Admin (ผู้ดูแลระบบ)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>สถานะเริ่มต้น <span class="req">*</span></label>
+          <select id="form-user-status">
+            <option value="active" selected>🟢 เปิดการใช้งาน (Active)</option>
+            <option value="disabled">🔴 ปิดการใช้งาน (Disabled)</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button id="form-submit-btn" class="primary" type="button">💾 บันทึกผู้ใช้งาน</button>
+          <button id="form-cancel-btn" type="button">ยกเลิก</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Users Table Container -->
+    <div class="admin-table-wrap">
+      <table class="admin-users-table">
+        <thead>
+          <tr>
+            <th>เลขประจำตัวประชาชน</th>
+            <th>ชื่อ - นามสกุล</th>
+            <th>แผนก / ตำแหน่ง</th>
+            <th style="text-align: center;">บทบาท (Role)</th>
+            <th style="text-align: center;">สถานะ (Status)</th>
+            <th>เพิ่มโดย</th>
+            <th style="text-align: center;">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="admin-users-tbody">
+          <!-- Populated dynamically via JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== Access Denied Modal (แจ้งเตือนเมื่อบุคคลไม่ได้รับอนุญาต) ===== -->
+  <div class="panel access-denied-modal hidden" id="access-denied-modal">
+    <div class="adm-head">
+      <div class="adm-icon-box">🚫</div>
+      <div>
+        <h3>ไม่ได้รับอนุญาตให้เข้าใช้งานระบบ</h3>
+        <p>Access Denied - Khok Si Suphan Hospital Security</p>
+      </div>
+    </div>
+    <div class="adm-body">
+      <p id="adm-error-msg" class="adm-msg">
+        เลขประจำตัวประชาชนของท่านได้รับการยืนยันตัวตนจาก ThaID สำเร็จแล้ว แต่ยังไม่ได้รับการอนุมัติสิทธิ์เข้าใช้งานระบบ
+      </p>
+      <div class="adm-contact-box">
+        <span>👨‍💻</span>
+        <div>
+          <strong>กรุณาติดต่อผู้ดูแลระบบเพื่อเปิดสิทธิ์:</strong>
+          <p><strong>นายภราเดช สุจริต</strong> (ผู้ดูแลระบบสูงสุด)</p>
+          <small>เลขประจำตัวประชาชน: 2-4704-00018-28-7</small>
+        </div>
+      </div>
+    </div>
+    <div class="adm-actions">
+      <button id="adm-close-btn" class="primary" type="button">รับทราบ / ปิดหน้าต่าง</button>
     </div>
   </div>
 

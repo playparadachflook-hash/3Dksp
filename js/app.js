@@ -3647,9 +3647,18 @@
   setInterval(() => syncLiveNetworkData(false), 30000);
 
   // =========================================================================
-  // ThaiD (DOPA Digital ID) Authentication Client Logic
+  // ThaiD (DOPA Digital ID) Authentication Client Logic & Admin Panel
   // =========================================================================
   let currentThaiDUser = null;
+  let adminUsersList = [];
+  let adminActiveFilter = 'all';
+  let adminSearchQuery = '';
+
+  function isUserAdmin(user) {
+    if (!user) return false;
+    const clean = String(user.pid || '').replace(/[^0-9]/g, '');
+    return clean === '2470400018287' || user.role === 'admin' || user.isSuperAdmin === true;
+  }
 
   function setThaiDUser(user) {
     currentThaiDUser = user;
@@ -3658,13 +3667,24 @@
     const userNameSpan = document.getElementById('thaid-user-name');
     const viewUnauth = document.getElementById('thaid-view-unauth');
     const viewAuth = document.getElementById('thaid-view-auth');
+    const btnAdmin = document.getElementById('btn-admin-panel');
 
     if (user) {
       if (btnLogin) btnLogin.classList.add('hidden');
       if (userBadge) {
         userBadge.classList.remove('hidden');
         if (userNameSpan) {
-          userNameSpan.textContent = user.name ? `คุณ${user.name.split(' ')[0] || user.name}` : 'ผู้ใช้งาน ThaID';
+          const roleTag = isUserAdmin(user) ? ' 🛡️' : '';
+          userNameSpan.textContent = user.name ? `คุณ${user.name.split(' ')[0] || user.name}${roleTag}` : 'ผู้ใช้งาน ThaID';
+        }
+      }
+
+      // Show/hide admin backend panel button
+      if (btnAdmin) {
+        if (isUserAdmin(user)) {
+          btnAdmin.classList.remove('hidden');
+        } else {
+          btnAdmin.classList.add('hidden');
         }
       }
 
@@ -3676,7 +3696,10 @@
 
       if (cardPid) cardPid.textContent = user.pid || '-';
       if (cardName) cardName.textContent = user.name || '-';
-      if (cardIal) cardIal.textContent = `Level ${user.ial || '2.3'} (Verified)`;
+      if (cardIal) {
+        const roleLabel = isUserAdmin(user) ? ' [🛡️ ผู้ดูแลระบบ]' : '';
+        cardIal.textContent = `Level ${user.ial || '2.3'} (Verified)${roleLabel}`;
+      }
       if (cardTime) {
         const d = user.verifiedAt ? new Date(user.verifiedAt) : new Date();
         cardTime.textContent = d.toLocaleString('th-TH');
@@ -3687,8 +3710,10 @@
     } else {
       if (btnLogin) btnLogin.classList.remove('hidden');
       if (userBadge) userBadge.classList.add('hidden');
+      if (btnAdmin) btnAdmin.classList.add('hidden');
       if (viewUnauth) viewUnauth.classList.remove('hidden');
       if (viewAuth) viewAuth.classList.add('hidden');
+      closeAdminModal();
     }
   }
 
@@ -3702,6 +3727,330 @@
     if (modal) modal.classList.add('hidden');
   }
 
+  function showAccessDeniedModal(errorMessage) {
+    const modal = document.getElementById('access-denied-modal');
+    const msgEl = document.getElementById('adm-error-msg');
+    if (msgEl && errorMessage) {
+      msgEl.textContent = errorMessage;
+    }
+    if (modal) {
+      modal.classList.remove('hidden');
+    }
+  }
+
+  function closeAccessDeniedModal() {
+    const modal = document.getElementById('access-denied-modal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  // =========================================================================
+  // Admin Backend User Management Logic
+  // =========================================================================
+  function openAdminModal() {
+    if (!isUserAdmin(currentThaiDUser)) {
+      alert('⚠️ เฉพาะผู้ดูแลระบบ (นายภราเดช สุจริต หรือแอดมินที่ได้รับสิทธิ์) เท่านั้นที่สามารถเข้าถึงระบบหลังบ้านได้');
+      return;
+    }
+    const modal = document.getElementById('admin-users-modal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      loadAdminUsers();
+    }
+  }
+
+  function closeAdminModal() {
+    const modal = document.getElementById('admin-users-modal');
+    if (modal) modal.classList.add('hidden');
+    hideAdminFormDrawer();
+  }
+
+  function toggleAdminFormDrawer() {
+    const drawer = document.getElementById('admin-form-drawer');
+    if (!drawer) return;
+    if (drawer.classList.contains('hidden')) {
+      showAdminFormDrawer();
+    } else {
+      hideAdminFormDrawer();
+    }
+  }
+
+  function showAdminFormDrawer() {
+    const drawer = document.getElementById('admin-form-drawer');
+    if (drawer) {
+      drawer.classList.remove('hidden');
+      const pidInput = document.getElementById('form-user-pid');
+      if (pidInput) pidInput.focus();
+    }
+  }
+
+  function hideAdminFormDrawer() {
+    const drawer = document.getElementById('admin-form-drawer');
+    if (drawer) drawer.classList.add('hidden');
+    const form = document.getElementById('admin-user-form');
+    if (form) form.reset();
+  }
+
+  async function loadAdminUsers() {
+    const tbody = document.getElementById('admin-users-tbody');
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 24px; color: #94a3b8;">⏳ กำลังโหลดรายชื่อผู้ใช้งาน...</td></tr>';
+    }
+
+    try {
+      const res = await fetch('/api/admin/users');
+      if (res.status === 403 || res.status === 401) {
+        showToast('⚠️ สิทธิ์ไม่เพียงพอสำหรับการเข้าถึงระบบหลังบ้าน');
+        closeAdminModal();
+        return;
+      }
+      const data = await res.json();
+      if (data.success && Array.isArray(data.users)) {
+        adminUsersList = data.users;
+        renderAdminUsers();
+      } else {
+        if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #f87171; padding: 18px;">❌ ไม่สามารถโหลดข้อมูลได้: ${data.error || 'Unknown error'}</td></tr>`;
+      }
+    } catch (e) {
+      if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #f87171; padding: 18px;">❌ เกิดข้อผิดพลาด: ${e.message}</td></tr>`;
+    }
+  }
+
+  function renderAdminUsers() {
+    const tbody = document.getElementById('admin-users-tbody');
+    if (!tbody) return;
+
+    // Calculate counters
+    let countAll = adminUsersList.length;
+    let countAdmin = 0;
+    let countUser = 0;
+    let countDisabled = 0;
+
+    adminUsersList.forEach(u => {
+      if (u.role === 'admin' || u.isSuperAdmin) countAdmin++;
+      if (u.role === 'user' && !u.isSuperAdmin) countUser++;
+      if (u.status === 'disabled') countDisabled++;
+    });
+
+    const cntAllEl = document.getElementById('cnt-all');
+    const cntAdminEl = document.getElementById('cnt-admin');
+    const cntUserEl = document.getElementById('cnt-user');
+    const cntDisabledEl = document.getElementById('cnt-disabled');
+    if (cntAllEl) cntAllEl.textContent = countAll;
+    if (cntAdminEl) cntAdminEl.textContent = countAdmin;
+    if (cntUserEl) cntUserEl.textContent = countUser;
+    if (cntDisabledEl) cntDisabledEl.textContent = countDisabled;
+
+    // Filter by tab
+    let filtered = adminUsersList.filter(u => {
+      if (adminActiveFilter === 'admin') return u.role === 'admin' || u.isSuperAdmin;
+      if (adminActiveFilter === 'user') return u.role === 'user' && !u.isSuperAdmin;
+      if (adminActiveFilter === 'disabled') return u.status === 'disabled';
+      return true;
+    });
+
+    // Filter by search query
+    if (adminSearchQuery.trim()) {
+      const q = adminSearchQuery.trim().toLowerCase();
+      filtered = filtered.filter(u => {
+        const pid = String(u.pid || '').toLowerCase();
+        const clean = String(u.cleanPid || '').toLowerCase();
+        const name = String(u.name || '').toLowerCase();
+        const dept = String(u.department || '').toLowerCase();
+        const pos = String(u.position || '').toLowerCase();
+        return pid.includes(q) || clean.includes(q) || name.includes(q) || dept.includes(q) || pos.includes(q);
+      });
+    }
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 24px; color: #94a3b8;">🔍 ไม่พบรายชื่อผู้ใช้งานที่ตรงกับเงื่อนไข</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(u => {
+      const isSuper = u.isSuperAdmin || u.cleanPid === '2470400018287';
+      const roleBadge = isSuper
+        ? '<span class="badge-role super-admin" title="ผู้ดูแลระบบสูงสุด (Super Admin)">👑 Super Admin</span>'
+        : u.role === 'admin'
+          ? '<span class="badge-role admin">🛡️ Admin</span>'
+          : '<span class="badge-role user">👤 User</span>';
+
+      const statusBtn = isSuper
+        ? '<span class="btn-status-toggle active" style="cursor: default;" title="ผู้ดูแลระบบสูงสุดเปิดใช้งานตลอดเวลา">🟢 เปิดใช้งาน (ล็อก)</span>'
+        : u.status === 'active'
+          ? `<button class="btn-status-toggle active" type="button" data-action="toggle-status" data-pid="${u.cleanPid}" data-status="active" title="คลิกเพื่อปิดการใช้งาน">🟢 เปิดใช้งาน</button>`
+          : `<button class="btn-status-toggle disabled" type="button" data-action="toggle-status" data-pid="${u.cleanPid}" data-status="disabled" title="คลิกเพื่อเปิดการใช้งาน">🔴 ปิดใช้งาน</button>`;
+
+      const roleActionBtn = isSuper
+        ? ''
+        : `<button class="btn-tbl-action" type="button" data-action="toggle-role" data-pid="${u.cleanPid}" data-role="${u.role}" title="เปลี่ยนเป็น ${u.role === 'admin' ? 'User' : 'Admin'}">⇄ สลับบทบาท</button>`;
+
+      const deleteBtn = isSuper
+        ? ''
+        : `<button class="btn-tbl-action danger" type="button" data-action="delete-user" data-pid="${u.cleanPid}" data-name="${u.name}" title="ลบผู้ใช้งาน">🗑️ ลบ</button>`;
+
+      return `
+        <tr>
+          <td>
+            <span class="user-pid-cell">${u.pid || u.cleanPid}</span>
+          </td>
+          <td>
+            <div class="user-name-cell">${u.name}</div>
+            <div class="user-dept-sub">${u.department || '-'} ${u.position ? '• ' + u.position : ''}</div>
+          </td>
+          <td style="text-align: center;">${roleBadge}</td>
+          <td style="text-align: center;">${statusBtn}</td>
+          <td style="font-size: 11px; color: #94a3b8;">
+            <div>${u.addedBy || 'แอดมิน'}</div>
+            <small style="opacity: 0.7;">${u.createdAt ? new Date(u.createdAt).toLocaleDateString('th-TH') : '-'}</small>
+          </td>
+          <td style="text-align: center;">
+            <div class="table-action-btns">
+              ${roleActionBtn}
+              ${deleteBtn}
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // Attach event listeners to action buttons in tbody
+    tbody.querySelectorAll('[data-action="toggle-status"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pid = btn.getAttribute('data-pid');
+        const current = btn.getAttribute('data-status');
+        toggleUserStatus(pid, current);
+      });
+    });
+
+    tbody.querySelectorAll('[data-action="toggle-role"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pid = btn.getAttribute('data-pid');
+        const current = btn.getAttribute('data-role');
+        toggleUserRole(pid, current);
+      });
+    });
+
+    tbody.querySelectorAll('[data-action="delete-user"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pid = btn.getAttribute('data-pid');
+        const name = btn.getAttribute('data-name');
+        deleteUser(pid, name);
+      });
+    });
+  }
+
+  async function toggleUserStatus(pid, currentStatus) {
+    const newStatus = currentStatus === 'active' ? 'disabled' : 'active';
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pid, status: newStatus })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`✓ อัปเดตสถานะเป็น: ${newStatus === 'active' ? 'เปิดการใช้งาน 🟢' : 'ปิดการใช้งาน 🔴'}`);
+        loadAdminUsers();
+      } else {
+        alert(`❌ ไม่สามารถเปลี่ยนสถานะได้: ${data.error || 'Unknown error'}`);
+      }
+    } catch (e) {
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + e.message);
+    }
+  }
+
+  async function toggleUserRole(pid, currentRole) {
+    const newRole = currentRole === 'admin' ? 'user' : 'admin';
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pid, role: newRole })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`✓ ปรับเปลี่ยนบทบาทเป็น: ${newRole === 'admin' ? '🛡️ Admin' : '👤 User'}`);
+        loadAdminUsers();
+      } else {
+        alert(`❌ ไม่สามารถเปลี่ยนบทบาทได้: ${data.error || 'Unknown error'}`);
+      }
+    } catch (e) {
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + e.message);
+    }
+  }
+
+  async function deleteUser(pid, name) {
+    if (!confirm(`ยืนยันการลบผู้ใช้งาน: "${name}" (${pid}) ออกจากระบบหรือไม่?\n\nเมื่อลบแล้ว ผู้ใช้นี้จะไม่สามารถ Login ผ่าน ThaID ได้อีกต่อไป`)) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pid })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`🗑️ ลบผู้ใช้งาน "${name}" เรียบร้อยแล้ว`);
+        loadAdminUsers();
+      } else {
+        alert(`❌ ไม่สามารถลบผู้ใช้งานได้: ${data.error || 'Unknown error'}`);
+      }
+    } catch (e) {
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + e.message);
+    }
+  }
+
+  async function handleAddUserSubmit() {
+    const pidInput = document.getElementById('form-user-pid');
+    const nameInput = document.getElementById('form-user-name');
+    const deptInput = document.getElementById('form-user-dept');
+    const posInput = document.getElementById('form-user-pos');
+    const roleSelect = document.getElementById('form-user-role');
+    const statusSelect = document.getElementById('form-user-status');
+    const submitBtn = document.getElementById('form-submit-btn');
+
+    const pid = (pidInput?.value || '').trim();
+    const name = (nameInput?.value || '').trim();
+    const department = (deptInput?.value || '').trim();
+    const position = (posInput?.value || '').trim();
+    const role = roleSelect?.value || 'user';
+    const status = statusSelect?.value || 'active';
+
+    if (!pid || pid.replace(/[^0-9]/g, '').length !== 13) {
+      alert('กรุณาระบุเลขประจำตัวประชาชน 13 หลักให้ถูกต้อง');
+      if (pidInput) pidInput.focus();
+      return;
+    }
+
+    if (!name) {
+      alert('กรุณาระบุชื่อ - นามสกุลของผู้ใช้งาน');
+      if (nameInput) nameInput.focus();
+      return;
+    }
+
+    try {
+      if (submitBtn) submitBtn.disabled = true;
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pid, name, department, position, role, status })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`🎉 เพิ่มผู้ใช้งาน "${name}" เรียบร้อยแล้ว`);
+        hideAdminFormDrawer();
+        loadAdminUsers();
+      } else {
+        alert(`❌ เพิ่มผู้ใช้งานไม่สำเร็จ: ${data.error || 'Unknown error'}`);
+      }
+    } catch (e) {
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + e.message);
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  }
+
   function initThaiDAuth() {
     const btnLogin = document.getElementById('btn-thaid-login');
     const userBadge = document.getElementById('thaid-user-badge');
@@ -3710,9 +4059,49 @@
     const btnDemoLogin = document.getElementById('thaid-demo-login-btn');
     const btnLogout = document.getElementById('thaid-logout-btn');
 
+    // Admin Panel buttons
+    const btnAdminPanel = document.getElementById('btn-admin-panel');
+    const btnAdminClose = document.getElementById('admin-close-btn');
+    const btnAdminAddUser = document.getElementById('admin-add-user-btn');
+    const btnAdminFormClose = document.getElementById('admin-form-close-btn');
+    const btnAdminFormCancel = document.getElementById('form-cancel-btn');
+    const btnAdminFormSubmit = document.getElementById('form-submit-btn');
+    const adminSearchInput = document.getElementById('admin-search-input');
+    const adminFilterPills = document.querySelectorAll('.admin-filter-pill');
+
+    // Access Denied Modal Close
+    const btnAdmClose = document.getElementById('adm-close-btn');
+    if (btnAdmClose) btnAdmClose.addEventListener('click', closeAccessDeniedModal);
+
     if (btnLogin) btnLogin.addEventListener('click', openThaiDModal);
     if (userBadge) userBadge.addEventListener('click', openThaiDModal);
     if (btnClose) btnClose.addEventListener('click', closeThaiDModal);
+
+    // Admin Panel Triggers
+    if (btnAdminPanel) btnAdminPanel.addEventListener('click', openAdminModal);
+    if (btnAdminClose) btnAdminClose.addEventListener('click', closeAdminModal);
+    if (btnAdminAddUser) btnAdminAddUser.addEventListener('click', toggleAdminFormDrawer);
+    if (btnAdminFormClose) btnAdminFormClose.addEventListener('click', hideAdminFormDrawer);
+    if (btnAdminFormCancel) btnAdminFormCancel.addEventListener('click', hideAdminFormDrawer);
+    if (btnAdminFormSubmit) btnAdminFormSubmit.addEventListener('click', handleAddUserSubmit);
+
+    // Admin Search Filter
+    if (adminSearchInput) {
+      adminSearchInput.addEventListener('input', (e) => {
+        adminSearchQuery = e.target.value || '';
+        renderAdminUsers();
+      });
+    }
+
+    // Admin Filter Pills
+    adminFilterPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        adminFilterPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        adminActiveFilter = pill.getAttribute('data-filter') || 'all';
+        renderAdminUsers();
+      });
+    });
 
     // Click to start real ThaID Login flow
     if (btnStartLogin) {
@@ -3737,7 +4126,7 @@
       });
     }
 
-    // Demo / IT Staff Login simulation
+    // Demo / IT Staff Login simulation (Super Admin: นายภราเดช สุจริต)
     if (btnDemoLogin) {
       btnDemoLogin.addEventListener('click', async () => {
         try {
@@ -3745,7 +4134,7 @@
           const data = await res.json();
           if (data.success && data.user) {
             setThaiDUser(data.user);
-            showToast('🎉 เข้าสู่ระบบทดสอบสำหรับเจ้าหน้าที่ IT สำเร็จ!');
+            showToast('🎉 เข้าสู่ระบบทดสอบสำหรับแอดมิน (นายภราเดช สุจริต) สำเร็จ!');
           }
         } catch (e) {
           showToast('⚠️ เข้าสู่ระบบจำลองไม่สำเร็จ: ' + e.message);
@@ -3792,6 +4181,9 @@
           setThaiDUser(res.user);
           openThaiDModal();
           showToast(`🎉 ยืนยันตัวตนสำเร็จ! ยินดีต้อนรับ คุณ${res.user.name}`);
+        } else if (res.accessDenied) {
+          // Strict Gate: Access Denied modal
+          showAccessDeniedModal(res.error);
         } else {
           showToast(`⚠️ ยืนยันตัวตนขัดข้อง: ${res.error || 'การยืนยันตัวตนไม่ผ่าน'}`);
         }
@@ -3813,7 +4205,7 @@
     }
   }
 
-  // Initialize ThaiD
+  // Initialize ThaiD & Admin
   initThaiDAuth();
 
   // Hide Loading Screen
