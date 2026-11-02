@@ -1247,3 +1247,142 @@ body.mode-interior #info { display: none !important; }
 .adm-actions button.primary:hover {
   background: #b91c1c;
 }
+
+/* ===== ThaiD In-App QR Code Card & Actions ===== */
+.thaid-qr-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.thaid-qr-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.thaid-emblem-sm {
+  font-size: 26px;
+}
+.thaid-qr-header strong {
+  display: block;
+  font-size: 13.5px;
+  color: #1e293b;
+}
+.thaid-qr-header p {
+  margin: 1px 0 0;
+  font-size: 11px;
+  color: #64748b;
+}
+.thaid-qr-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 14px;
+}
+.thaid-qrcode-box {
+  background: #ffffff;
+  padding: 14px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 2px solid #3b82f6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 190px;
+  min-height: 190px;
+  position: relative;
+}
+.thaid-qrcode-box img,
+.thaid-qrcode-box canvas {
+  display: block;
+  border-radius: 8px;
+}
+.thaid-qr-loading {
+  font-size: 12px;
+  color: #64748b;
+}
+.thaid-status-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+.thaid-status-alert.warning {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+.thaid-status-alert.ready {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+.thaid-status-alert.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+.thaid-status-alert strong {
+  display: block;
+  margin-bottom: 2px;
+}
+.thaid-status-alert p {
+  margin: 0;
+}
+.thaid-actions-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.thaid-action-admin {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+  color: #ffffff;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+.thaid-action-admin:hover {
+  background: linear-gradient(135deg, #172554 0%, #1d4ed8 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
+}
+.thaid-action-admin span {
+  font-size: 24px;
+}
+.thaid-actions-subgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.thaid-btn-sub {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.thaid-btn-sub:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}

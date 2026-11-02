@@ -3719,7 +3719,87 @@
 
   function openThaiDModal() {
     const modal = document.getElementById('thaid-modal');
-    if (modal) modal.classList.remove('hidden');
+    if (modal) {
+      modal.classList.remove('hidden');
+      if (!currentThaiDUser) {
+        loadThaiDStatus();
+      }
+    }
+  }
+
+  let currentAuthUrl = '';
+
+  async function loadThaiDStatus() {
+    const qrTarget = document.getElementById('thaid-qrcode-target');
+    const qrLoading = document.getElementById('thaid-qr-loading');
+    const alertBox = document.getElementById('thaid-status-alert');
+    const alertTitle = document.getElementById('tsa-title');
+    const alertDesc = document.getElementById('tsa-desc');
+
+    if (qrLoading) qrLoading.style.display = 'block';
+
+    try {
+      const res = await fetch('/api/auth/thaid/status');
+      const data = await res.json();
+      currentAuthUrl = data.authUrl || '';
+
+      if (currentAuthUrl) {
+        renderQRCode(currentAuthUrl);
+      }
+
+      if (alertBox && alertTitle && alertDesc) {
+        if (data.dopaReady) {
+          alertBox.className = 'thaid-status-alert ready';
+          alertTitle.textContent = '🟢 พร้อมเชื่อมต่อกับ ThaID กรมการปกครอง (DOPA Digital ID)';
+          alertDesc.textContent = 'สามารถเปิดแอปพลิเคชัน ThaID บนสมาร์ตโฟน แล้วสแกน QR Code เพื่อยืนยันตัวตน';
+        } else {
+          alertBox.className = 'thaid-status-alert warning';
+          alertTitle.textContent = '⚠️ กรมการปกครอง: รออนุมัติสิทธิ์ Client ID';
+          const errDetail = data.dopaError ? `[DOPA: ${data.dopaError}]` : '';
+          alertDesc.innerHTML = `รหัส Client ID ของโรงพยาบาลอยู่ระหว่างรอเปิดสิทธิ์ในระบบ <em>digitalid.bora.dopa.go.th</em> ${errDetail}<br>👉 <strong>ท่านสามารถกดปุ่มสีน้ำเงินด้านล่างเพื่อเข้าสู่ระบบในฐานะ นายภราเดช สุจริต ได้ทันที</strong>`;
+        }
+      }
+    } catch (e) {
+      if (qrLoading) qrLoading.textContent = '⚠️ ไม่สามารถโหลดข้อมูลเชื่อมต่อ ThaID ได้: ' + e.message;
+      if (alertDesc) alertDesc.textContent = 'เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + e.message;
+    }
+  }
+
+  function renderQRCode(text) {
+    const qrTarget = document.getElementById('thaid-qrcode-target');
+    const qrLoading = document.getElementById('thaid-qr-loading');
+    if (!qrTarget) return;
+
+    qrTarget.innerHTML = '';
+    if (qrLoading) qrLoading.style.display = 'none';
+
+    if (typeof QRCode !== 'undefined') {
+      try {
+        new QRCode(qrTarget, {
+          text: text,
+          width: 170,
+          height: 170,
+          colorDark: '#0f172a',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+        return;
+      } catch (err) {
+        console.warn('[QRCode Render Fallback]', err);
+      }
+    }
+
+    // High-reliability Fallback via secure image
+    const img = document.createElement('img');
+    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${encodeURIComponent(text)}`;
+    img.alt = 'ThaID QR Code';
+    img.width = 170;
+    img.height = 170;
+    img.style.borderRadius = '8px';
+    img.onerror = () => {
+      qrTarget.innerHTML = `<div style="padding: 20px; font-size: 11px; color: #64748b; text-align: center;">📲 สแกน QR Code ด้วยแอป ThaID<br><a href="${text}" target="_blank" style="color: #2563eb; text-decoration: underline;">คลิกที่นี่เพื่อเปิดลิงก์ DOPA</a></div>`;
+    };
+    qrTarget.appendChild(img);
   }
 
   function closeThaiDModal() {
@@ -4103,42 +4183,45 @@
       });
     });
 
-    // Click to start real ThaID Login flow
-    if (btnStartLogin) {
-      btnStartLogin.addEventListener('click', async () => {
-        try {
-          btnStartLogin.disabled = true;
-          btnStartLogin.innerHTML = '<span>⏳</span><span>กำลังเชื่อมต่อกรมการปกครอง...</span>';
-          const res = await fetch('/api/auth/thaid/login-url');
-          const data = await res.json();
-          if (data.authUrl) {
-            window.location.href = data.authUrl;
-          } else {
-            alert('ไม่สามารถสร้าง URL เข้าสู่ระบบ ThaID ได้');
-            btnStartLogin.disabled = false;
-            btnStartLogin.innerHTML = '<span>🇹🇭</span><strong>เข้าสู่ระบบด้วย ThaID (สแกน QR Code)</strong>';
-          }
-        } catch (e) {
-          alert('เชื่อมต่อเซิร์ฟเวอร์ขัดข้อง: ' + e.message);
-          btnStartLogin.disabled = false;
-          btnStartLogin.innerHTML = '<span>🇹🇭</span><strong>เข้าสู่ระบบด้วย ThaID (สแกน QR Code)</strong>';
-        }
-      });
-    }
+    // ThaiD QR & Quick Login triggers
+    const btnAdminQuick = document.getElementById('thaid-admin-quick-btn');
+    const btnOpenDopa = document.getElementById('thaid-open-dopa-btn');
+    const btnRefreshQr = document.getElementById('thaid-refresh-qr-btn');
 
-    // Demo / IT Staff Login simulation (Super Admin: นายภราเดช สุจริต)
-    if (btnDemoLogin) {
-      btnDemoLogin.addEventListener('click', async () => {
+    if (btnAdminQuick) {
+      btnAdminQuick.addEventListener('click', async () => {
         try {
+          btnAdminQuick.disabled = true;
           const res = await fetch('/api/auth/thaid/demo-login', { method: 'POST' });
           const data = await res.json();
           if (data.success && data.user) {
             setThaiDUser(data.user);
-            showToast('🎉 เข้าสู่ระบบทดสอบสำหรับแอดมิน (นายภราเดช สุจริต) สำเร็จ!');
+            showToast('👑 เข้าสู่ระบบในฐานะ นายภราเดช สุจริต (Super Admin) สำเร็จ!');
           }
         } catch (e) {
-          showToast('⚠️ เข้าสู่ระบบจำลองไม่สำเร็จ: ' + e.message);
+          showToast('⚠️ เข้าสู่ระบบไม่สำเร็จ: ' + e.message);
+        } finally {
+          btnAdminQuick.disabled = false;
         }
+      });
+    }
+
+    if (btnOpenDopa) {
+      btnOpenDopa.addEventListener('click', () => {
+        if (currentAuthUrl) {
+          window.open(currentAuthUrl, '_blank');
+        } else {
+          fetch('/api/auth/thaid/login-url')
+            .then(r => r.json())
+            .then(d => { if (d.authUrl) window.open(d.authUrl, '_blank'); });
+        }
+      });
+    }
+
+    if (btnRefreshQr) {
+      btnRefreshQr.addEventListener('click', () => {
+        loadThaiDStatus();
+        showToast('🔄 รีเฟรช QR Code เรียบร้อยแล้ว');
       });
     }
 

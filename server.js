@@ -270,6 +270,46 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // API: ThaiD Gateway Status & Realtime Check
+  if (pathname === '/api/auth/thaid/status' && req.method === 'GET') {
+    const state = crypto.randomBytes(16).toString('hex');
+    const authUrl = `${THAID_CONFIG.authUrl}?response_type=code&client_id=${THAID_CONFIG.clientId}&redirect_uri=${encodeURIComponent(THAID_CONFIG.redirectUri)}&scope=${encodeURIComponent(THAID_CONFIG.scope)}&state=${state}`;
+
+    let dopaReady = false;
+    let dopaError = null;
+    let dopaStatusCode = 0;
+
+    try {
+      const checkRes = await requestDopa(authUrl, { method: 'GET' });
+      dopaStatusCode = checkRes.statusCode;
+      if (checkRes.statusCode === 200 || (checkRes.statusCode >= 300 && checkRes.statusCode < 400)) {
+        dopaReady = true;
+      } else {
+        dopaError = (checkRes.data && (checkRes.data.error_description || checkRes.data.error)) || ('HTTP_' + checkRes.statusCode);
+      }
+    } catch (e) {
+      dopaError = e.message;
+    }
+
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({
+      success: true,
+      authUrl,
+      state,
+      clientId: THAID_CONFIG.clientId,
+      redirectUri: THAID_CONFIG.redirectUri,
+      dopaReady,
+      dopaStatusCode,
+      dopaError,
+      superAdmin: {
+        name: SUPER_ADMIN_NAME,
+        pid: SUPER_ADMIN_PID,
+        formattedPid: formatPid(SUPER_ADMIN_PID)
+      }
+    }));
+    return;
+  }
+
   // API: ThaiD Callback (Exchange Code for Token & User Info)
   if (pathname === '/api/auth/thaid/callback' && req.method === 'POST') {
     try {

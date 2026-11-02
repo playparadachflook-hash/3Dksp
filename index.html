@@ -373,45 +373,54 @@
 
     <!-- View When NOT Logged In -->
     <div id="thaid-view-unauth" class="thaid-modal-body">
-      <div class="thaid-hero-card">
-        <div class="thaid-emblem">🇹🇭</div>
-        <h4>เข้าสู่ระบบด้วยบัตรประจำตัวประชาชนดิจิทัล (ThaID)</h4>
-        <p>เชื่อมต่อระบบยืนยันตัวตนดิจิทัลมาตรฐาน OpenID Connect / OAuth 2.0 ร่วมกับแอปพลิเคชัน ThaID ของกรมการปกครอง กระทรวงมหาดไทย</p>
+      <!-- QR Code Display Card -->
+      <div class="thaid-qr-card">
+        <div class="thaid-qr-header">
+          <span class="thaid-emblem-sm">🇹🇭</span>
+          <div>
+            <strong>สแกน QR Code ด้วยแอปพลิเคชัน ThaID</strong>
+            <p>เปิดแอป ThaID บนสมาร์ตโฟน แล้วสแกนเพื่อยืนยันตัวตนเข้าสู่ระบบ</p>
+          </div>
+        </div>
+
+        <div class="thaid-qr-wrap">
+          <div class="thaid-qrcode-box">
+            <!-- QR code target container -->
+            <div id="thaid-qrcode-target"></div>
+            <div id="thaid-qr-loading" class="thaid-qr-loading">⏳ กำลังสร้าง QR Code...</div>
+          </div>
+        </div>
+
+        <!-- DOPA Gateway Status Alert -->
+        <div id="thaid-status-alert" class="thaid-status-alert warning">
+          <span class="tsa-icon">ℹ️</span>
+          <div class="tsa-content">
+            <strong id="tsa-title">สถานะระบบ ThaID กรมการปกครอง (DOPA):</strong>
+            <p id="tsa-desc">กำลังตรวจสอบสถานะการเชื่อมต่อ...</p>
+          </div>
+        </div>
       </div>
 
-      <div class="thaid-feature-list">
-        <div class="thaid-feat-item">
-          <span class="tf-icon">🛡️</span>
-          <div>
-            <strong>ความปลอดภัยระดับชาติ (IAL 2.3)</strong>
-            <small>พิสูจน์และยืนยันตัวตนผ่านฐานข้อมูลทะเบียนราษฎร กรมการปกครอง</small>
+      <div class="thaid-actions-stack">
+        <!-- Direct Super Admin 1-Click Login (นายภราเดช สุจริต) -->
+        <button id="thaid-admin-quick-btn" class="thaid-action-admin" type="button" title="เข้าสู่ระบบในฐานะ นายภราเดช สุจริต ผู้ดูแลระบบสูงสุด">
+          <span>👑</span>
+          <div style="text-align: left;">
+            <strong style="font-size: 13.5px;">เข้าสู่ระบบทันที: นายภราเดช สุจริต</strong>
+            <small style="display: block; opacity: 0.9; font-size: 11px;">(ผู้ดูแลระบบสูงสุด Super Admin • เลขบัตร 2-4704-00018-28-7 • จัดการหลังบ้านได้ทันที)</small>
           </div>
-        </div>
-        <div class="thaid-feat-item">
-          <span class="tf-icon">📱</span>
-          <div>
-            <strong>สแกน QR Code ผ่านแอปพลิเคชัน ThaID</strong>
-            <small>เปิดแอป ThaID บนสมาร์ตโฟนแล้วสแกนเพื่อยืนยันตัวตนได้ทันที</small>
-          </div>
-        </div>
-        <div class="thaid-feat-item">
-          <span class="tf-icon">🔐</span>
-          <div>
-            <strong>คุ้มครองข้อมูลส่วนบุคคล (PDPA Compliant)</strong>
-            <small>เข้ารหัสข้อมูลแบบ End-to-End ปลอดภัยสูงสุด</small>
-          </div>
-        </div>
-      </div>
+        </button>
 
-      <div class="thaid-actions">
-        <button id="thaid-start-login-btn" class="thaid-action-primary" type="button">
-          <span>🇹🇭</span>
-          <strong>เข้าสู่ระบบด้วย ThaID (สแกน QR Code)</strong>
-        </button>
-        <button id="thaid-demo-login-btn" class="thaid-action-demo" type="button" title="ทดสอบระบบสำหรับผู้ดูแลระบบ IT">
-          <span>🧪</span>
-          <span>ทดสอบเข้าสู่ระบบ (Demo IT Staff)</span>
-        </button>
+        <div class="thaid-actions-subgrid">
+          <button id="thaid-open-dopa-btn" class="thaid-btn-sub" type="button" title="เปิดหน้าเว็บยืนยันตัวตน DOPA โดยตรงในแท็บใหม่">
+            <span>🌐</span>
+            <span>เปิดหน้าเว็บ DOPA ตรง</span>
+          </button>
+          <button id="thaid-refresh-qr-btn" class="thaid-btn-sub" type="button" title="รีเฟรช QR Code และตรวจสอบสถานะ DOPA อีกครั้ง">
+            <span>🔄</span>
+            <span>รีเฟรช QR Code</span>
+          </button>
+        </div>
       </div>
 
       <div class="thaid-meta-footer">
@@ -604,6 +613,7 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS2DRenderer.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <!-- App -->
   <script src="js/data.js?v=20261102thaid"></script>
