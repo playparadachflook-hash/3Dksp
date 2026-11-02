@@ -1393,7 +1393,7 @@
       serverId: 'idrac-dell'
     });
     L.push({
-      text: '🛡️ Fortigate (147.50.107.210)',
+      text: '🛡️ ไฟร์วอลล์ FortiGate (10.10.10.1)',
       pos: V(11.8, 1.18, 3.0),
       cls: 'int-label server-badge clickable',
       serverId: 'fortigate'
@@ -1608,7 +1608,7 @@
       ['⚡', '  • iDRAC DELL Remote Controller (10.10.150.12)', '🟢 IPMI Ready', 'server-idrac-dell', 'free'],
       ['🖥️', '  • Proxmox Server HPE DL360 (10.10.10.250:8006)', '🟢 Node 2 Online', 'server-proxmox-hpe', 'free'],
       ['⚡', '  • iLO HPE Remote Controller (10.10.150.11)', '🟢 IPMI Ready', 'server-ilo-hpe', 'free'],
-      ['🛡️', '  • Fortigate Firewall (147.50.107.210)', '🟢 UTM Active', 'server-fortigate', 'free'],
+      ['🛡️', '  • ไฟร์วอลล์ FortiGate 120G (10.10.10.1)', '🟢 UTM Active (Core Firewall)', 'server-fortigate', 'free'],
       ['💾', '  • NAS-KSP Storage Array (10.10.10.240)', '🟢 Storage OK', 'server-nas-ksp', 'free'],
       ['🌐', '  • Mikrotik Router & Gateway (10.10.100.1)', '🟢 Gateway OK', 'server-mikrotik', 'free'],
       ['🔀', '  • Cisco SG250 Core Switch (10.10.100.2)', '🟢 Core Switch', 'server-cisco-sg250', 'free'],

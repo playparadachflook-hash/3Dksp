@@ -1932,13 +1932,13 @@
           </div>
         </div>
       `;
-    } else if (d.id === 'fortigate') {
+    } else if (d.id === 'fortigate' || d.id === 'fortigate-core') {
       contentHtml = `
         <div style="background:#182234;border:1px solid #334155;border-radius:10px;padding:16px;">
           <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #334155;padding-bottom:12px;margin-bottom:14px;">
             <div style="display:flex;align-items:center;gap:10px;">
               <span style="background:#dc2626;color:#fff;padding:4px 8px;border-radius:6px;font-weight:700;font-size:12px;">FORTINET FORTIOS</span>
-              <strong style="font-size:15px;color:#f8fafc;">FortiGate Next-Generation Firewall</strong>
+              <strong style="font-size:15px;color:#f8fafc;">ไฟร์วอลล์หลัก (FortiGate 120G Firewall)</strong>
             </div>
             <span class="chip" style="background:#22c55e;color:#052e16;">🟢 Security Fabric: Active</span>
           </div>
@@ -1963,8 +1963,8 @@
 
           <div style="background:#0f172a;padding:12px;border-radius:8px;font-size:12.5px;">
             <div style="color:#94a3b8;margin-bottom:6px;">พารามิเตอร์การเข้าสู่ระบบ FortiGate Admin GUI:</div>
-            <div style="display:flex;gap:20px;color:#f8fafc;">
-              <div>IP: <strong style="color:#38bdf8;">147.50.107.210</strong></div>
+            <div style="display:flex;gap:20px;color:#f8fafc;flex-wrap:wrap;">
+              <div>IP ไฟร์วอลล์: <strong style="color:#38bdf8;font-size:14px;">10.10.10.1</strong> <span style="color:#94a3b8;font-size:11px;">(VLAN 10 / 192.168.2.1)</span></div>
               <div>Username: <strong style="color:#f8fafc;">admin</strong></div>
               <div>Password: <strong style="color:#f8fafc;">qwertyuiop</strong></div>
             </div>
