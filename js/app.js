@@ -162,31 +162,36 @@
     );
     addSharpEdges(baseSlab, 0x475569);
 
-    // Crisp 3D Perimeter Border Frame (ขอบกรอบสี่เหลี่ยมรอบโรงพยาบาล)
+    // Crisp 3D Perimeter Border Frame (ขอบกรอบสี่เหลี่ยมรอบโรงพยาบาล พร้อมช่องประตูทางเข้า-ออก)
     const borderMat = M.mat(0x475569, { roughness: 0.5 });
     const bThick = 0.7;
     const bHeight = 0.45;
     // Left & Right borders
     const bLeft = M.box(exteriorGroup, bThick, bHeight, rectD + bThick * 2, borderMat, pMin.x - bThick / 2, bHeight / 2 - 0.1, centerZ);
     const bRight = M.box(exteriorGroup, bThick, bHeight, rectD + bThick * 2, borderMat, pMax.x + bThick / 2, bHeight / 2 - 0.1, centerZ);
-    // Top border (solid)
-    const bTop = M.box(exteriorGroup, rectW + bThick * 2, bHeight, bThick, borderMat, centerX, bHeight / 2 - 0.1, pMin.z - bThick / 2);
 
-    // Front/Bottom border with openings for Entrance Gate (left, px: 135) and Secondary Gate (px: 330)
+    // Top border with opening for West Perimeter Road
+    const zTop = pMin.z - bThick / 2;
+    const bTopLeft = M.box(exteriorGroup, 5.7, bHeight, bThick, borderMat, -62.35, bHeight / 2 - 0.1, zTop);
+    const bTopRight = M.box(exteriorGroup, 118.2, bHeight, bThick, borderMat, 6.1, bHeight / 2 - 0.1, zTop);
+
+    // Front/Bottom border with openings for West Gate (px: 105), Drivers Gate (px: 255), and Main Gate (px: 330)
     const zBottom = pMax.z + bThick / 2;
-    // Segment 1 (left of Gate, px: 50..103)
-    const seg1W = 8.0;
-    const bBot1 = M.box(exteriorGroup, seg1W, bHeight, bThick, borderMat, -64.5 + seg1W / 2, bHeight / 2 - 0.1, zBottom);
-    // Segment 2 (between Gate 1 and Gate 2, px: 167..303)
-    const seg2W = 20.5;
-    const bBot2 = M.box(exteriorGroup, seg2W, bHeight, bThick, borderMat, -47.0 + seg2W / 2, bHeight / 2 - 0.1, zBottom);
-    // Segment 3 (right of Gate 2, px: 357..910)
-    const seg3W = 83.0;
-    const bBot3 = M.box(exteriorGroup, seg3W, bHeight, bThick, borderMat, -18.5 + seg3W / 2, bHeight / 2 - 0.1, zBottom);
-    [bLeft, bRight, bTop, bBot1, bBot2, bBot3].forEach(m => addSharpEdges(m, 0x1e293b));
+    const bBot1 = M.box(exteriorGroup, 5.7, bHeight, bThick, borderMat, -62.35, bHeight / 2 - 0.1, zBottom);
+    const bBot2 = M.box(exteriorGroup, 16.0, bHeight, bThick, borderMat, -45.0, bHeight / 2 - 0.1, zBottom);
+    const bBot3 = M.box(exteriorGroup, 4.5, bHeight, bThick, borderMat, -28.25, bHeight / 2 - 0.1, zBottom);
+    const bBot4 = M.box(exteriorGroup, 84.2, bHeight, bThick, borderMat, 23.1, bHeight / 2 - 0.1, zBottom);
+    [bLeft, bRight, bTopLeft, bTopRight, bBot1, bBot2, bBot3, bBot4].forEach(m => addSharpEdges(m, 0x1e293b));
 
-    // 3. Main Access Roads (Straight Orthogonal Roads with Crisp Curbs)
+    // 3. Main Access Roads (Straight Orthogonal Roads with Crisp Curbs & Seamless Junctions)
     K.ROADS.forEach(road => {
+      // Junction caps at bends and intersection nodes
+      road.pts.forEach(pt => {
+        const p = toWorld(pt[0], pt[1]);
+        const cap = M.box(exteriorGroup, road.w, 0.06, road.w, 0xcbd5e1, p.x, 0.04, p.z);
+        addSharpEdges(cap, 0x64748b);
+      });
+
       for (let i = 0; i < road.pts.length - 1; i++) {
         const p1 = toWorld(road.pts[i][0], road.pts[i][1]);
         const p2 = toWorld(road.pts[i + 1][0], road.pts[i + 1][1]);
