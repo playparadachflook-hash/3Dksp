@@ -16,7 +16,7 @@
     mac: '3C:52:82:7D:6E:19',
     switchId: 'ksp-sw-rompho1',
     switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - ห้องพักแพทย์)',
-    switchIp: '10.10.100.14',
+    switchIp: '10.10.100.10',
     switchPort: 'Port 1 (VLAN 40)',
     wallOutlet: 'ROM1-LR-01 (เต้ารับ LAN ผนังเคาน์เตอร์สูติกรรมห้องคลอด)',
     vlan: 'VLAN 40 - แผนกผู้ป่วยใน สูติกรรม และห้องคลอด (LR)',
@@ -90,7 +90,7 @@
     mac: '3C:52:82:7D:6E:24',
     switchId: 'ksp-sw-rompho1',
     switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - ตึกร่มโพธิ์)',
-    switchIp: '10.10.100.14',
+    switchIp: '10.10.100.10',
     switchPort: 'Port 3 (10/100/1000Base-T / VLAN 40 Untagged)',
     wallOutlet: 'Outlet ID: ROMPHO-FL3-NURSE-01 (เต้ารับ LAN เค้าเตอร์พยาบาลห้องพิเศษ ชั้น 3)',
     vlan: 'VLAN 40 - แผนกผู้ป่วยใน สูติกรรม และหอผู้ป่วยพิเศษ (VIP Ward)',
@@ -1606,7 +1606,7 @@
     // ติดตั้งตู้แร็ค Switch Hub ที่ผนังห้องพักแพทย์ (ตำแหน่งมาร์คสีส้ม: x = -13.21, y = 2.05, z = 7.35)
     makeRompho1SwitchRack(-13.21, 2.05, 7.35);
     L.push({
-      text: '🔀 KSP-SW-ROMPHO1 (10.10.100.14)',
+      text: '🔀 KSP-SW-ROMPHO1 (10.10.100.10)',
       pos: V(-12.95, 2.70, 7.35),
       cls: 'int-label server-badge clickable',
       serverId: 'ksp-sw-rompho1'
@@ -1835,7 +1835,7 @@
       ['🪑', 'โต๊ะทำงานเคาน์เตอร์บริการ', '2 ตัว'],
       ['🚻', 'ห้องน้ำ', '1 ห้อง'],
       ['🚪', 'ประตูทางเข้าและประตูห้องภายใน', '22 จุด ตามผัง'],
-      ['🔀', 'KSP-SW-ROMPHO1: สวิตช์ฮับตึกร่มโพธิ์ ชั้น 1 (10.10.100.14)', '🟢 ออนไลน์ (ห้องพักแพทย์ 2 / ห้องคลอด)', 'server-ksp-sw-rompho1', 'free']
+      ['🔀', 'KSP-SW-ROMPHO1: สวิตช์ฮับตึกร่มโพธิ์ ชั้น 1 (10.10.100.10)', '🟢 ออนไลน์ (ห้องพักแพทย์ 2 / ห้องคลอด)', 'server-ksp-sw-rompho1', 'free']
     ];
 
     return {

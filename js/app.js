@@ -183,18 +183,25 @@
     const bBot4 = M.box(exteriorGroup, 84.2, bHeight, bThick, borderMat, 23.1, bHeight / 2 - 0.1, zBottom);
     [bLeft, bRight, bTopLeft, bTopRight, bBot1, bBot2, bBot3, bBot4].forEach(m => addSharpEdges(m, 0x1e293b));
 
-    // 3. Main Access Roads (Seamless Unified Bold Black Roads - เชื่อมเป็นแนวเส้นเดียวกันเพื่อความสวยงาม)
-    const roadMat = M.mat(0x18181b, { roughness: 0.82 }); // Deep dark asphalt black
-    const curbLineMat = new THREE.LineBasicMaterial({ color: 0x09090b, transparent: true, opacity: 0.95 });
-    const curbPositions = [];
+    // 3. Main Access Roads (Seamless Unified Bold Black Roads - ถนนสีดำเส้นเดียวกันทั้งแนว เพื่อความสวยงาม)
+    const roadMat = M.mat(0x141417, { roughness: 0.85 }); // Pure bold dark asphalt black
+    const dashMat = M.mat(0xffffff, { roughness: 0.4 });  // Clean white road markings
+
+    // Track unique road intersection/bend points for seamless rounded junction caps
+    const renderedNodes = new Set();
 
     K.ROADS.forEach(road => {
       const hw = (road.w / 2);
 
-      // Junction caps at bends and intersection nodes (seamlessly bridging corners without cut lines)
+      // Seamless rounded junction caps at nodes and bends (bridges intersections smoothly into one unified road)
       road.pts.forEach(pt => {
-        const p = toWorld(pt[0], pt[1]);
-        M.box(exteriorGroup, road.w, 0.08, road.w, roadMat, p.x, 0.05, p.z);
+        const key = `${pt[0]},${pt[1]}`;
+        if (!renderedNodes.has(key)) {
+          renderedNodes.add(key);
+          const p = toWorld(pt[0], pt[1]);
+          M.cyl(exteriorGroup, hw, hw, 0.08, roadMat, p.x, 0.05, p.z, 24);
+          M.box(exteriorGroup, road.w * 0.96, 0.08, road.w * 0.96, roadMat, p.x, 0.05, p.z);
+        }
       });
 
       for (let i = 0; i < road.pts.length - 1; i++) {
@@ -205,7 +212,7 @@
         const len = Math.hypot(dx, dz);
         const ang = Math.atan2(dx, dz);
 
-        // Road surface body (continuous black asphalt)
+        // Continuous black asphalt road body
         const roadMesh = M.box(
           exteriorGroup,
           road.w, 0.08, len,
@@ -214,19 +221,10 @@
         );
         roadMesh.rotation.y = ang;
 
-        // Outer Curb Lines along the sides of the road (NO transverse cross lines cutting the road!)
-        if (len > 0.001) {
-          const nx = (dz / len) * hw;
-          const nz = -(dx / len) * hw;
-          const yTop = 0.091;
-          curbPositions.push(p1.x + nx, yTop, p1.z + nz, p2.x + nx, yTop, p2.z + nz);
-          curbPositions.push(p1.x - nx, yTop, p1.z - nz, p2.x - nx, yTop, p2.z - nz);
-        }
-
-        // Crisp white dashed center lines for road lane continuity
-        if (len > 3.5 && road.w >= 5.0) {
-          const numDashes = Math.max(1, Math.floor(len / 4.2));
-          const dashLen = Math.min(1.8, (len / numDashes) * 0.45);
+        // Crisp white dashed center lines for road lane continuity (placed along straightaways)
+        if (len > 4.5 && road.w >= 5.0) {
+          const numDashes = Math.max(1, Math.floor(len / 4.5));
+          const dashLen = Math.min(1.8, (len / numDashes) * 0.42);
           for (let d = 0; d < numDashes; d++) {
             const t = (d + 0.5) / numDashes;
             const cx = p1.x + dx * t;
@@ -234,7 +232,7 @@
             const dashMesh = M.box(
               exteriorGroup,
               0.32, 0.082, dashLen,
-              0xffffff,
+              dashMat,
               cx, 0.052, cz
             );
             dashMesh.rotation.y = ang;
@@ -242,13 +240,6 @@
         }
       }
     });
-
-    if (curbPositions.length > 0) {
-      const curbGeo = new THREE.BufferGeometry();
-      curbGeo.setAttribute('position', new THREE.Float32BufferAttribute(curbPositions, 3));
-      const curbLines = new THREE.LineSegments(curbGeo, curbLineMat);
-      exteriorGroup.add(curbLines);
-    }
 
     // 4. Construct Buildings & Features from KSS.BUILDINGS
     K.BUILDINGS.forEach(b => {
@@ -2350,7 +2341,7 @@
           <div style="background:#0f172a;padding:12px;border-radius:8px;font-size:12.5px;">
             <div style="color:#94a3b8;margin-bottom:6px;">พารามิเตอร์การเข้าสู่ระบบ Switch Management Web GUI:</div>
             <div style="display:flex;gap:20px;color:#f8fafc;">
-              <div>IP: <strong style="color:#38bdf8;">10.10.100.8</strong></div>
+              <div>IP: <strong style="color:#38bdf8;">10.10.100.15</strong></div>
               <div>Username: <strong style="color:#f8fafc;">admin</strong></div>
               <div>Password: <strong style="color:#f8fafc;">ksp@12345</strong></div>
             </div>
@@ -2507,7 +2498,7 @@
           <div style="background:#0f172a;padding:12px;border-radius:8px;font-size:12.5px;">
             <div style="color:#94a3b8;margin-bottom:6px;">พารามิเตอร์การเข้าสู่ระบบ Switch Management Web GUI:</div>
             <div style="display:flex;gap:20px;color:#f8fafc;">
-              <div>IP: <strong style="color:#38bdf8;">10.10.100.11</strong></div>
+              <div>IP: <strong style="color:#38bdf8;">10.10.100.8</strong></div>
               <div>Username: <strong style="color:#f8fafc;">admin</strong></div>
               <div>Password: <strong style="color:#f8fafc;">ksp@12345</strong></div>
             </div>
@@ -2820,7 +2811,7 @@
           <div style="background:#0f172a;padding:12px;border-radius:8px;font-size:12.5px;">
             <div style="color:#94a3b8;margin-bottom:6px;">พารามิเตอร์การเข้าสู่ระบบ Switch Management Web GUI:</div>
             <div style="display:flex;gap:20px;color:#f8fafc;">
-              <div>IP: <strong style="color:#38bdf8;">10.10.100.14</strong></div>
+              <div>IP: <strong style="color:#38bdf8;">10.10.100.10</strong></div>
               <div>Username: <strong style="color:#f8fafc;">admin</strong></div>
               <div>Password: <strong style="color:#f8fafc;">ksp@12345</strong></div>
             </div>

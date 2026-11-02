@@ -132,7 +132,11 @@
         storage: 'NVMe M.2 SSD 512 GB',
         monitor: 'Dell 24" IPS Full HD (Eye-Care)',
         os: 'Windows 11 Pro 64-bit (Hospital Domain)',
-        ip: `192.168.40.${ipSuffix}`,
+        ip: `10.10.40.${ipSuffix}`,
+        switchId: 'ksp-sw-ipd',
+        switchName: 'Aruba / HPE 2530 24G (KSP-SW-IPD - ตึกผู้ป่วยใน)',
+        switchIp: '10.10.100.8',
+        switchPort: `Port ${code.endsWith('01') ? '1' : code.endsWith('02') ? '2' : '3'} (VLAN 40)`,
         status: '🟢 ออนไลน์ (เชื่อมต่อระบบ HOSxP IPD)',
         software,
         peripherals: 'เครื่องอ่านบัตรประชาชน Smart Card • เครื่องพิมพ์สติ๊กเกอร์บาร์โค้ดผู้ป่วยใน • เครื่องสแกนบาร์โค้ด',
@@ -485,7 +489,7 @@
     // ติดตั้งตู้แร็ค Switch Hub ที่ผนังข้างห้อง Nurse Station (ตำแหน่งมาร์คสีแดง: x = -12.05, y = 2.05, z = 8.21)
     makeIpdSwitchRack(-12.05, 2.05, 8.21);
     L.push({
-      text: '🔀 KSP-SW-IPD (10.10.100.11)',
+      text: '🔀 KSP-SW-IPD (10.10.100.8)',
       pos: V(-12.05, 2.70, 7.95),
       cls: 'int-label server-badge clickable',
       serverId: 'ksp-sw-ipd'
@@ -601,7 +605,7 @@
     items.push(['📟', 'Nurse Call System (ระบบเรียกพยาบาล)', 'ออนไลน์']);
     items.push(['🚻', 'ห้องน้ำผู้ป่วย (ฝั่งซ้าย 4 • ฝั่งขวา 4)', '8 ห้อง']);
     items.push(['🪑', 'จุดที่นั่งคอยญาติผู้ป่วยด้านหน้า', '3 จุด']);
-    items.push(['🔀', 'KSP-SW-IPD: สวิตช์ฮับตึกผู้ป่วยใน (10.10.100.11)', '🟢 ออนไลน์ (Nurse Station IPD)', 'server-ksp-sw-ipd', 'free']);
+    items.push(['🔀', 'KSP-SW-IPD: สวิตช์ฮับตึกผู้ป่วยใน (10.10.100.8)', '🟢 ออนไลน์ (Nurse Station IPD)', 'server-ksp-sw-ipd', 'free']);
 
     return {
       group: g,

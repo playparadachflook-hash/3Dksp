@@ -166,20 +166,20 @@ KSS.CONTEXT = [
 // ขอบเขตพื้นที่โรงพยาบาล (กรอบสี่เหลี่ยมผืนผ้าแนวตรงชัดเจน)
 KSS.BOUNDARY = [[50, 710], [910, 710], [910, 50], [50, 50]];
 
-// ถนนเส้นหลักของโรงพยาบาล (Hospital Road Network ตามแนวเส้นสีแดงในผังจริง)
+// ถนนเส้นหลักของโรงพยาบาล (Hospital Road Network ตามแนวเส้นสีแดงในผังจริง เชื่อมเป็นเส้นเดียวกัน)
 KSS.ROADS = [
   // 1. ถนนใหญ่สายหลักหน้าโรงพยาบาล (Main Highway Along Hospital Frontage)
   {
     name: 'ถนนใหญ่สายหลักหน้าโรงพยาบาล',
     w: 7.5,
-    pts: [[0, 960], [980, 960]]
+    pts: [[0, 960], [990, 960]]
   },
 
   // 2. ถนนเลียบแนวรั้วฝั่งทิศตะวันตก (West Perimeter Road - จากถนนใหญ่ขึ้นไปตลอดแนวจนถึงด้านหลัง)
   {
     name: 'ถนนเลียบแนวรั้วฝั่งทิศตะวันตก',
     w: 6.0,
-    pts: [[105, 50], [105, 960]]
+    pts: [[105, 45], [105, 960]]
   },
 
   // 3. ถนนเลียบแนวรั้วด้านหลังโรงพยาบาล (North Boundary Road - เชื่อมฝั่งตะวันตกไปตะวันออก)
@@ -189,18 +189,18 @@ KSS.ROADS = [
     pts: [[105, 95], [785, 95]]
   },
 
-  // 4. ถนนตัดขวางด้านหลังตึก IPD / หน้าหอประชุม (North Cross Road - เชื่อมถนนตะวันตกเข้าสู่ส่วนกลาง)
+  // 4. ถนนตัดขวางด้านหลังตึก IPD / หน้าหอประชุม (North Cross Road)
   {
     name: 'ถนนตัดขวางด้านหลังตึกผู้ป่วยใน (IPD)',
     w: 5.5,
     pts: [[105, 270], [330, 270]]
   },
 
-  // 5. ทางเชื่อมซอยข้างหอประชุมและตึกกายภาพ (Connector between Hall and Physio/Rompho)
+  // 5. ทางเชื่อมซอยข้างหอประชุมและตึกกายภาพ (Hall, Physio & IPD-ER Alley)
   {
     name: 'ทางเชื่อมซอยข้างหอประชุมและตึกกายภาพ',
     w: 5.0,
-    pts: [[330, 160], [330, 270]]
+    pts: [[330, 160], [330, 350]]
   },
 
   // 6. ถนนตัดขวางด้านหน้าตึก IPD / หน้าสวนหย่อม (South IPD Cross Road)
@@ -210,60 +210,60 @@ KSS.ROADS = [
     pts: [[105, 510], [330, 510]]
   },
 
-  // 7. ถนนแกนกลางทางเข้าหลักโรงพยาบาล (Central Spine Road - เชื่อมทางเข้าหลักสู่ตึกอุบัติเหตุ ER)
+  // 7. ถนนทางเข้าหลักหน้าโรงพยาบาลและแกนกลาง (Main Hospital Entrance & Central Spine Road)
   {
-    name: 'ถนนแกนกลางทางเข้าหลักโรงพยาบาล',
+    name: 'ถนนทางเข้าหลักหน้าโรงพยาบาลและแกนกลาง',
     w: 6.0,
-    pts: [[330, 510], [330, 960]]
+    pts: [[248, 960], [248, 725], [330, 725], [330, 510]]
   },
 
-  // 8. ทางแยกเข้าตึก พขร. และโรงจอดรถพยาบาล (Transportation Dept & Median Lane)
+  // 8. ทางแยกเข้าตึก พขร. และโรงจอดรถพยาบาล (Transportation Dept & EMS Ambulance Garage)
   {
     name: 'ทางแยกเข้าตึก พขร. และโรงจอดรถพยาบาล',
     w: 5.5,
-    pts: [[330, 720], [255, 720], [255, 960]]
+    pts: [[330, 725], [330, 925], [360, 925]]
   },
 
-  // 9. ถนนวนรับส่งผู้ป่วยตึกอุบัติเหตุฉุกเฉิน (ER Ambulance Loop & Drive-Thru)
+  // 9. ถนนวนรับส่งผู้ป่วยตึกอุบัติเหตุฉุกเฉิน (ER Ambulance Driveway)
   {
     name: 'ถนนวนรับส่งผู้ป่วยตึกอุบัติเหตุฉุกเฉิน (ER)',
     w: 5.5,
-    pts: [[330, 510], [375, 430], [590, 430]]
+    pts: [[330, 510], [375, 430]]
   },
 
-  // 10. ถนนซอยด้านหลังระหว่างตึกร่มโพธิ์และแพทย์แผนไทย (North Central Spine)
-  {
-    name: 'ถนนซอยด้านหลังระหว่างตึกร่มโพธิ์และแพทย์แผนไทย',
-    w: 5.5,
-    pts: [[590, 95], [590, 430]]
-  },
-
-  // 11. ถนนซอยระหว่างตึกอุบัติเหตุ (ER) และอาคารผู้ป่วยนอก (OPD)
-  {
-    name: 'ถนนซอยระหว่างตึกอุบัติเหตุ (ER) และอาคารผู้ป่วยนอก (OPD)',
-    w: 5.5,
-    pts: [[590, 430], [590, 665]]
-  },
-
-  // 12. ถนนตัดขวางหน้าโรงรถและตึกจิตเวช (Main Cross Road in front of Psych & Garage)
+  // 10. ถนนตัดขวางหน้าโรงรถและตึกจิตเวช (Main Cross Road in front of Psych & Garage)
   {
     name: 'ถนนตัดขวางหน้าโรงรถและตึกจิตเวช',
     w: 5.5,
     pts: [[330, 665], [910, 665]]
   },
 
-  // 13. ถนนเลียบฝั่งตะวันออกตอนบน (East Perimeter Road North)
+  // 11. ถนนซอยระหว่างตึกอุบัติเหตุ (ER) และอาคารผู้ป่วยนอก (OPD) - ตอนบน
   {
-    name: 'ถนนเลียบฝั่งตะวันออกตอนบน',
+    name: 'ถนนซอยระหว่างตึกอุบัติเหตุ (ER) และอาคารผู้ป่วยนอก (OPD) - ตอนบน',
     w: 5.5,
-    pts: [[785, 95], [785, 280]]
+    pts: [[590, 95], [590, 385]]
   },
 
-  // 14. ถนนเลียบอาคารพัสดุและโรงรถเจ้าหน้าที่ฝั่งตะวันออก (East Perimeter Road South)
+  // 12. ถนนซอยระหว่างตึกอุบัติเหตุ (ER) และอาคารผู้ป่วยนอก (OPD) - ตอนล่าง
   {
-    name: 'ถนนเลียบอาคารพัสดุและโรงรถเจ้าหน้าที่ฝั่งตะวันออก',
+    name: 'ถนนซอยระหว่างตึกอุบัติเหตุ (ER) และอาคารผู้ป่วยนอก (OPD) - ตอนล่าง',
+    w: 5.5,
+    pts: [[590, 445], [590, 665]]
+  },
+
+  // 13. ถนนเลียบฝั่งตะวันออก (OPD ด้านตะวันออก)
+  {
+    name: 'ถนนเลียบฝั่งตะวันออก (OPD ด้านตะวันออก)',
+    w: 5.5,
+    pts: [[785, 95], [785, 665]]
+  },
+
+  // 14. ทางแยกเลียบโรงรถเจ้าหน้าที่และงานช่าง (Staff Garage East Loop)
+  {
+    name: 'ทางแยกเลียบโรงรถเจ้าหน้าที่และงานช่าง',
     w: 5.0,
-    pts: [[785, 280], [860, 280], [860, 475], [785, 475], [785, 665]]
+    pts: [[785, 280], [865, 280], [865, 470]]
   }
 ];
 
@@ -423,8 +423,153 @@ KSS.SERVER_DEVICES = [
     os: 'InstantOn_1930_3.1.0.0'
   },
   {
-    id: 'proxmox-dell',
+    id: 'ksp-sw-ipd',
     no: 6,
+    name: 'KSP-SW-IPD (ตึกผู้ป่วยใน)',
+    type: 'switch',
+    typeName: 'Distribution Managed Switch',
+    model: 'Aruba 2530 24G Switch (J9776A)',
+    serial: 'CN58FZZ01P',
+    ip: '10.10.100.8',
+    port: '80',
+    protocol: 'http',
+    url: 'http://10.10.100.8',
+    location: 'ตึกผู้ป่วยใน (IPD - Nurse Station)',
+    username: 'admin',
+    password: 'ksp@12345',
+    role: 'สวิตช์ฮับตึกผู้ป่วยใน (IPD) เชื่อมต่อคอมพิวเตอร์เคาน์เตอร์พยาบาล IPC 1–3, ระบบเรียกพยาบาล Nurse Call, จุดซักประวัติ Admit และเครือข่ายหอผู้ป่วย 30 เตียง',
+    status: 'online',
+    ping: '0.4ms',
+    uptime: '188 วัน 14 ชม.',
+    cpu: 'ARM9E 800 MHz Enterprise Core',
+    cpuUsage: 14,
+    ram: '512 MB SDRAM',
+    ramUsage: 36,
+    storage: '128 MB Flash',
+    storageUsage: 24,
+    temp: '28°C',
+    power: 'Internal AC Power Supply (Good)',
+    os: 'ArubaOS-S YA.16.11.0004'
+  },
+  {
+    id: 'ksp-sw-pcu',
+    no: 7,
+    name: 'KSP-SW-PCU (ตึก PCU)',
+    type: 'switch',
+    typeName: 'Distribution Managed Switch',
+    model: 'Aruba 2530 24G Switch (J9776A)',
+    serial: 'CN58FZZ02Q',
+    ip: '10.10.100.9',
+    port: '80',
+    protocol: 'http',
+    url: 'http://10.10.100.9',
+    location: 'ตึกอุบัติเหตุฉุกเฉิน (ฝั่ง PCU บริการปฐมภูมิ)',
+    username: 'admin',
+    password: 'ksp@12345',
+    role: 'สวิตช์ฮับกลุ่มงานบริการปฐมภูมิ (PCU) เชื่อมต่อคอมพิวเตอร์คลินิกปฐมภูมิ 1–4, งานส่งเสริมสุขภาพ, ระบาดวิทยา และงานคัดกรองวัคซีน',
+    status: 'online',
+    ping: '0.5ms',
+    uptime: '190 วัน 10 ชม.',
+    cpu: 'ARM9E 800 MHz Enterprise Core',
+    cpuUsage: 11,
+    ram: '512 MB SDRAM',
+    ramUsage: 34,
+    storage: '128 MB Flash',
+    storageUsage: 22,
+    temp: '29°C',
+    power: 'Internal AC Power Supply (Good)',
+    os: 'ArubaOS-S YA.16.11.0004'
+  },
+  {
+    id: 'ksp-sw-rompho1',
+    no: 8,
+    name: 'KSP-SW-ROMPHO1 (ตึกร่มโพธิ์ 3)',
+    type: 'switch',
+    typeName: 'Distribution Managed Switch',
+    model: 'Aruba 2530 24G Switch (J9776A)',
+    serial: 'CN58FZZ03R',
+    ip: '10.10.100.10',
+    port: '80',
+    protocol: 'http',
+    url: 'http://10.10.100.10',
+    location: 'ตึกร่มโพธิ์ 3 (ห้องพักแพทย์ ชั้น 1)',
+    username: 'admin',
+    password: 'ksp@12345',
+    role: 'สวิตช์ฮับอาคารร่มโพธิ์ 3 กระจายสัญญาณ 3 ชั้น: ชั้น 1 แผนกสูติกรรม/ห้องคลอด, ชั้น 2 ศูนย์ไตเทียม, ชั้น 3 หอผู้ป่วยพิเศษ 301–314 และตึกกายภาพบำบัด',
+    status: 'online',
+    ping: '0.6ms',
+    uptime: '165 วัน 21 ชม.',
+    cpu: 'ARM9E 800 MHz Enterprise Core',
+    cpuUsage: 16,
+    ram: '512 MB SDRAM',
+    ramUsage: 41,
+    storage: '128 MB Flash',
+    storageUsage: 27,
+    temp: '30°C',
+    power: 'Internal AC Power Supply (Good)',
+    os: 'ArubaOS-S YA.16.11.0004'
+  },
+  {
+    id: 'ksp-sw-psych',
+    no: 9,
+    name: 'KSP-SW-PSYCH (จิตเวชและยาเสพติด)',
+    type: 'switch',
+    typeName: 'Distribution Managed Switch',
+    model: 'Aruba 2530 24G Switch (J9776A)',
+    serial: 'CN58FZZ04S',
+    ip: '10.10.100.12',
+    port: '80',
+    protocol: 'http',
+    url: 'http://10.10.100.12',
+    location: 'คลินิกสุขภาพจิตและยาเสพติด (ห้องที่ 3)',
+    username: 'admin',
+    password: 'ksp@12345',
+    role: 'สวิตช์ฮับคลินิกจิตเวชและยาเสพติด เชื่อมต่อคอมพิวเตอร์ห้องหัวหน้า (ห้อง 1), ห้องทำงานจิตเวช (ห้อง 2) และห้องประเมินสุขภาพจิต (ห้อง 5)',
+    status: 'online',
+    ping: '0.5ms',
+    uptime: '142 วัน 18 ชม.',
+    cpu: 'ARM9E 800 MHz Enterprise Core',
+    cpuUsage: 8,
+    ram: '512 MB SDRAM',
+    ramUsage: 29,
+    storage: '128 MB Flash',
+    storageUsage: 20,
+    temp: '27°C',
+    power: 'Internal AC Power Supply (Good)',
+    os: 'ArubaOS-S YA.16.11.0004'
+  },
+  {
+    id: 'ksp-sw-drivers',
+    no: 10,
+    name: 'KSP-SW-DRIVERS (ตึก พขร.)',
+    type: 'switch',
+    typeName: 'Edge Managed Switch',
+    model: 'Aruba 2530 8G Switch (J9777A)',
+    serial: 'CN58FZZ05T',
+    ip: '10.10.100.15',
+    port: '80',
+    protocol: 'http',
+    url: 'http://10.10.100.15',
+    location: 'อาคารกลุ่มงานยานพาหนะ (ตึก พขร.)',
+    username: 'admin',
+    password: 'ksp@12345',
+    role: 'สวิตช์ฮับตึก พขร. เชื่อมต่อคอมพิวเตอร์สำนักงานยานพาหนะ, ระบบวิทยุสื่อสารฉุกเฉิน EMS และระบบติดตามรถพยาบาล GPS Tracking',
+    status: 'online',
+    ping: '0.7ms',
+    uptime: '120 วัน 6 ชม.',
+    cpu: 'ARM9E 800 MHz Enterprise Core',
+    cpuUsage: 7,
+    ram: '256 MB SDRAM',
+    ramUsage: 25,
+    storage: '128 MB Flash',
+    storageUsage: 18,
+    temp: '28°C',
+    power: 'Internal AC Power Supply (Good)',
+    os: 'ArubaOS-S YA.16.11.0004'
+  },
+  {
+    id: 'proxmox-dell',
+    no: 11,
     name: 'Proxmox Node 1 (Dell T440)',
     type: 'server',
     typeName: 'Hypervisor Host Server (Node 1)',
@@ -452,7 +597,7 @@ KSS.SERVER_DEVICES = [
   },
   {
     id: 'idrac-dell',
-    no: 7,
+    no: 12,
     name: 'iDRAC9 (Dell T440 Remote)',
     type: 'controller',
     typeName: 'IPMI / Out-of-band Controller',
@@ -480,7 +625,7 @@ KSS.SERVER_DEVICES = [
   },
   {
     id: 'proxmox-hpe',
-    no: 8,
+    no: 13,
     name: 'Proxmox Node 2 (HPE DL380)',
     type: 'server',
     typeName: 'Hypervisor Host Server (Node 2)',
@@ -508,7 +653,7 @@ KSS.SERVER_DEVICES = [
   },
   {
     id: 'ilo-hpe',
-    no: 9,
+    no: 14,
     name: 'iLO 5 (HPE DL380 Remote)',
     type: 'controller',
     typeName: 'IPMI / Out-of-band Controller',
@@ -536,7 +681,7 @@ KSS.SERVER_DEVICES = [
   },
   {
     id: 'hosxp-main-db',
-    no: 10,
+    no: 15,
     name: 'HOSxP Database Server (Master)',
     type: 'server',
     typeName: 'Production Database Server',
@@ -564,7 +709,7 @@ KSS.SERVER_DEVICES = [
   },
   {
     id: 'hosxp-slave-db',
-    no: 11,
+    no: 16,
     name: 'HOSxP Database Server (Standby)',
     type: 'server',
     typeName: 'Standby / Replication Database',
@@ -592,7 +737,7 @@ KSS.SERVER_DEVICES = [
   },
   {
     id: 'ksp-web-monitor',
-    no: 12,
+    no: 17,
     name: 'Web Server & 3D Digital Twin',
     type: 'server',
     typeName: 'Hospital Application & Monitoring Server',
@@ -1111,6 +1256,68 @@ KSS.MAC_REGISTRY = {
     status: 'online'
   },
 
+  /* หอผู้ป่วยใน (IPD - Inpatient Department) */
+  'B4:2E:99:A1:01:1A': {
+    mac: 'B4:2E:99:A1:01:1A',
+    hostname: 'IPD-PC1',
+    pcCode: 'PC-IPD-01',
+    name: 'โต๊ะคอม IPC 1 (รับใหม่/จำหน่ายผู้ป่วย)',
+    currentIp: '10.10.40.11',
+    user: 'พยาบาลวิชาชีพเวรรับใหม่ (หอผู้ป่วยใน IPD)',
+    switchId: 'ksp-sw-ipd',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-IPD - ตึกผู้ป่วยใน)',
+    switchIp: '10.10.100.8',
+    switchPort: 'Port 1 (10/100/1000Base-T / VLAN 40 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: IPD-NS-01 (เคาน์เตอร์ Nurse Station)',
+    vlan: 'VLAN 40 - แผนกผู้ป่วยใน (IPD)',
+    gateway: '10.10.40.1 (IPD Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '02/11/2026 08:30:00',
+    status: 'online'
+  },
+  'B4:2E:99:A1:02:2B': {
+    mac: 'B4:2E:99:A1:02:2B',
+    hostname: 'IPD-PC2',
+    pcCode: 'PC-IPD-02',
+    name: 'โต๊ะคอม IPC 2 (Nurse Note/สั่งยา IPD)',
+    currentIp: '10.10.40.12',
+    user: 'พยาบาลวิชาชีพหัวหน้าเวร (หอผู้ป่วยใน IPD)',
+    switchId: 'ksp-sw-ipd',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-IPD - ตึกผู้ป่วยใน)',
+    switchIp: '10.10.100.8',
+    switchPort: 'Port 2 (10/100/1000Base-T / VLAN 40 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: IPD-NS-02 (เคาน์เตอร์ Nurse Station)',
+    vlan: 'VLAN 40 - แผนกผู้ป่วยใน (IPD)',
+    gateway: '10.10.40.1 (IPD Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '02/11/2026 08:30:00',
+    status: 'online'
+  },
+  'B4:2E:99:A1:03:3C': {
+    mac: 'B4:2E:99:A1:03:3C',
+    hostname: 'IPD-PC3',
+    pcCode: 'PC-IPD-03',
+    name: 'โต๊ะคอม IPC 3 (แพทย์ตรวจเยี่ยม/ดูผลแล็บ & X-Ray)',
+    currentIp: '10.10.40.13',
+    user: 'แพทย์ประจำหอผู้ป่วยใน (IPD Ward Doctor)',
+    switchId: 'ksp-sw-ipd',
+    switchName: 'Aruba / HPE 2530 24G (KSP-SW-IPD - ตึกผู้ป่วยใน)',
+    switchIp: '10.10.100.8',
+    switchPort: 'Port 3 (10/100/1000Base-T / VLAN 40 Untagged)',
+    portSpeed: '1000 Mbps Full Duplex',
+    wallOutlet: 'Outlet ID: IPD-NS-03 (เคาน์เตอร์ Nurse Station)',
+    vlan: 'VLAN 40 - แผนกผู้ป่วยใน (IPD)',
+    gateway: '10.10.40.1 (IPD Gateway)',
+    subnet: '255.255.255.0',
+    leaseType: 'DHCP Reservation / Dynamic MAC Tracking',
+    lastRenew: '02/11/2026 08:30:00',
+    status: 'online'
+  },
+
   /* แผนกห้องคลอดและสูติกรรม ตึกร่มโพธิ์ 3 ชั้น 1 (Labor & Delivery Room) */
   '3C:52:82:7D:6E:19': {
     mac: '3C:52:82:7D:6E:19',
@@ -1120,7 +1327,7 @@ KSS.MAC_REGISTRY = {
     currentIp: '10.10.40.30',
     switchId: 'ksp-sw-rompho1',
     switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - ห้องพักแพทย์)',
-    switchIp: '10.10.100.14',
+    switchIp: '10.10.100.10',
     switchPort: 'Port 1 (10/100/1000Base-T / VLAN 40 Untagged)',
     portSpeed: '1000 Mbps Full Duplex',
     wallOutlet: 'Outlet ID: ROM1-LR-01 (เต้ารับ LAN ผนังเคาน์เตอร์สูติกรรมห้องคลอด)',
@@ -1261,7 +1468,7 @@ KSS.MAC_REGISTRY = {
     currentIp: '10.10.40.24',
     switchId: 'ksp-sw-rompho1',
     switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - ตึกร่มโพธิ์)',
-    switchIp: '10.10.100.14',
+    switchIp: '10.10.100.10',
     switchPort: 'Port 3 (10/100/1000Base-T / VLAN 40 Untagged)',
     portSpeed: '1000 Mbps Full Duplex',
     wallOutlet: 'Outlet ID: ROMPHO-FL3-NURSE-01 (เต้ารับ LAN เค้าเตอร์พยาบาลห้องพิเศษ ชั้น 3)',
@@ -1383,7 +1590,7 @@ KSS.MAC_REGISTRY = {
     user: 'นางสาวสุภัชฌา สุภาทอง (นักกายภาพบำบัด)',
     switchId: 'ksp-sw-rompho1',
     switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - สวิตช์ตึกร่มโพธิ์/กายภาพ)',
-    switchIp: '10.10.100.14',
+    switchIp: '10.10.100.10',
     switchPort: 'Port 7 (10/100/1000Base-T / VLAN 20 Untagged)',
     portSpeed: '1000 Mbps Full Duplex',
     wallOutlet: 'Outlet ID: PT-ADM-01 (เต้ารับ LAN จุดลงทะเบียน/คัดกรองกายภาพ)',
@@ -1403,7 +1610,7 @@ KSS.MAC_REGISTRY = {
     user: 'นายสรรพสิทธิ์ ศรีโพธิ์ (นักกายภาพบำบัด)',
     switchId: 'ksp-sw-rompho1',
     switchName: 'Aruba / HPE 2530 24G (KSP-SW-ROMPHO1 - สวิตช์ตึกร่มโพธิ์/กายภาพ)',
-    switchIp: '10.10.100.14',
+    switchIp: '10.10.100.10',
     switchPort: 'Port 8 (10/100/1000Base-T / VLAN 20 Untagged)',
     portSpeed: '1000 Mbps Full Duplex',
     wallOutlet: 'Outlet ID: PT-TREAT-02 (เต้ารับ LAN โต๊ะบันทึกการรักษาและนัดหมายกายภาพ)',
