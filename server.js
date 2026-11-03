@@ -192,7 +192,7 @@ const server = http.createServer(async (req, res) => {
   <div class="card">
     <h2>⚠️ การยืนยันตัวตนไม่สำเร็จ</h2>
     <p>${error || 'ไม่ได้รับ Authorization Code จากระบบ MOPH Provider ID'}</p>
-    <a href="/">กลับหน้าหลัก</a>
+    <a href="/api/auth/moph/login">เข้าสู่ระบบด้วย Provider ID อีกครั้ง</a>
   </div>
 </body>
 </html>`);
@@ -462,7 +462,7 @@ const server = http.createServer(async (req, res) => {
   <div class="card">
     <h2>❌ เกิดข้อผิดพลาดในการเชื่อมต่อ</h2>
     <p>${err.message}</p>
-    <a href="/">กลับหน้าหลัก</a>
+    <a href="/api/auth/moph/login">เข้าสู่ระบบด้วย Provider ID อีกครั้ง</a>
   </div>
 </body>
 </html>`);
@@ -581,6 +581,21 @@ const server = http.createServer(async (req, res) => {
   let safePath = path.normalize(pathname).replace(/^(\.\.[\/\\])+/, '');
   if (safePath === '/' || safePath === '\\') {
     safePath = '/index.html';
+  }
+
+  // Auth Guard: เมื่อมีผู้เข้าสู่ Link http://147.50.107.211:3080/ หากยังไม่ได้ยืนยันตัวตน ให้เด้งไปหน้า Login Provider ID ทันที
+  if (safePath === '/index.html') {
+    const cookies = parseCookies(req);
+    const sid = cookies.moph_session;
+    const isAuthenticated = Boolean(sid && sessions[sid]);
+    const isBypass = parsedUrl.searchParams.has('preview') || parsedUrl.searchParams.has('guest');
+
+    if (!isAuthenticated && !isBypass) {
+      console.log('[Auth Guard] Unauthenticated access to / -> Redirecting immediately to MOPH Provider ID Login...');
+      res.writeHead(302, { 'Location': '/api/auth/moph/login' });
+      res.end();
+      return;
+    }
   }
 
   const filePath = path.join(PUBLIC_DIR, safePath);
