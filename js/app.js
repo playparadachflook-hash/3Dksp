@@ -3664,7 +3664,7 @@
         if (btnLogin) btnLogin.classList.add('hidden');
         if (badge) {
           badge.classList.remove('hidden');
-          if (userName) userName.textContent = data.user.name || 'เน€เธเนเธฒเธซเธเนเธฒเธ—เธตเน';
+          if (userName) userName.textContent = data.user.name || 'เจ้าหน้าที่';
           if (userRole) userRole.textContent = data.user.groupname || 'Provider ID';
         }
       } else {
@@ -3694,20 +3694,20 @@
         const nameEl = document.getElementById('moph-modal-fullname');
         if (nameEl) nameEl.textContent = currentMophUser.name || '-';
         const grpEl = document.getElementById('moph-modal-group');
-        if (grpEl) grpEl.textContent = currentMophUser.groupname || 'เธเธธเธเธฅเธฒเธเธฃเธชเธฒเธเธฒเธฃเธ“เธชเธธเธ';
+        if (grpEl) grpEl.textContent = currentMophUser.groupname || 'บุคลากรสาธารณสุข';
         const loginEl = document.getElementById('moph-modal-loginname');
         if (loginEl) loginEl.textContent = currentMophUser.loginname || '-';
         const licEl = document.getElementById('moph-modal-license');
-        if (licEl) licEl.textContent = currentMophUser.doctorcode || currentMophUser.license_id || 'เนเธกเนเธฃเธฐเธเธธ';
+        if (licEl) licEl.textContent = currentMophUser.doctorcode || currentMophUser.license_id || 'ไม่ระบุ';
         const deptEl = document.getElementById('moph-modal-dept');
-        if (deptEl) deptEl.textContent = currentMophUser.department || 'เนเธฃเธเธเธขเธฒเธเธฒเธฅเนเธเธเธจเธฃเธตเธชเธธเธเธฃเธฃเธ“';
+        if (deptEl) deptEl.textContent = currentMophUser.department || 'โรงพยาบาลโคกศรีสุพรรณ';
 
         const verifiedEl = document.getElementById('moph-modal-verified');
         if (verifiedEl) {
           if (currentMophUser.verified_hosxp) {
-            verifiedEl.innerHTML = '<span style="color:#16a34a; font-weight:700;">โ“ เธขเธทเธเธขเธฑเธเธ•เธฃเธเธเธฑเธเธเธฒเธเธเนเธญเธกเธนเธฅ HOSxP</span>';
+            verifiedEl.innerHTML = '<span style="color:#16a34a; font-weight:700;">✓ ยืนยันตรงกับฐานข้อมูล HOSxP</span>';
           } else {
-            verifiedEl.innerHTML = '<span style="color:#ea580c; font-weight:700;">โ  Provider ID เธเธฑเธเธเธตเธเธฅเธฒเธ</span>';
+            verifiedEl.innerHTML = '<span style="color:#ea580c; font-weight:700;">⚠ Provider ID บัญชีกลาง</span>';
           }
         }
 
@@ -3730,7 +3730,7 @@
 
     if (btnLogout) {
       btnLogout.addEventListener('click', async () => {
-        if (!confirm('เธขเธทเธเธขเธฑเธเธญเธญเธเธเธฒเธเธฃเธฐเธเธ Provider ID เธซเธฃเธทเธญเนเธกเน?')) return;
+        if (!confirm('ยืนยันออกจากระบบ Provider ID หรือไม่?')) return;
         try {
           await fetch('/api/auth/moph/logout', { method: 'POST' });
         } catch (e) {}
