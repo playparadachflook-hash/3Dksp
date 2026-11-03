@@ -8,19 +8,21 @@ const PORT = parseInt(process.env.PORT, 10) || 3080;
 const PUBLIC_DIR = __dirname;
 
 // =========================================================================
-// MOPH Provider ID / Health ID OAuth Configuration (PRD Environment)
+// MOPH Provider ID / Health ID OAuth Configuration (Official MOPH PRD)
 // =========================================================================
 const MOPH_CONFIG = {
-  HEALTH_ID_CLIENT_ID: 'Vm5IaU1QY21waWNGTWVHc2NSVDhYajNxMkRiMEFLQUw',
-  HEALTH_ID_SECRET: 'dmZnb0lpb2NqYnBWVUFRN3BFTjV6bVp4UGE4SEhNaU82dVFxS3BuRA',
-  HEALTH_ID_API_KEY: 'A4ovGdTNcJW6uhVu8LxfPQgFKtTT56Yzk5d96lon',
-  PROVIDER_ID_CLIENT_ID: 'QVMwdkZzSXpzR05STUJTTkx1Smd1QU81dHJ5SFE2NFo',
-  PROVIDER_ID_SECRET: 'V21Qa2dvQkRDWWZFYjdTdlJjbE5nN1ZnMUY5aWJiVU0zUFNwMXhGbg',
-  PROVIDER_ID_API_KEY: 'vdWNePFng5t9wn7wh5VtprQAR63LiNe9EEolXalS',
+  // Health ID (ส่วนที่ 1)
+  HEALTH_ID_CLIENT_ID: process.env.HEALTH_ID_CLIENT_ID || '01a0faf5-2888-758a-a1c3-d885143cf2e4',
+  HEALTH_ID_SECRET: process.env.HEALTH_ID_SECRET || 'a92c05aeec078f4cd9da04d34dd3e5ebe1ea0942',
   AUTH_REDIRECT_URL: 'https://moph.id.th/oauth/redirect',
   TOKEN_URL: 'https://moph.id.th/api/v1/token',
+
+  // Provider ID (ส่วนที่ 2)
+  PROVIDER_ID_CLIENT_ID: process.env.PROVIDER_ID_CLIENT_ID || '68fdef16-2121-451b-952c-07a9aaf4d1f0',
+  PROVIDER_ID_SECRET: process.env.PROVIDER_ID_SECRET || '6bFJzxrV1SnBwEwphUK9vcAPXiWFlzX8',
   PROVIDER_TOKEN_URL: 'https://provider.id.th/api/v1/services/token',
   PROVIDER_PROFILE_URL: 'https://provider.id.th/api/v1/services/profile',
+
   HOSPCODE: '11101',
   HOSPITAL_NAME: 'โรงพยาบาลโคกศรีสุพรรณ'
 };
@@ -151,11 +153,11 @@ const server = http.createServer(async (req, res) => {
   // MOPH Provider ID Authentication Flow
   // =========================================================================
 
-  // Step 1 (Redirect Login): Redirect user to MOPH Health ID OAuth
+  // Step 1 (Redirect Login): Redirect user to MOPH Health ID OAuth (ตามคู่มือทางการ)
   if (pathname === '/api/auth/moph/login' && (req.method === 'GET' || req.method === 'HEAD')) {
     const callbackUrl = getCallbackUrl(req);
     const state = crypto.randomBytes(16).toString('hex');
-    const targetUrl = `${MOPH_CONFIG.AUTH_REDIRECT_URL}?client_id=${MOPH_CONFIG.HEALTH_ID_CLIENT_ID}&redirect_uri=${encodeURIComponent(callbackUrl)}&response_type=code&state=${state}&scope=openid%20profile%20pid`;
+    const targetUrl = `${MOPH_CONFIG.AUTH_REDIRECT_URL}?client_id=${MOPH_CONFIG.HEALTH_ID_CLIENT_ID}&redirect_uri=${encodeURIComponent(callbackUrl)}&response_type=code&state=${state}`;
     console.log(`[MOPH Auth] Redirecting user to: ${targetUrl}`);
     res.writeHead(302, { 'Location': targetUrl });
     res.end();
@@ -201,30 +203,47 @@ const server = http.createServer(async (req, res) => {
       const callbackUrl = getCallbackUrl(req);
       const userAgent = req.headers['user-agent'] || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
-      // Step 2: Exchange Health ID Token
+      // Step 2: Exchange Health ID Token (ตามคู่มือทางการ ใช้ application/x-www-form-urlencoded)
       console.log(`[MOPH Auth] Exchanging code: ${code.substring(0, 10)}... via ${MOPH_CONFIG.TOKEN_URL}`);
-      const tokenRes = await fetch(MOPH_CONFIG.TOKEN_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': userAgent,
-          'x-api-key': MOPH_CONFIG.HEALTH_ID_API_KEY
-        },
-        body: JSON.stringify({
-          client_id: MOPH_CONFIG.HEALTH_ID_CLIENT_ID,
-          client_secret: MOPH_CONFIG.HEALTH_ID_SECRET,
-          code: code,
-          redirect_uri: callbackUrl,
-          grant_type: 'authorization_code'
-        })
+      const bodyParams = new URLSearchParams({
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: callbackUrl,
+        client_id: MOPH_CONFIG.HEALTH_ID_CLIENT_ID,
+        client_secret: MOPH_CONFIG.HEALTH_ID_SECRET
       });
 
-      const tokenText = await tokenRes.text();
+      let tokenRes = await fetch(MOPH_CONFIG.TOKEN_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': userAgent
+        },
+        body: bodyParams.toString()
+      });
+
+      let tokenText = await tokenRes.text();
       let tokenData = {};
       try {
         tokenData = JSON.parse(tokenText);
       } catch (e) {
-        throw new Error(`Health ID Token exchange HTTP ${tokenRes.status}: ${tokenText.substring(0, 150)}`);
+        // Fallback to JSON body if necessary
+        const jsonRes = await fetch(MOPH_CONFIG.TOKEN_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': userAgent
+          },
+          body: JSON.stringify({
+            client_id: MOPH_CONFIG.HEALTH_ID_CLIENT_ID,
+            client_secret: MOPH_CONFIG.HEALTH_ID_SECRET,
+            code: code,
+            redirect_uri: callbackUrl,
+            grant_type: 'authorization_code'
+          })
+        });
+        tokenText = await jsonRes.text();
+        tokenData = JSON.parse(tokenText);
       }
 
       if (tokenData.status === 'fail' || tokenData.error) {
@@ -239,16 +258,13 @@ const server = http.createServer(async (req, res) => {
         throw new Error('ไม่พบ access_token ในผลลัพธ์ของ Health ID Token');
       }
 
-      // Step 3: Exchange Provider ID Token
+      // Step 3: Exchange Provider ID Token (ตามคู่มือทางการ: POST {Provider-URL}/api/v1/services/token)
       console.log(`[MOPH Auth] Exchanging Health ID token for Provider ID access token...`);
       const pRes = await fetch(MOPH_CONFIG.PROVIDER_TOKEN_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'User-Agent': userAgent,
-          'client-id': MOPH_CONFIG.PROVIDER_ID_CLIENT_ID,
-          'secret-key': MOPH_CONFIG.PROVIDER_ID_SECRET,
-          'x-api-key': MOPH_CONFIG.PROVIDER_ID_API_KEY
+          'User-Agent': userAgent
         },
         body: JSON.stringify({
           client_id: MOPH_CONFIG.PROVIDER_ID_CLIENT_ID,
@@ -271,7 +287,7 @@ const server = http.createServer(async (req, res) => {
         throw new Error(pJson.message || pJson.message_th || 'ไม่สามารถรับ Provider ID Access Token ได้');
       }
 
-      // Step 4: Get Provider Profile
+      // Step 4: Get Provider Profile (ตามคู่มือทางการ: GET {Provider-URL}/api/v1/services/profile)
       console.log(`[MOPH Auth] Fetching Provider profile from ${MOPH_CONFIG.PROVIDER_PROFILE_URL}...`);
       const profRes = await fetch(MOPH_CONFIG.PROVIDER_PROFILE_URL, {
         method: 'GET',
@@ -280,7 +296,6 @@ const server = http.createServer(async (req, res) => {
           'Authorization': `Bearer ${providerAccessToken}`,
           'client-id': MOPH_CONFIG.PROVIDER_ID_CLIENT_ID,
           'secret-key': MOPH_CONFIG.PROVIDER_ID_SECRET,
-          'x-api-key': MOPH_CONFIG.PROVIDER_ID_API_KEY,
           'User-Agent': userAgent
         }
       });
