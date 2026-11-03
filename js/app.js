@@ -3646,6 +3646,106 @@
   setTimeout(() => syncLiveNetworkData(true), 1200);
   setInterval(() => syncLiveNetworkData(false), 30000);
 
+  // --- MOPH Provider ID Authentication Manager ---
+  let currentMophUser = null;
+
+  async function checkMophAuth() {
+    const btnLogin = document.getElementById('btn-moph-login');
+    const badge = document.getElementById('moph-user-badge');
+    const userName = document.getElementById('moph-user-name');
+    const userRole = document.getElementById('moph-user-role');
+
+    try {
+      const res = await fetch('/api/auth/moph/me');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data && data.authenticated && data.user) {
+        currentMophUser = data.user;
+        if (btnLogin) btnLogin.classList.add('hidden');
+        if (badge) {
+          badge.classList.remove('hidden');
+          if (userName) userName.textContent = data.user.name || 'เน€เธเนเธฒเธซเธเนเธฒเธ—เธตเน';
+          if (userRole) userRole.textContent = data.user.groupname || 'Provider ID';
+        }
+      } else {
+        currentMophUser = null;
+        if (btnLogin) btnLogin.classList.remove('hidden');
+        if (badge) badge.classList.add('hidden');
+      }
+    } catch (e) {
+      console.warn('[MOPH Auth Check Notice]', e);
+    }
+  }
+
+  function setupMophModal() {
+    const badge = document.getElementById('moph-user-badge');
+    const modal = document.getElementById('moph-profile-modal');
+    const btnClose1 = document.getElementById('btn-close-moph-modal');
+    const btnClose2 = document.getElementById('btn-close-moph-modal-btn');
+    const btnLogout = document.getElementById('btn-moph-logout');
+
+    const fnClose = () => {
+      if (modal) modal.classList.add('hidden');
+    };
+
+    if (badge) {
+      badge.addEventListener('click', () => {
+        if (!currentMophUser || !modal) return;
+        const nameEl = document.getElementById('moph-modal-fullname');
+        if (nameEl) nameEl.textContent = currentMophUser.name || '-';
+        const grpEl = document.getElementById('moph-modal-group');
+        if (grpEl) grpEl.textContent = currentMophUser.groupname || 'เธเธธเธเธฅเธฒเธเธฃเธชเธฒเธเธฒเธฃเธ“เธชเธธเธ';
+        const loginEl = document.getElementById('moph-modal-loginname');
+        if (loginEl) loginEl.textContent = currentMophUser.loginname || '-';
+        const licEl = document.getElementById('moph-modal-license');
+        if (licEl) licEl.textContent = currentMophUser.doctorcode || currentMophUser.license_id || 'เนเธกเนเธฃเธฐเธเธธ';
+        const deptEl = document.getElementById('moph-modal-dept');
+        if (deptEl) deptEl.textContent = currentMophUser.department || 'เนเธฃเธเธเธขเธฒเธเธฒเธฅเนเธเธเธจเธฃเธตเธชเธธเธเธฃเธฃเธ“';
+
+        const verifiedEl = document.getElementById('moph-modal-verified');
+        if (verifiedEl) {
+          if (currentMophUser.verified_hosxp) {
+            verifiedEl.innerHTML = '<span style="color:#16a34a; font-weight:700;">โ“ เธขเธทเธเธขเธฑเธเธ•เธฃเธเธเธฑเธเธเธฒเธเธเนเธญเธกเธนเธฅ HOSxP</span>';
+          } else {
+            verifiedEl.innerHTML = '<span style="color:#ea580c; font-weight:700;">โ  Provider ID เธเธฑเธเธเธตเธเธฅเธฒเธ</span>';
+          }
+        }
+
+        const timeEl = document.getElementById('moph-modal-logintime');
+        if (timeEl) {
+          timeEl.textContent = currentMophUser.login_at ? new Date(currentMophUser.login_at).toLocaleString('th-TH') : '-';
+        }
+
+        modal.classList.remove('hidden');
+      });
+    }
+
+    if (btnClose1) btnClose1.addEventListener('click', fnClose);
+    if (btnClose2) btnClose2.addEventListener('click', fnClose);
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) fnClose();
+      });
+    }
+
+    if (btnLogout) {
+      btnLogout.addEventListener('click', async () => {
+        if (!confirm('เธขเธทเธเธขเธฑเธเธญเธญเธเธเธฒเธเธฃเธฐเธเธ Provider ID เธซเธฃเธทเธญเนเธกเน?')) return;
+        try {
+          await fetch('/api/auth/moph/logout', { method: 'POST' });
+        } catch (e) {}
+        try {
+          localStorage.removeItem('moph_user');
+        } catch (e) {}
+        window.location.reload();
+      });
+    }
+  }
+
+  // Run MOPH Auth initialization
+  checkMophAuth();
+  setupMophModal();
+
   // Hide Loading Screen
   const loading = document.getElementById('loading');
   if (loading) {

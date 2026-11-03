@@ -55,6 +55,18 @@
       <span id="git-status-icon">🔴</span>
       <span id="git-status-text">ปัจจุบัน</span>
     </button>
+    <a id="btn-moph-login" class="moph-login-btn" href="/api/auth/moph/login" title="เข้าสู่ระบบด้วย Provider ID (หมอพร้อม)">
+      <span class="moph-icon">🩺</span>
+      <span>Provider ID</span>
+    </a>
+    <div id="moph-user-badge" class="moph-user-badge hidden" title="คลิกเพื่อดูข้อมูลผู้ใช้งาน">
+      <span class="moph-avatar">👨‍⚕️</span>
+      <div class="moph-user-text">
+        <span id="moph-user-name" class="moph-user-name">-</span>
+        <span id="moph-user-role" class="moph-user-role">-</span>
+      </div>
+      <span class="moph-online-dot" title="เชื่อมต่อสำเร็จ"></span>
+    </div>
   </div>
 
   <aside class="panel sidebar" id="sidebar">
@@ -340,6 +352,61 @@
     </div>
     <div class="console-body" id="cs-body">
       <!-- Simulated GUI Screen content -->
+    </div>
+  </div>
+
+  <!-- Modal เธเนเธญเธกเธนเธฅเนเธเธฃเนเธเธฅเน MOPH Provider ID -->
+  <div id="moph-profile-modal" class="modal-overlay hidden">
+    <div class="moph-modal-card">
+      <div class="moph-modal-header">
+        <div class="moph-modal-title-group">
+          <span class="moph-modal-title-icon">๐ฉบ</span>
+          <div>
+            <h3>เธเนเธญเธกเธนเธฅเธเธนเนเนเธเนเธเธฒเธ Provider ID</h3>
+            <p class="moph-modal-subtitle">เธฃเธฐเธเธเธเธดเธชเธนเธเธเนเนเธฅเธฐเธขเธทเธเธขเธฑเธเธ•เธฑเธงเธ•เธ เธซเธกเธญเธเธฃเนเธญเธก (MOPH ID)</p>
+          </div>
+        </div>
+        <button id="btn-close-moph-modal" class="icon-btn" title="เธเธดเธ”">โ•</button>
+      </div>
+      <div class="moph-modal-body">
+        <div class="moph-profile-summary">
+          <div class="moph-profile-avatar-large">๐‘จโ€โ•๏ธ</div>
+          <div class="moph-profile-name-group">
+            <h4 id="moph-modal-fullname">-</h4>
+            <span id="moph-modal-group" class="chip chip-success">-</span>
+          </div>
+        </div>
+        <div class="moph-profile-details">
+          <div class="moph-detail-row">
+            <span class="moph-detail-label">เธซเธเนเธงเธขเธเธฃเธดเธเธฒเธฃ:</span>
+            <span class="moph-detail-val">เนเธฃเธเธเธขเธฒเธเธฒเธฅเนเธเธเธจเธฃเธตเธชเธธเธเธฃเธฃเธ“ (11101)</span>
+          </div>
+          <div class="moph-detail-row">
+            <span class="moph-detail-label">เธเธทเนเธญเธเธนเนเนเธเนเธเธฒเธ HOSxP:</span>
+            <span id="moph-modal-loginname" class="moph-detail-val">-</span>
+          </div>
+          <div class="moph-detail-row">
+            <span class="moph-detail-label">เธฃเธซเธฑเธชเนเธเธ—เธขเน / เน€เธฅเธ เธง.:</span>
+            <span id="moph-modal-license" class="moph-detail-val">-</span>
+          </div>
+          <div class="moph-detail-row">
+            <span class="moph-detail-label">เนเธเธเธ / เธเนเธฒเธข:</span>
+            <span id="moph-modal-dept" class="moph-detail-val">-</span>
+          </div>
+          <div class="moph-detail-row">
+            <span class="moph-detail-label">เธชเธ–เธฒเธเธฐ HOSxP:</span>
+            <span id="moph-modal-verified" class="moph-detail-val">-</span>
+          </div>
+          <div class="moph-detail-row">
+            <span class="moph-detail-label">เน€เธงเธฅเธฒเน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธ:</span>
+            <span id="moph-modal-logintime" class="moph-detail-val">-</span>
+          </div>
+        </div>
+      </div>
+      <div class="moph-modal-footer">
+        <button id="btn-moph-logout" class="moph-btn-logout">เธญเธญเธเธเธฒเธเธฃเธฐเธเธ</button>
+        <button id="btn-close-moph-modal-btn" class="moph-btn-close">เธเธดเธ”</button>
+      </div>
     </div>
   </div>
 
