@@ -93,14 +93,8 @@ function parseCookies(req) {
 }
 
 function getCallbackUrl(req) {
-  // Registered Callback Endpoint in MOPH Developer Console is http://147.50.107.211:3080/
-  const host = req.headers['host'] || '147.50.107.211:3080';
-  if (host.includes('147.50.107.211')) {
-    return 'http://147.50.107.211:3080/';
-  }
-  const forwardedProto = req.headers['x-forwarded-proto'];
-  const protocol = forwardedProto ? forwardedProto.split(',')[0].trim() : 'http';
-  return `${protocol}://${host}/`;
+  // Registered Callback Endpoint in MOPH Developer Console is strictly http://147.50.107.211:3080/
+  return process.env.MOPH_CALLBACK_URL || 'http://147.50.107.211:3080/';
 }
 
 const MIME_TYPES = {
@@ -158,7 +152,7 @@ const server = http.createServer(async (req, res) => {
   // =========================================================================
 
   // Step 1 (Redirect Login): Redirect user to MOPH Health ID OAuth
-  if (pathname === '/api/auth/moph/login' && req.method === 'GET') {
+  if (pathname === '/api/auth/moph/login' && (req.method === 'GET' || req.method === 'HEAD')) {
     const callbackUrl = getCallbackUrl(req);
     const state = crypto.randomBytes(16).toString('hex');
     const targetUrl = `${MOPH_CONFIG.AUTH_REDIRECT_URL}?client_id=${MOPH_CONFIG.HEALTH_ID_CLIENT_ID}&redirect_uri=${encodeURIComponent(callbackUrl)}&response_type=code&state=${state}&scope=openid%20profile%20pid`;
