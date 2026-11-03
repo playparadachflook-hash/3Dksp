@@ -13,9 +13,9 @@ const THAID_CONFIG = {
   authUrl: 'https://imauth.bora.dopa.go.th/api/v2/oauth2/auth/',
   tokenUrl: 'https://imauth.bora.dopa.go.th/api/v2/oauth2/token/',
   userinfoUrl: 'https://imauth.bora.dopa.go.th/api/v2/oauth2/userinfo/',
-  clientId: 'Vm5laU1QY21waWNGTWVHc2NSVDhYajNxMkRiMEFLQUw',
-  clientSecret: 'dmZnb0lpb2NqYnBWVUFRN3BFTjV6bVp4UGE4SEhNaU82dVFxS3BuRA',
-  apiKey: 'A4ovGdTNcJW6uhVu8LxfPQgFkTTT56Yzk5d96lon',
+  clientId: 'QVMwdkZzSXpzR05STUJTTkx1Smd1QU81dHJ5SFE2NFO',
+  clientSecret: 'V21Qa2dvQkRDWWZFYjdTdlJjbE5nN1ZnMUY5aWJiVU0zUFNwMXhGbg',
+  apiKey: 'vdWNePFng5t9wn7wh5VtprQAR63LiNe9EEolXalS',
   redirectUri: 'http://147.50.107.211:3080/',
   scope: 'openid pid name birthdate'
 };
