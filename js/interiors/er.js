@@ -1271,8 +1271,268 @@
     rWall(27.2, 7.0, 30.2, 7.0, 0.22, WH, true);
     rWall(31.8, 7.0, 40.5, 7.0, 0.22, WH, true);
     rWall(42.0, 7.0, 42.5, 7.0, 0.22, WH, true);
-    rDoor(26.4, 7.0, 0, 1.35, true);
-    rDoor(31.0, 7.0, 0, 1.35, true);
+    // =========================================================================
+    // หน้าห้องรังสี / X-Ray Room (ตรงตามภาพถ่ายสถานที่จริง)
+    // ผนังไม้สีน้ำตาลเข้มด้านบน + ตัวอักษร 3D "ห้องรังสี X-Ray Room" + กล่องไฟเตือนรังสี
+    // ฝั่งซ้าย: หน้าต่างบานเลื่อนกรอบขาว 2 ช่องคู่บนผนังไม้เข้ม + ช่องประตูเข้าโต๊ะคอม X-Ray 1
+    // ฝั่งขวา: วงกบไม้สีอ่อนขนาดใหญ่ + ประตูบานเลื่อนกันรังสีตะกั่วพร้อมป้ายสัญลักษณ์รังสี
+    // =========================================================================
+
+    // 1. Texture ป้ายไม้สีน้ำตาลเข้มด้านบน: "ห้องรังสี   X-Ray Room"
+    const xrayHeaderSignTex = M.canvasTexture(2048, 320, (c, w, h) => {
+      const bg = c.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#3e271d');
+      bg.addColorStop(0.5, '#311e15');
+      bg.addColorStop(1, '#24150e');
+      c.fillStyle = bg;
+      c.fillRect(0, 0, w, h);
+
+      // รอยต่อแผ่นไม้แนวตั้ง & ลายไม้บางๆ
+      c.fillStyle = 'rgba(0, 0, 0, 0.35)';
+      [w * 0.25, w * 0.55, w * 0.80].forEach((px) => c.fillRect(px, 0, 4, h));
+      c.fillStyle = 'rgba(255, 255, 255, 0.03)';
+      for (let y = 10; y < h; y += 14) c.fillRect(0, y, w, 2);
+
+      // ตัวอักษร 3D สีขาว: ห้องรังสี   X-Ray Room
+      const title = 'ห้องรังสี      X-Ray Room';
+      c.font = "bold 96px 'Prompt', 'Kanit', 'Sarabun', 'Segoe UI', sans-serif";
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+
+      c.fillStyle = 'rgba(20, 10, 5, 0.85)';
+      for (let off = 6; off >= 1; off--) c.fillText(title, w / 2 + off * 0.4, h / 2 + off);
+      c.shadowColor = 'rgba(0, 0, 0, 0.45)';
+      c.shadowBlur = 10;
+      c.fillStyle = '#ffffff';
+      c.fillText(title, w / 2, h / 2);
+    });
+
+    // 2. Texture หน้าต่างบานเลื่อนติดต่อห้องรังสี + ผนังไม้สีน้ำตาลเข้มครึ่งล่าง
+    const xrayWindowWallTex = M.canvasTexture(1024, 768, (c, w, h) => {
+      const splitY = 384;
+      // ครึ่งล่าง: ผนังไม้สีน้ำตาลเข้ม
+      const woodBg = c.createLinearGradient(0, splitY, 0, h);
+      woodBg.addColorStop(0, '#3e271d');
+      woodBg.addColorStop(1, '#2c1a12');
+      c.fillStyle = woodBg;
+      c.fillRect(0, splitY, w, h - splitY);
+      c.fillStyle = 'rgba(255, 255, 255, 0.03)';
+      for (let y = splitY + 8; y < h; y += 12) c.fillRect(0, y, w, 2);
+
+      // ครึ่งบน: กรอบหน้าต่างอะลูมิเนียมสีขาว 2 ช่องคู่
+      c.fillStyle = '#f8fafc';
+      c.fillRect(0, 0, w, splitY);
+
+      // กระจกภายใน 2 ช่องบน + 2 ช่องล่าง (บานเลื่อน)
+      const cols = [24, 520];
+      const colW = 480;
+      cols.forEach((cx, idx) => {
+        // ช่องกระจกบน
+        c.fillStyle = '#1e293b';
+        c.fillRect(cx, 20, colW, 170);
+        c.fillStyle = 'rgba(148, 163, 184, 0.25)';
+        c.fillRect(cx + 10, 26, colW / 2 - 14, 158);
+        c.fillStyle = 'rgba(255, 255, 255, 0.14)';
+        c.fillRect(cx + colW / 2 + 4, 26, colW / 2 - 14, 158);
+        // กรอบอลูมิเนียมแบ่งครึ่งบน
+        c.fillStyle = '#ffffff';
+        c.fillRect(cx + colW / 2 - 5, 20, 10, 170);
+
+        // ช่องกระจกล่าง (ช่องส่งเอกสาร)
+        c.fillStyle = '#0f172a';
+        c.fillRect(cx, 206, colW, 156);
+        c.fillStyle = 'rgba(255, 255, 255, 0.16)';
+        c.fillRect(cx + 8, 212, colW / 2 - 12, 144);
+        c.fillStyle = '#ffffff';
+        c.fillRect(cx + colW / 2 - 5, 206, 10, 156);
+
+        // ป้ายลูกศรยื่นเอกสารตรงช่องขวาสุด
+        if (idx === 1) {
+          c.fillStyle = '#ffffff';
+          c.fillRect(cx + colW - 140, 210, 130, 82);
+          c.fillStyle = '#1e293b';
+          c.font = "bold 18px 'Prompt', sans-serif";
+          c.textAlign = 'center';
+          c.fillText('ยื่นเอกสารที่นี่', cx + colW - 75, 234);
+          c.font = "bold 34px sans-serif";
+          c.fillText('⬇', cx + colW - 75, 272);
+        }
+      });
+
+      // เส้นขอบคั่นระหว่างกรอบบน-ล่าง
+      c.fillStyle = '#e2e8f0';
+      c.fillRect(0, 190, w, 16);
+      c.fillRect(0, splitY - 12, w, 12);
+    });
+
+    // Helper วาดสัญลักษณ์ใบพัดเตือนรังสี (Radiation Trefoil)
+    function drawRadiationTrefoil(c, cx, cy, rOuter) {
+      c.save();
+      c.fillStyle = '#312e81'; // สีม่วงเข้ม-ดำ ตามป้ายจริง
+      c.beginPath();
+      c.arc(cx, cy, rOuter * 0.22, 0, Math.PI * 2);
+      c.fill();
+      for (let i = 0; i < 3; i++) {
+        const a0 = -Math.PI / 2 + i * ((Math.PI * 2) / 3) - Math.PI / 6;
+        const a1 = a0 + Math.PI / 3;
+        c.beginPath();
+        c.arc(cx, cy, rOuter, a0, a1, false);
+        c.arc(cx, cy, rOuter * 0.34, a1, a0, true);
+        c.closePath();
+        c.fill();
+      }
+      c.restore();
+    }
+
+    // 3. Texture ประตูบานเลื่อนกันรังสีตะกั่วไม้สีอ่อน (Light Oak Lead Door)
+    const xrayLeadDoorTex = M.canvasTexture(768, 768, (c, w, h) => {
+      const bg = c.createLinearGradient(0, 0, w, 0);
+      bg.addColorStop(0, '#dfc096');
+      bg.addColorStop(0.5, '#d5b284');
+      bg.addColorStop(1, '#c9a474');
+      c.fillStyle = bg;
+      c.fillRect(0, 0, w, h);
+
+      // ลายเสี้ยนไม้แนวตั้ง
+      c.fillStyle = 'rgba(120, 75, 35, 0.08)';
+      for (let x = 8; x < w; x += 14) c.fillRect(x, 0, 2, h);
+
+      // มือจับสเตนเลสแนวตั้งฝั่งซ้ายของบานประตู
+      c.fillStyle = '#94a3b8';
+      c.fillRect(46, 230, 18, 250);
+      c.fillStyle = '#f8fafc';
+      c.fillRect(50, 232, 8, 246);
+
+      // ป้ายเตือนรังสีสี่เหลี่ยมสีเหลืองขนาดใหญ่ตรงกลาง
+      const rx = w * 0.34, ry = 135, rs = 210;
+      c.fillStyle = '#facc15';
+      c.fillRect(rx, ry, rs, rs);
+      c.strokeStyle = '#ca8a04';
+      c.lineWidth = 4;
+      c.strokeRect(rx, ry, rs, rs);
+      drawRadiationTrefoil(c, rx + rs / 2, ry + rs / 2, rs * 0.38);
+
+      // ป้ายเตือนรังสีเล็กด้านขวา
+      c.fillStyle = '#fef08a';
+      c.fillRect(w * 0.72, 165, 110, 145);
+      drawRadiationTrefoil(c, w * 0.72 + 55, 220, 32);
+      c.fillStyle = '#1e293b';
+      c.font = "bold 14px 'Prompt', sans-serif";
+      c.textAlign = 'center';
+      c.fillText('อันตราย รังสี', w * 0.72 + 55, 285);
+
+      // ป้ายเตือนสตรีมีครรภ์ด้านล่าง (พื้นขาวขอบแดง)
+      const px = w * 0.39, py = 395, pw = 135, ph = 125;
+      c.fillStyle = '#ffffff';
+      c.fillRect(px, py, pw, ph);
+      c.strokeStyle = '#dc2626';
+      c.lineWidth = 4;
+      c.strokeRect(px, py, pw, ph);
+      c.strokeStyle = '#dc2626';
+      c.lineWidth = 5;
+      c.beginPath();
+      c.arc(px + pw / 2, py + 44, 24, 0, Math.PI * 2);
+      c.stroke();
+      c.beginPath();
+      c.moveTo(px + pw / 2 - 16, py + 28);
+      c.lineTo(px + pw / 2 + 16, py + 60);
+      c.stroke();
+      c.fillStyle = '#dc2626';
+      c.font = "bold 15px 'Prompt', sans-serif";
+      c.fillText('สตรีมีครรภ์', px + pw / 2, py + 88);
+      c.fillStyle = '#1e293b';
+      c.font = "13px 'Prompt', sans-serif";
+      c.fillText('กรุณาแจ้งเจ้าหน้าที่', px + pw / 2, py + 108);
+    });
+
+    // 4. Texture กล่องไฟเตือนรังสีแขวนด้านบน: "โปรดระวัง กำลังเอกซเรย์ / ห้ามเข้าก่อนได้รับอนุญาต"
+    const xrayLightBoxTex = M.canvasTexture(512, 160, (c, w, h) => {
+      c.fillStyle = '#f8fafc';
+      c.fillRect(0, 0, w, h);
+      c.fillStyle = '#0f172a';
+      c.fillRect(14, 14, w - 28, h - 28);
+
+      // ช่องเหลืองซ้ายพร้อมไอคอนรังสี
+      c.fillStyle = '#facc15';
+      c.fillRect(26, 26, 96, h - 52);
+      drawRadiationTrefoil(c, 74, h / 2, 36);
+
+      // ข้อความสีเหลือง
+      c.fillStyle = '#facc15';
+      c.textAlign = 'left';
+      c.textBaseline = 'middle';
+      c.font = "bold 28px 'Prompt', 'Kanit', sans-serif";
+      c.fillText('โปรดระวัง กำลังเอกซเรย์', 140, h / 2 - 20);
+      c.fillStyle = '#fde047';
+      c.font = "bold 25px 'Prompt', 'Kanit', sans-serif";
+      c.fillText('ห้ามเข้าก่อนได้รับอนุญาต', 140, h / 2 + 22);
+    });
+
+    // 5. ประกอบโครงสร้าง 3D หน้าห้องรังสี (X = 25.50, หันหน้าออกทาง -X)
+    const xrWallX = 25.50;
+    const darkWalnutMat = M.mat(0x311e15, { roughness: 0.45 });
+    const lightOakMat = M.mat(0xd5b284, { roughness: 0.4 });
+    const xrHeaderMat = new THREE.MeshStandardMaterial({ map: xrayHeaderSignTex, roughness: 0.4 });
+    const xrWinWallMat = new THREE.MeshStandardMaterial({ map: xrayWindowWallTex, roughness: 0.35 });
+    const xrLeadDoorMat = new THREE.MeshStandardMaterial({ map: xrayLeadDoorTex, roughness: 0.4 });
+    const xrLightBoxMat = new THREE.MeshStandardMaterial({
+      map: xrayLightBoxTex,
+      emissive: 0x332200,
+      emissiveIntensity: 0.35,
+      roughness: 0.3
+    });
+
+    // A) ผนังหน้าต่างติดต่อห้องรังสี (ฝั่งซ้าย Z = -6.45 .. -3.75, กว้าง 2.70m)
+    const winWallMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.04, WH, 2.70),
+      [darkWalnutMat, xrWinWallMat, darkWalnutMat, darkWalnutMat, darkWalnutMat, darkWalnutMat]
+    );
+    winWallMesh.position.set(xrWallX - 0.13, WH / 2, -5.10);
+    g.add(winWallMesh);
+
+    // B) ช่องประตูทางเข้าห้องทำงาน X-Ray 1 (Z = -3.75 .. -2.74, เปิดโล่งเห็นโต๊ะคอม X-Ray 1)
+    M.box(g, 0.24, 0.03, 1.02, M.mat(0xfacc15), xrWallX, 0.015, -3.245); // เส้นเหลืองธรณีประตู
+    M.box(g, 0.26, WH, 0.06, lightOakMat, xrWallX, WH / 2, -3.72);         // วงกบซ้าย
+    M.box(g, 0.26, WH, 0.06, lightOakMat, xrWallX, WH / 2, -2.76);         // วงกบขวา
+
+    // C) ซุ้มกรอบวงกบไม้สีอ่อนขนาดใหญ่ + ประตูบานเลื่อนกันรังสี (ฝั่งขวา Z = -0.95 .. +1.78)
+    // เสาซุ้มไม้สีอ่อนฝั่งซ้ายของช่องเปิด (Z = -0.92) และฝั่งขวา (Z = +1.76)
+    M.box(g, 0.28, WH, 0.14, lightOakMat, xrWallX - 0.04, WH / 2, -0.92);
+    M.box(g, 0.28, WH, 0.12, lightOakMat, xrWallX - 0.04, WH / 2, 1.76);
+    // คานบนซุ้มไม้สีอ่อนพาดตลอดแนวซุ้มประตูบานเลื่อน
+    M.box(g, 0.28, 0.18, 2.82, lightOakMat, xrWallX - 0.04, WH - 0.05, 0.42);
+    // แผงบังรางด้านในฝั่งผนังกลาง (Z = -2.74 .. -0.95) เป็นผนังไม้เข้มกลมกลืน
+    M.box(g, 0.04, WH, 1.78, darkWalnutMat, xrWallX - 0.13, WH / 2, -1.84);
+
+    // บานประตูเลื่อนกันรังสีตะกั่วไม้สีอ่อนขนาดใหญ่ (เปิดค้างไปทางขวา Z = +0.20 .. +1.70, เปิดช่อง Z = -0.83 .. +0.19 เดินเข้าได้)
+    const leadDoorMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.06, WH - 0.14, 1.50),
+      [lightOakMat, xrLeadDoorMat, lightOakMat, lightOakMat, lightOakMat, lightOakMat]
+    );
+    leadDoorMesh.position.set(xrWallX - 0.15, (WH - 0.14) / 2 + 0.02, 0.95);
+    g.add(leadDoorMesh);
+
+    // D) แผงไม้สีน้ำตาลเข้มด้านบนตลอดแนว + ตัวอักษร 3D "ห้องรังสี  X-Ray Room"
+    const xrSignMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.16, 0.62, 8.35),
+      [darkWalnutMat, xrHeaderMat, darkWalnutMat, darkWalnutMat, darkWalnutMat, darkWalnutMat]
+    );
+    xrSignMesh.position.set(xrWallX - 0.06, WH + 0.31, -2.30);
+    g.add(xrSignMesh);
+    addEdges(xrSignMesh, 0x1e110b);
+
+    // E) กล่องไฟเตือนรังสีแขวนด้านบนเหนือประตู X-Ray
+    const xrLightBox = new THREE.Mesh(
+      new THREE.BoxGeometry(0.18, 0.24, 0.78),
+      [M.mat(0x1e293b), xrLightBoxMat, M.mat(0xf8fafc), M.mat(0xf8fafc), M.mat(0xf8fafc), M.mat(0xf8fafc)]
+    );
+    xrLightBox.position.set(xrWallX - 0.26, WH + 0.16, 0.45);
+    g.add(xrLightBox);
+    // ขาเหล็กแขวนกล่องไฟ
+    M.box(g, 0.04, 0.20, 0.04, M.mat(0xf8fafc), xrWallX - 0.26, WH + 0.36, 0.45);
+
+    // ป้าย Label 3D
+    L.push({ text: '🩻 ห้องรังสี • X-Ray Room', pos: V(xrWallX - 0.2, WH + 0.85, -2.30), cls: 'int-label room-title' });
     rDoor(41.25, 7.0, 0, 1.3, true);
 
     // LAB
