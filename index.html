@@ -6,7 +6,7 @@
   <title>แผนผัง 3D Isometric - โรงพยาบาลโคกศรีสุพรรณ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20261026o">
+  <link rel="stylesheet" href="css/style.css?v=20261124_int_toggle">
   <!-- Modular Building Stylesheets (เชื่อมต่อไฟล์ CSS แยกตามแต่ละอาคาร) -->
   <link rel="stylesheet" href="css/buildings/opd.css?v=20261026o">
   <link rel="stylesheet" href="css/buildings/server.css?v=20261026o">
@@ -101,6 +101,7 @@
       <p id="int-sub"></p>
     </div>
     <div id="int-floor-selector" class="floor-selector hidden"></div>
+    <button id="btn-toggle-int-labels" class="int-label-toggle active" title="เปิด/ปิด ป้ายชื่อและไอคอนภายในอาคาร">🏷️ ซ่อนป้าย/ไอคอน</button>
   </div>
   <div class="panel interior-items hidden" id="interior-items">
     <h3>สิ่งที่อยู่ภายใน</h3>
@@ -444,7 +445,7 @@
   <script src="js/interiors/opd.js?v=20261102roadunified"></script>
   <script src="js/interiors/psych.js?v=20261102roadunified"></script>
   <script src="js/interiors/drivers.js?v=20261102roadunified"></script>
-  <script src="js/app.js?v=20261124_topmap"></script>
+  <script src="js/app.js?v=20261124_int_toggle"></script>
 </body>
 </html>
 

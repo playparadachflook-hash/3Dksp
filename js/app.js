@@ -25,6 +25,7 @@
     currentBuilding: null,
     selectedBuildingId: null,
     pinsVisible: true,
+    intLabelsVisible: true,
     autoRotate: false,
     filterCategory: 'all',
     searchQuery: ''
@@ -3159,6 +3160,8 @@
       }
       const labelObj = new THREE.CSS2DObject(labelDiv);
       labelObj.position.copy(l.pos);
+      labelObj.visible = state.intLabelsVisible;
+      if (!state.intLabelsVisible) labelDiv.style.display = 'none';
       interiorGroup.add(labelObj);
     });
 
@@ -3432,6 +3435,28 @@
     const layer = document.querySelector('.label-layer');
     if (layer) layer.style.display = state.pinsVisible ? 'block' : 'none';
   };
+
+  // Toggle Interior Labels / Icons
+  function applyIntLabelsVisibility() {
+    interiorGroup.traverse(child => {
+      if (child.isCSS2DObject && child.element && child.element.classList.contains('int-label')) {
+        child.visible = state.intLabelsVisible;
+        child.element.style.display = state.intLabelsVisible ? '' : 'none';
+      }
+    });
+    const btnIntLabels = document.getElementById('btn-toggle-int-labels');
+    if (btnIntLabels) {
+      btnIntLabels.classList.toggle('active', state.intLabelsVisible);
+      btnIntLabels.innerText = state.intLabelsVisible ? '🏷️ ซ่อนป้าย/ไอคอน' : '🏷️ แสดงป้าย/ไอคอน';
+    }
+  }
+  const btnToggleIntLabels = document.getElementById('btn-toggle-int-labels');
+  if (btnToggleIntLabels) {
+    btnToggleIntLabels.onclick = () => {
+      state.intLabelsVisible = !state.intLabelsVisible;
+      applyIntLabelsVisibility();
+    };
+  }
 
   // Deadlock Toolbar Button Handler & Global Event Listener
   const btnDlAlert = document.getElementById('btn-deadlock-alert');
