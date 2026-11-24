@@ -309,7 +309,7 @@
         // Standard Hospital Building with High-Definition Architectural Details & Sharp Dark Outlines
         const height = b.h || 6;
         const baseMat = M.mat(0xffffff, { roughness: 0.45 }); // Crisp bright white/ivory facade
-        const roofMat = M.mat(0xd6d0c4, { roughness: 0.4 });
+        const roofMat = M.mat(b.roofColor || 0xd6d0c4, { roughness: 0.45 });
         const plinthMat = M.mat(0x475569, { roughness: 0.6 }); // Deep slate base for strong ground shadow contrast
         const windowMat = M.mat(0x0284c7, { roughness: 0.12, metalness: 0.75 }); // Reflective glass windows
         const edgeDark = 0x334155; // Strong dark architectural edge line
@@ -697,7 +697,7 @@
         // Optional Arch Roof (e.g. โรงยิม)
         if (b.roof === 'arch') {
           const archGeo = new THREE.CylinderGeometry(b.w / 2, b.w / 2, b.d, 24, 1, false, 0, Math.PI);
-          const archMesh = new THREE.Mesh(archGeo, M.mat(0x0284c7, { roughness: 0.35 }));
+          const archMesh = new THREE.Mesh(archGeo, M.mat(b.roofColor || 0x0284c7, { roughness: 0.4 }));
           archMesh.rotation.z = Math.PI / 2;
           archMesh.position.set(0, height + 0.25, 0);
           archMesh.castShadow = true;
@@ -3384,8 +3384,8 @@
   }
 
   function viewTopDown() {
-    gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1 });
-    gsap.to(camera.position, { x: 0.1, y: 140, z: 5, duration: 1.2 });
+    gsap.to(controls.target, { x: 0, y: 0, z: 2, duration: 1 });
+    gsap.to(camera.position, { x: 0.01, y: 162, z: 2.1, duration: 1.2 });
     setActiveButton('btn-top');
   }
 
