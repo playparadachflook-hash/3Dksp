@@ -306,6 +306,31 @@
         const driversModel = M.buildDriversExterior(b.w, b.d);
         addGroupEdges(driversModel, 0x1e293b);
         bGroup.add(driversModel);
+      } else if (b.type === 'pond') {
+        // บ่อบำบัดน้ำเสีย (Wastewater Treatment Pond - 2 บ่อคู่ + เครื่องเติมอากาศ + ราวกั้น)
+        const pw = b.w || 12.5, pd = b.d || 5.8, ph = 0.85;
+        const wallMat = M.mat(0x94a3b8, { roughness: 0.7 });
+        const pondFloor = M.box(bGroup, pw, 0.2, pd, M.mat(0x64748b), 0, 0.1, 0);
+        addSharpEdges(pondFloor, 0x334155);
+        // ขอบบ่อ 4 ด้าน + ผนังกั้นกลาง
+        M.box(bGroup, pw, ph, 0.35, wallMat, 0, ph / 2, -pd / 2 + 0.175);
+        M.box(bGroup, pw, ph, 0.35, wallMat, 0, ph / 2, pd / 2 - 0.175);
+        M.box(bGroup, 0.35, ph, pd, wallMat, -pw / 2 + 0.175, ph / 2, 0);
+        M.box(bGroup, 0.35, ph, pd, wallMat, pw / 2 - 0.175, ph / 2, 0);
+        M.box(bGroup, 0.32, ph, pd - 0.4, wallMat, 0, ph / 2, 0);
+        // ผิวน้ำในบ่อทั้ง 2 ช่อง
+        const waterMat1 = M.mat(0x0284c7, { roughness: 0.12, metalness: 0.25, transparent: true, opacity: 0.85 });
+        const waterMat2 = M.mat(0x0d9488, { roughness: 0.12, metalness: 0.25, transparent: true, opacity: 0.85 });
+        M.box(bGroup, pw / 2 - 0.55, 0.08, pd - 0.7, waterMat1, -pw / 4, ph - 0.18, 0);
+        M.box(bGroup, pw / 2 - 0.55, 0.08, pd - 0.7, waterMat2, pw / 4, ph - 0.18, 0);
+        // เครื่องเติมอากาศ (Aerators) 2 จุดกลางบ่อ
+        [-pw / 4, pw / 4].forEach(ax => {
+          M.cyl(bGroup, 0.65, 0.65, 0.18, M.mat(0xfacc15), ax, ph - 0.08, 0, 14);
+          M.cyl(bGroup, 0.22, 0.22, 0.45, M.mat(0x334155), ax, ph + 0.14, 0, 12);
+        });
+        // ราวกั้นความปลอดภัยสีเหลือง-เทาด้านบนขอบบ่อ
+        M.box(bGroup, pw, 0.05, 0.05, M.mat(0xfacc15), 0, ph + 0.35, -pd / 2 + 0.175);
+        M.box(bGroup, pw, 0.05, 0.05, M.mat(0xfacc15), 0, ph + 0.35, pd / 2 - 0.175);
       } else {
         // Standard Hospital Building with High-Definition Architectural Details & Sharp Dark Outlines
         const height = b.h || 6;
