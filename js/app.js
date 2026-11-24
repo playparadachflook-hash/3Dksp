@@ -387,90 +387,185 @@
         // 5. Ground Entrance Canopy / Doorway (Faces front of building; for rot:90 faces Right)
         if (b.id === 'er') {
           // =========================================================================
-          // ทางรถขึ้นหน้าตึก ER แบบมีหลังคาคลุม (Covered Ambulance Drive-up Ramp & Canopy)
+          // 1) โซนสีส้ม (ฝั่งซ้าย x = -16.0 .. +2.0): ส่วนหน้าอาคาร "โรงพยาบาลโคกศรีสุพรรณ" ตามรูปที่ 2
+          //    หลังคาลาดกระเบื้องสีน้ำตาล + โลโก้และตัวอักษร "โรงพยาบาลโคกศรีสุพรรณ" สีเขียวขอบขาว
+          //    พร้อมระเบียงทางเดิน เสา ราวกั้น และป้าย "ห้ามจอด ตลอดแนว"
+          // =========================================================================
+          const facadeGroup = new THREE.Group();
+          const fW = 17.8;
+          const fCx = -7.0; // x = -15.9 .. +1.9
+          const fD = 3.2;
+
+          // พื้นระเบียงทางเดินยกระดับหน้าอาคาร
+          const terraceMat = M.mat(0x9c8270, { roughness: 0.7 });
+          const terrace = M.box(facadeGroup, fW, 0.52, fD, terraceMat, fCx, 0.26, frontZ + fD / 2);
+          addSharpEdges(terrace, 0x475569);
+
+          // ราวกั้นระเบียงสเตนเลส
+          M.box(facadeGroup, fW - 0.6, 0.06, 0.06, M.mat(0x64748b), fCx, 1.15, frontZ + fD - 0.15);
+          M.box(facadeGroup, fW - 0.6, 0.04, 0.04, M.mat(0x94a3b8), fCx, 0.85, frontZ + fD - 0.15);
+
+          // เสาโครงสร้างหน้าอาคาร 5 ต้น
+          const colMat = M.mat(0xe2e8f0, { roughness: 0.4 });
+          for (let ci = 0; ci < 5; ci++) {
+            const cx = fCx - fW / 2 + 0.6 + ci * ((fW - 1.2) / 4);
+            const col = M.box(facadeGroup, 0.34, 3.8, 0.34, colMat, cx, 1.9 + 0.52, frontZ + fD - 0.22);
+            addSharpEdges(col, 0x475569);
+          }
+
+          // หลังคาลาดกระเบื้องสีน้ำตาลคลุมระเบียง (Sloped Brown Tile Roof)
+          const roofTileMat = M.mat(0x8d5b4c, { roughness: 0.65 });
+          const slopedRoof = M.box(facadeGroup, fW + 0.4, 0.28, fD + 0.9, roofTileMat, fCx, 4.75, frontZ + (fD + 0.5) / 2);
+          slopedRoof.rotation.x = 0.26; // ลาดลงมาด้านหน้าเหมือนในรูปจริง
+          addSharpEdges(slopedRoof, 0x4a2c23);
+
+          // เชิงชายสีครีม-ขาวด้านหน้าหลังคา
+          const fascia = M.box(facadeGroup, fW + 0.45, 0.24, 0.12, M.mat(0xf1f5f9), fCx, 4.25, frontZ + fD + 0.42);
+          addSharpEdges(fascia, 0x64748b);
+
+          // ป้ายโลโก้ + ตัวอักษร "โรงพยาบาลโคกศรีสุพรรณ" สีเขียวเข้มขอบขาว บนชายคาหลังคา
+          const hospSignTex = M.canvasTexture(1536, 256, (ctx, cw, ch) => {
+            ctx.clearRect(0, 0, cw, ch);
+
+            // โลโก้โรงพยาบาลด้านซ้าย
+            const lx = 155, ly = ch / 2;
+            ctx.fillStyle = '#e2e8f0';
+            ctx.beginPath();
+            ctx.moveTo(lx - 45, ly + 55);
+            ctx.bezierCurveTo(lx - 50, ly - 35, lx + 15, ly - 45, lx + 25, ly - 30);
+            ctx.bezierCurveTo(lx - 10, ly + 10, lx - 15, ly + 35, lx - 45, ly + 55);
+            ctx.fill();
+
+            ctx.fillStyle = '#0f766e';
+            ctx.beginPath();
+            ctx.moveTo(lx - 8, ly + 55);
+            ctx.bezierCurveTo(lx + 48, ly + 40, lx + 62, ly - 20, lx + 20, ly - 40);
+            ctx.bezierCurveTo(lx + 8, ly + 10, lx + 4, ly + 35, lx - 8, ly + 55);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(lx + 20, ly - 20, 12, 34);
+            ctx.fillRect(lx + 9, ly - 9, 34, 12);
+
+            // ตัวอักษร 3D สีเขียวเข้มขอบขาว: โรงพยาบาลโคกศรีสุพรรณ
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.font = "bold 96px 'Prompt', 'Kanit', 'Sarabun', sans-serif";
+            const txt = 'โรงพยาบาลโคกศรีสุพรรณ';
+            ctx.lineWidth = 10;
+            ctx.strokeStyle = '#ffffff';
+            ctx.strokeText(txt, 240, ch / 2 + 4);
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetY = 4;
+            ctx.fillStyle = '#0f5132';
+            ctx.fillText(txt, 240, ch / 2 + 4);
+          });
+          const hospSignMesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(13.5, 2.2),
+            new THREE.MeshBasicMaterial({ map: hospSignTex, transparent: true, side: THREE.DoubleSide })
+          );
+          hospSignMesh.position.set(fCx, 5.15, frontZ + fD + 0.12);
+          facadeGroup.add(hospSignMesh);
+
+          // ป้ายแดงเล็ก "ห้ามจอด ตลอดแนว" ฝั่งขวาของระเบียง (ติดทางเข้าโถงรถ ER)
+          const noParkTex = M.canvasTexture(256, 160, (ctx, cw, ch) => {
+            ctx.fillStyle = '#dc2626';
+            ctx.fillRect(0, 0, cw, ch);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 8;
+            ctx.strokeRect(4, 4, cw - 8, ch - 8);
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = 'bold 42px Prompt, sans-serif';
+            ctx.fillText('ห้ามจอด', cw / 2, ch / 2 - 22);
+            ctx.font = 'bold 34px Prompt, sans-serif';
+            ctx.fillText('ตลอดแนว', cw / 2, ch / 2 + 28);
+          });
+          const noParkSign = M.box(
+            facadeGroup, 1.35, 0.85, 0.08,
+            new THREE.MeshStandardMaterial({ map: noParkTex, roughness: 0.4 }),
+            fCx + fW / 2 - 1.1, 1.35, frontZ + fD + 0.04
+          );
+          addSharpEdges(noParkSign, 0x7f1d1d);
+
+          bGroup.add(facadeGroup);
+
+          // =========================================================================
+          // 2) โซนกรอบสีเหลือง (ฝั่งขวา x = +2.6 .. +14.4): ย่อโถงจอดรถฉุกเฉิน ER ให้พอดีในกรอบ
           // =========================================================================
           const erRampGroup = new THREE.Group();
-          const rW = 16.0;   // แท่นเทียบรถฉุกเฉินกว้าง 16 ม.
-          const rD = 6.2;    // ยื่นออกมาจากหน้าตึก 6.2 ม.
-          const rH = 0.52;   // ยกระดับ 0.52 ม. เสมอระดับพื้นตึก ER สะดวกต่อการเข็นเตียง
+          erRampGroup.position.x = 8.5; // เลื่อนมาอยู่ฝั่งขวาในกรอบสีเหลือง (หน้าเสาธง/ลานจอด)
+          const rW = 8.2;    // ย่อแท่นเทียบรถให้พอดีกรอบ (8.2 ม.)
+          const rD = 5.6;    // ยื่นออกมาจากหน้าตึก 5.6 ม.
+          const rH = 0.52;
           const rampZ = frontZ + rD / 2;
-          const slopeW = 4.2; // ความยาวทางลาดขึ้น-ลง 4.2 ม.
+          const slopeW = 2.4; // ทางลาดขึ้น-ลงฝั่งละ 2.4 ม.
 
-          const driveMat = M.mat(0x334155, { roughness: 0.85 }); // ผิวทางวิ่งคอนกรีต/แอสฟัลต์
-          const curbMat = M.mat(0xfacc15, { roughness: 0.5 });   // ขอบกันทางลาดสีเหลืองเตือนภัย
+          const driveMat = M.mat(0x334155, { roughness: 0.85 });
+          const curbMat = M.mat(0xfacc15, { roughness: 0.5 });
 
-          // 1. แท่นจอดเทียบรถฉุกเฉินตรงกลาง (Raised Platform)
+          // 1. แท่นจอดเทียบรถฉุกเฉิน
           const platMesh = M.box(erRampGroup, rW, rH, rD, driveMat, 0, rH / 2, rampZ);
           addSharpEdges(platMesh, 0x0f172a);
-
-          // ขอบกันตกสีเหลือง-ดำด้านหน้า (Safety Curb)
           const curbSouth = M.box(erRampGroup, rW, 0.22, 0.28, curbMat, 0, rH + 0.11, rampZ + rD / 2 - 0.14);
           addSharpEdges(curbSouth, 0xb45309);
 
-          // 2. ทางลาดขึ้นฝั่งทิศตะวันตก (West Approach Slope)
+          // 2. ทางลาดขึ้นฝั่งทิศตะวันตก
           const z0 = rampZ - rD / 2, z1 = rampZ + rD / 2;
           const wSlopeGeo = new THREE.BufferGeometry();
           const sX0 = -rW / 2, sX1 = -rW / 2 - slopeW;
           const wVerts = new Float32Array([
-            // Top slope quad (2 triangles)
             sX1, 0, z0,   sX0, rH, z0,   sX0, rH, z1,
             sX1, 0, z0,   sX0, rH, z1,   sX1, 0, z1,
-            // Front vertical side
             sX1, 0, z1,   sX0, rH, z1,   sX0, 0, z1,
-            // Rear vertical side
             sX1, 0, z0,   sX0, 0, z0,    sX0, rH, z0,
-            // Bottom base quad
             sX1, 0, z0,   sX1, 0, z1,    sX0, 0, z1,
             sX1, 0, z0,   sX0, 0, z1,    sX0, 0, z0
           ]);
           wSlopeGeo.setAttribute('position', new THREE.BufferAttribute(wVerts, 3));
           wSlopeGeo.computeVertexNormals();
           const wSlopeMesh = new THREE.Mesh(wSlopeGeo, driveMat);
-          wSlopeMesh.castShadow = true;
-          wSlopeMesh.receiveShadow = true;
+          wSlopeMesh.castShadow = true; wSlopeMesh.receiveShadow = true;
           erRampGroup.add(wSlopeMesh);
           addSharpEdges(wSlopeMesh, 0x0f172a);
 
-          // 3. ทางลาดลงฝั่งทิศตะวันออก (East Exit Slope)
+          // 3. ทางลาดลงฝั่งทิศตะวันออก
           const eSlopeGeo = new THREE.BufferGeometry();
           const eX0 = rW / 2, eX1 = rW / 2 + slopeW;
           const eVerts = new Float32Array([
-            // Top slope quad
             eX0, rH, z0,   eX1, 0, z0,   eX1, 0, z1,
             eX0, rH, z0,   eX1, 0, z1,   eX0, rH, z1,
-            // Front vertical side
-            eX0, 0, z1,   eX0, rH, z1,   eX1, 0, z1,
-            // Rear vertical side
-            eX0, rH, z0,  eX0, 0, z0,    eX1, 0, z0,
-            // Bottom base quad
-            eX0, 0, z0,   eX0, 0, z1,    eX1, 0, z1,
-            eX0, 0, z0,   eX1, 0, z1,    eX1, 0, z0
+            eX0, 0, z1,    eX0, rH, z1,  eX1, 0, z1,
+            eX0, rH, z0,   eX0, 0, z0,   eX1, 0, z0,
+            eX0, 0, z0,    eX0, 0, z1,   eX1, 0, z1,
+            eX0, 0, z0,    eX1, 0, z1,   eX1, 0, z0
           ]);
           eSlopeGeo.setAttribute('position', new THREE.BufferAttribute(eVerts, 3));
           eSlopeGeo.computeVertexNormals();
           const eSlopeMesh = new THREE.Mesh(eSlopeGeo, driveMat);
-          eSlopeMesh.castShadow = true;
-          eSlopeMesh.receiveShadow = true;
+          eSlopeMesh.castShadow = true; eSlopeMesh.receiveShadow = true;
           erRampGroup.add(eSlopeMesh);
           addSharpEdges(eSlopeMesh, 0x0f172a);
 
-          // 4. โครงหลังคาคลุมทางรถขึ้นขนาดใหญ่ (Grand Ambulance Canopy)
-          const canopyW = rW + slopeW * 1.5; // คลุมตลอดแนวแท่นและทางลาด (~22 ม.)
-          const canopyD = rD + 0.8;          // ยื่นคลุมแนวทางวิ่งรถทั้งหมด (~7 ม.)
-          const canopyH = 4.6;               // ความสูงโปร่ง 4.6 ม. รถพยาบาลทรงสูงเข้าได้สะดวก
+          // 4. หลังคาคลุมทางรถขึ้นขนาดกะทัดรัด (ครอบคลุม 11.8 ม. ในกรอบสีเหลือง)
+          const canopyW = rW + slopeW * 1.5; // 11.8 ม.
+          const canopyD = rD + 0.6;          // 6.2 ม.
+          const canopyH = 4.4;
           const canopyY = rH + canopyH;
           const canopyMat = M.mat(0xffffff, { roughness: 0.45 });
-          const cRoofMesh = M.box(erRampGroup, canopyW, 0.5, canopyD, canopyMat, 0, canopyY, rampZ);
+          const cRoofMesh = M.box(erRampGroup, canopyW, 0.46, canopyD, canopyMat, 0, canopyY, rampZ);
           addSharpEdges(cRoofMesh, 0x1e293b);
 
-          // ขอบบัวสีแดงฉุกเฉินรอบหลังคา (Red Emergency Fascia Trim)
+          // ขอบบัวสีแดงฉุกเฉินรอบหลังคา
           const trimRed = M.mat(0xdc2626, { roughness: 0.35 });
-          const fTrim = M.box(erRampGroup, canopyW + 0.12, 0.6, 0.12, trimRed, 0, canopyY, rampZ + canopyD / 2 + 0.06);
-          const lTrim = M.box(erRampGroup, 0.12, 0.6, canopyD + 0.12, trimRed, -canopyW / 2 - 0.06, canopyY, rampZ);
-          const rTrim = M.box(erRampGroup, 0.12, 0.6, canopyD + 0.12, trimRed, canopyW / 2 + 0.06, canopyY, rampZ);
+          const fTrim = M.box(erRampGroup, canopyW + 0.12, 0.56, 0.12, trimRed, 0, canopyY, rampZ + canopyD / 2 + 0.06);
+          const lTrim = M.box(erRampGroup, 0.12, 0.56, canopyD + 0.12, trimRed, -canopyW / 2 - 0.06, canopyY, rampZ);
+          const rTrim = M.box(erRampGroup, 0.12, 0.56, canopyD + 0.12, trimRed, canopyW / 2 + 0.06, canopyY, rampZ);
           [fTrim, lTrim, rTrim].forEach(m => addSharpEdges(m, 0x7f1d1d));
 
-          // ป้ายไฟหน้าหลังคา: "🚑 EMERGENCY • แผนกอุบัติเหตุ-ฉุกเฉิน"
+          // ป้ายไฟหน้าหลังคา: "🚑 EMERGENCY • อุบัติเหตุ-ฉุกเฉิน" (ปรับขนาดให้พอดีกับหลังคา)
           const erSignTex = M.canvasTexture(1024, 160, (ctx, cw, ch) => {
             ctx.fillStyle = '#dc2626';
             ctx.fillRect(0, 0, cw, ch);
@@ -483,33 +578,31 @@
             ctx.font = 'bold 62px Prompt, Tahoma, sans-serif';
             ctx.fillText('🚑 EMERGENCY • อุบัติเหตุ-ฉุกเฉิน', cw / 2, ch / 2);
           });
-          const erSignBox = M.box(erRampGroup, 11.5, 0.95, 0.08, new THREE.MeshStandardMaterial({ map: erSignTex, roughness: 0.4 }), 0, canopyY + 0.6, rampZ + canopyD / 2 + 0.08);
+          const erSignBox = M.box(erRampGroup, 8.2, 0.85, 0.08, new THREE.MeshStandardMaterial({ map: erSignTex, roughness: 0.4 }), 0, canopyY + 0.55, rampZ + canopyD / 2 + 0.08);
           addSharpEdges(erSignBox, 0x7f1d1d);
 
-          // 5. เสาเหล็กกล่องค้ำยันโครงสร้างหลังคา (Structural Support Columns)
+          // 5. เสาเหล็กกล่องค้ำยันโครงสร้างหลังคา (3 ต้นพอดีกับขนาดใหม่)
           const pillarMat = M.mat(0x334155, { metalness: 0.6, roughness: 0.25 });
-          const pillarXs = [-canopyW / 2 + 1.2, -canopyW * 0.2, canopyW * 0.2, canopyW / 2 - 1.2];
-          pillarXs.forEach(px => {
-            const pillar = M.box(erRampGroup, 0.42, canopyY, 0.42, pillarMat, px, canopyY / 2, rampZ + canopyD / 2 - 0.35);
+          [-canopyW / 2 + 0.9, 0, canopyW / 2 - 0.9].forEach(px => {
+            const pillar = M.box(erRampGroup, 0.38, canopyY, 0.38, pillarMat, px, canopyY / 2, rampZ + canopyD / 2 - 0.32);
             addSharpEdges(pillar, 0x0f172a);
-            const pBase = M.box(erRampGroup, 0.65, 0.38, 0.65, curbMat, px, 0.19, rampZ + canopyD / 2 - 0.35);
+            const pBase = M.box(erRampGroup, 0.58, 0.34, 0.58, curbMat, px, 0.17, rampZ + canopyD / 2 - 0.32);
             addSharpEdges(pBase, 0xb45309);
           });
 
-          // 6. ประตูเลื่อนอัตโนมัติฉุกเฉินบานคู่ขนาดใหญ่ (Wide Emergency Automatic Sliding Doors)
+          // 6. ประตูเลื่อนอัตโนมัติฉุกเฉินบานคู่
           const erDoorGlass = M.mat(0x0284c7, { roughness: 0.1, metalness: 0.8 });
-          const erDoor = M.box(erRampGroup, 4.6, 2.5, 0.1, erDoorGlass, 0, rH + 1.25, frontZ + 0.06);
+          const erDoor = M.box(erRampGroup, 4.0, 2.4, 0.1, erDoorGlass, 0, rH + 1.2, frontZ + 0.06);
           addSharpEdges(erDoor, 0x0f172a);
-          // กากบาทสีแดงเหนือประตู
-          const crossV = M.box(erRampGroup, 0.38, 1.2, 0.06, M.mat(0xdc2626), 0, rH + 3.15, frontZ + 0.08);
-          const crossH = M.box(erRampGroup, 1.2, 0.38, 0.06, M.mat(0xdc2626), 0, rH + 3.15, frontZ + 0.08);
+          const crossV = M.box(erRampGroup, 0.35, 1.05, 0.06, M.mat(0xdc2626), 0, rH + 3.0, frontZ + 0.08);
+          const crossH = M.box(erRampGroup, 1.05, 0.35, 0.06, M.mat(0xdc2626), 0, rH + 3.0, frontZ + 0.08);
           addSharpEdges(crossV, 0x7f1d1d);
           addSharpEdges(crossH, 0x7f1d1d);
 
-          // 7. รถพยาบาลฉุกเฉินจอดเทียบอยู่บนทางลาดใต้หลังคา (Ambulance Van)
+          // 7. รถพยาบาลฉุกเฉินจอดเทียบอยู่บนทางลาดใต้หลังคา
           const ambulance = M.makeCar(0xffffff, 'van');
-          ambulance.position.set(-2.2, rH + 0.02, rampZ);
-          ambulance.rotation.y = Math.PI / 2; // หันหน้าไปทางทิศตะวันออกตามทิศทางวิ่งออก
+          ambulance.position.set(-0.6, rH + 0.02, rampZ);
+          ambulance.rotation.y = Math.PI / 2;
           erRampGroup.add(ambulance);
 
           bGroup.add(erRampGroup);
