@@ -57,7 +57,7 @@
       pos: V(22.1, 0.4, 1.2),
       cls: 'int-label walkway-tag'
     });
-    L.push({ text: '🏥 กลุ่มงาน PCU (ฝั่งซ้าย)', pos: V(-8.5, 0.45, 8.0), cls: 'int-label zone-pcu' });
+    L.push({ text: '🏥 กลุ่มงานบริการด้านปฐมภูมิและองค์รวม (PCU)', pos: V(-8.5, 0.45, 8.0), cls: 'int-label zone-pcu' });
     L.push({ text: '🚑 อุบัติเหตุฉุกเฉิน ER (ตรงกลาง)', pos: V(6.5, 0.45, 8.0), cls: 'int-label zone-er' });
     L.push({ text: '🩻 ห้อง X-Ray • 🗂️ ห้องบัตร • 🔬 ห้อง LAB (หันหน้าไปทาง ER)', pos: V(33.0, 0.45, 8.0), cls: 'int-label zone-pcu' });
     L.push({ text: '➔ ทางเดินหลักหน้าอาคาร', pos: V(12.5, 0.3, 8.75), cls: 'int-label walkway-tag' });
@@ -573,7 +573,257 @@
       )
     });
 
-    doorWay(-7.1, 7.0, 0, 1.4);
+    // =========================================================================
+    // ทางเข้ากลุ่มงานบริการด้านปฐมภูมิและองค์รวม (PCU Entrance - ตรงตามรูปภาพจริง)
+    // ป้ายไม้สีน้ำตาลอ่อนตัวอักษร 3D สีขาว "กลุ่มงานบริการด้านปฐมภูมิและองค์รวม / Primary and Holistic Services Group"
+    // ประตูบานเลื่อนเปิดโล่งตรงกลาง + บอร์ด "คลินิกส่งเสริมการมีบุตร" (ซ้าย) & "ตารางคลินิกบริการ" (ขวา) + ลูกฟูกขาว
+    // =========================================================================
+
+    // 1. Texture ป้ายไม้สีน้ำตาลอ่อนแนวนอนด้านบน
+    const pcuHeaderSignTex = M.canvasTexture(2048, 320, (c, w, h) => {
+      const bg = c.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#d8a972');
+      bg.addColorStop(0.5, '#c7945b');
+      bg.addColorStop(1, '#b58048');
+      c.fillStyle = bg;
+      c.fillRect(0, 0, w, h);
+
+      // เส้นเสี้ยนไม้แนวนอน
+      c.fillStyle = 'rgba(101, 59, 25, 0.12)';
+      for (let y = 6; y < h; y += 10) c.fillRect(0, y, w, 2);
+      c.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      for (let y = 12; y < h; y += 18) c.fillRect(0, y, w, 1);
+
+      // ขอบบน-ล่างเล็กน้อย
+      c.strokeStyle = 'rgba(78, 42, 15, 0.45)';
+      c.lineWidth = 6;
+      c.strokeRect(3, 3, w - 6, h - 6);
+
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+
+      // บรรทัดบน: กลุ่มงานบริการด้านปฐมภูมิและองค์รวม (3D สีขาวนูนหนา)
+      const t1 = 'กลุ่มงานบริการด้านปฐมภูมิและองค์รวม';
+      c.font = "bold 92px 'Prompt', 'Kanit', 'Sarabun', 'Tahoma', sans-serif";
+      c.fillStyle = 'rgba(78, 42, 15, 0.75)';
+      for (let off = 6; off >= 1; off--) c.fillText(t1, w / 2 + off * 0.4, 118 + off);
+      c.shadowColor = 'rgba(0,0,0,0.35)';
+      c.shadowBlur = 8;
+      c.fillStyle = '#ffffff';
+      c.fillText(t1, w / 2, 118);
+
+      // บรรทัดล่าง: Primary and Holistic Services Group
+      c.shadowBlur = 0;
+      const t2 = 'Primary and Holistic Services Group';
+      c.font = "bold 50px 'Prompt', 'Kanit', 'Montserrat', 'Segoe UI', sans-serif";
+      c.fillStyle = 'rgba(78, 42, 15, 0.75)';
+      for (let off = 4; off >= 1; off--) c.fillText(t2, w / 2 + off * 0.3, 224 + off);
+      c.shadowColor = 'rgba(0,0,0,0.3)';
+      c.shadowBlur = 6;
+      c.fillStyle = '#f8fafc';
+      c.fillText(t2, w / 2, 224);
+    });
+
+    // Helper วาดครึ่งล่างแผงลูกฟูกสีขาว (White Corrugated Panel)
+    function drawWhiteCorrugatedBottom(c, w, yStart, hTotal) {
+      c.fillStyle = '#e2e8f0';
+      c.fillRect(0, yStart, w, hTotal - yStart);
+      const ribW = 14;
+      for (let rx = 0; rx < w; rx += ribW) {
+        c.fillStyle = '#f8fafc';
+        c.fillRect(rx, yStart, ribW - 4, hTotal - yStart);
+        c.fillStyle = '#cbd5e1';
+        c.fillRect(rx + ribW - 4, yStart, 4, hTotal - yStart);
+      }
+      // กรอบคั่นกลางสีขาวเงิน
+      c.fillStyle = '#cbd5e1';
+      c.fillRect(0, yStart - 10, w, 12);
+    }
+
+    // 2. Texture แผงบอร์ดซ้าย: คลินิกส่งเสริมการมีบุตร + ลูกฟูกขาวครึ่งล่าง
+    const pcuLeftBoardTex = M.canvasTexture(768, 768, (c, w, h) => {
+      const splitY = 415;
+      // กรอบนอกสีขาวเงิน
+      c.fillStyle = '#f8fafc';
+      c.fillRect(0, 0, w, h);
+
+      // พื้นหลังบอร์ดครึ่งบน: น้ำเงินเข้ม-ฟ้า
+      const bg = c.createLinearGradient(0, 0, 0, splitY);
+      bg.addColorStop(0, '#0284c7');
+      bg.addColorStop(0.4, '#0369a1');
+      bg.addColorStop(1, '#0f172a');
+      c.fillStyle = bg;
+      c.fillRect(16, 16, w - 32, splitY - 26);
+
+      // แถบรูปภาพทีมแพทย์/พยาบาลด้านบนสุด
+      c.fillStyle = '#e0f2fe';
+      c.fillRect(24, 24, w - 48, 105);
+      // จำลองภาพกลุ่มบุคลากร
+      for (let i = 0; i < 9; i++) {
+        const px = 65 + i * 76;
+        c.fillStyle = '#fde68a';
+        c.beginPath(); c.arc(px, 60, 14, 0, Math.PI * 2); c.fill();
+        c.fillStyle = i % 2 === 0 ? '#ffffff' : '#0284c7';
+        c.fillRect(px - 16, 76, 32, 48);
+      }
+
+      // แถบชื่อ: คลินิกส่งเสริมการมีบุตร
+      c.fillStyle = '#ffffff';
+      c.fillRect(24, 136, w - 48, 52);
+      c.fillStyle = '#0369a1';
+      c.font = "bold 28px 'Prompt', 'Kanit', 'Sarabun', sans-serif";
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      c.fillText('คลินิกส่งเสริมการมีบุตร • กลุ่มงานปฐมภูมิและองค์รวม', w / 2, 162);
+
+      // ข้อความขั้นตอนการรับบริการ
+      c.textAlign = 'left';
+      c.fillStyle = '#38bdf8';
+      c.font = "bold 20px 'Prompt', sans-serif";
+      c.fillText('ขั้นตอนการรับบริการ', 42, 215);
+      c.fillStyle = '#e2e8f0';
+      c.font = "16px 'Prompt', sans-serif";
+      c.fillText('1. ติดต่อยื่นบัตร/ลงทะเบียนหน้าจุดคัดกรอง', 42, 245);
+      c.fillText('2. ซักประวัติ คัดกรอง และให้คำปรึกษา', 42, 272);
+      c.fillText('3. พบแพทย์/พยาบาลวางแผนครอบครัว', 42, 299);
+      c.fillText('4. รับบริการตรวจสุขภาพและคำแนะนำต่อเนื่อง', 42, 326);
+
+      // กล่องขวา: เวลาให้บริการ
+      c.fillStyle = 'rgba(2, 132, 199, 0.45)';
+      c.fillRect(w - 245, 200, 205, 145);
+      c.strokeStyle = '#38bdf8';
+      c.lineWidth = 2;
+      c.strokeRect(w - 245, 200, 205, 145);
+      c.fillStyle = '#fef08a';
+      c.font = "bold 18px 'Prompt', sans-serif";
+      c.fillText('เปิดให้บริการทุกวัน', w - 230, 230);
+      c.fillStyle = '#ffffff';
+      c.font = "16px 'Prompt', sans-serif";
+      c.fillText('จันทร์ - ศุกร์', w - 230, 260);
+      c.fillText('08.30 - 16.00 น.', w - 230, 288);
+
+      // ครึ่งล่าง: ลูกฟูกสีขาว
+      drawWhiteCorrugatedBottom(c, w, splitY, h - 16);
+      c.strokeStyle = '#cbd5e1';
+      c.lineWidth = 14;
+      c.strokeRect(7, 7, w - 14, h - 14);
+    });
+
+    // 3. Texture แผงบอร์ดขวา: ตารางคลินิกบริการ + ลูกฟูกขาวครึ่งล่าง
+    const pcuRightBoardTex = M.canvasTexture(768, 768, (c, w, h) => {
+      const splitY = 415;
+      c.fillStyle = '#f8fafc';
+      c.fillRect(0, 0, w, h);
+
+      // พื้นบอร์ดสีขาว-เขียวอ่อน
+      c.fillStyle = '#f0fdf4';
+      c.fillRect(16, 16, w - 32, splitY - 26);
+      c.strokeStyle = '#16a34a';
+      c.lineWidth = 4;
+      c.strokeRect(20, 20, w - 40, splitY - 34);
+
+      c.fillStyle = '#15803d';
+      c.fillRect(20, 20, w - 40, 52);
+      c.fillStyle = '#ffffff';
+      c.font = "bold 28px 'Prompt', 'Kanit', 'Sarabun', sans-serif";
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      c.fillText('ตารางคลินิกบริการ • รพ.โคกศรีสุพรรณ', w / 2, 46);
+
+      // ตารางจำลอง 5 แถว
+      const days = [
+        ['จันทร์', 'คลินิกเบาหวาน / ความดันโลหิตสูง', '08.30 - 12.00 น.'],
+        ['อังคาร', 'คลินิกฝากครรภ์ (ANC) / ส่งเสริมมีบุตร', '08.30 - 12.00 น.'],
+        ['พุธ', 'คลินิกสุขภาพเด็กดี (WBC) / วัคซีน', '08.30 - 12.00 น.'],
+        ['พฤหัสบดี', 'คลินิกโรคเรื้อรัง (NCDs) / เยี่ยมบ้าน', '08.30 - 16.00 น.'],
+        ['ศุกร์', 'คลินิกคัดกรองมะเร็ง / ให้คำปรึกษา', '08.30 - 16.00 น.']
+      ];
+      days.forEach(([d, desc, tm], idx) => {
+        const ry = 92 + idx * 54;
+        c.fillStyle = idx % 2 === 0 ? '#ffffff' : '#dcfce7';
+        c.fillRect(34, ry, w - 68, 46);
+        c.strokeStyle = '#86efac';
+        c.lineWidth = 1.5;
+        c.strokeRect(34, ry, w - 68, 46);
+
+        c.textAlign = 'left';
+        c.fillStyle = '#166534';
+        c.font = "bold 18px 'Prompt', sans-serif";
+        c.fillText(d, 48, ry + 23);
+
+        c.fillStyle = '#1e293b';
+        c.font = "17px 'Prompt', sans-serif";
+        c.fillText(desc, 155, ry + 23);
+
+        c.textAlign = 'right';
+        c.fillStyle = '#0369a1';
+        c.font = "bold 16px 'Prompt', sans-serif";
+        c.fillText(tm, w - 48, ry + 23);
+      });
+
+      // ครึ่งล่าง: ลูกฟูกสีขาว
+      drawWhiteCorrugatedBottom(c, w, splitY, h - 16);
+      c.strokeStyle = '#cbd5e1';
+      c.lineWidth = 14;
+      c.strokeRect(7, 7, w - 14, h - 14);
+    });
+
+    // 4. ประกอบโครงสร้าง 3D ทางเข้า PCU (x = -7.1, z = 7.0)
+    const pcuEntX = -7.1;
+    const pcuEntZ = 7.0;
+    const pcuWhiteMat = M.mat(0xf8fafc, { roughness: 0.25, metalness: 0.1 });
+    const pcuHeaderMat = new THREE.MeshStandardMaterial({ map: pcuHeaderSignTex, roughness: 0.45 });
+    const pcuHeaderWoodMat = M.mat(0xb58048, { roughness: 0.5 });
+    const pcuLeftBoardMat = new THREE.MeshStandardMaterial({ map: pcuLeftBoardTex, roughness: 0.4 });
+    const pcuRightBoardMat = new THREE.MeshStandardMaterial({ map: pcuRightBoardTex, roughness: 0.4 });
+    const pcuGlassMat = M.glass(0xdbeafe, 0.35);
+
+    // ธรณีประตูและรางเลื่อนพื้น
+    M.box(g, 1.88, 0.03, 0.28, M.mat(0x94a3b8), pcuEntX, 0.015, pcuEntZ);
+
+    // เสาขอบประตูสีขาว 2 ข้าง (x = -8.0 และ x = -6.2)
+    M.box(g, 0.08, WH, 0.26, pcuWhiteMat, -8.0, WH / 2, pcuEntZ);
+    M.box(g, 0.08, WH, 0.26, pcuWhiteMat, -6.2, WH / 2, pcuEntZ);
+
+    // คานรางประตูสีขาวเหนือช่องประตู
+    M.box(g, 2.00, 0.10, 0.28, pcuWhiteMat, pcuEntX, WH + 0.02, pcuEntZ);
+
+    // บานประตูกระจกกรอบสีขาว เปิดค้างไว้ด้านซ้ายและขวา (เหลือช่องตรงกลางเดินผ่านได้สะดวก)
+    [-7.82, -6.38].forEach((dx) => {
+      M.box(g, 0.42, WH - 0.04, 0.04, pcuGlassMat, dx, (WH - 0.04) / 2 + 0.02, pcuEntZ + 0.06);
+      M.box(g, 0.44, 0.05, 0.05, pcuWhiteMat, dx, WH - 0.03, pcuEntZ + 0.06);
+      M.box(g, 0.44, 0.05, 0.05, pcuWhiteMat, dx, 0.045, pcuEntZ + 0.06);
+      M.box(g, 0.05, WH - 0.04, 0.05, pcuWhiteMat, dx - 0.20, (WH - 0.04) / 2 + 0.02, pcuEntZ + 0.06);
+      M.box(g, 0.05, WH - 0.04, 0.05, pcuWhiteMat, dx + 0.20, (WH - 0.04) / 2 + 0.02, pcuEntZ + 0.06);
+    });
+
+    // แผงบอร์ดข้างประตูฝั่งซ้าย (x = -8.82, ติดหน้าผนัง z = 7.14)
+    const pcuLeftBoard = new THREE.Mesh(
+      new THREE.BoxGeometry(1.56, WH, 0.04),
+      [pcuWhiteMat, pcuWhiteMat, pcuWhiteMat, pcuWhiteMat, pcuLeftBoardMat, pcuWhiteMat]
+    );
+    pcuLeftBoard.position.set(-8.82, WH / 2, pcuEntZ + 0.14);
+    g.add(pcuLeftBoard);
+
+    // แผงบอร์ดข้างประตูฝั่งขวา (x = -5.38, ติดหน้าผนัง z = 7.14)
+    const pcuRightBoard = new THREE.Mesh(
+      new THREE.BoxGeometry(1.56, WH, 0.04),
+      [pcuWhiteMat, pcuWhiteMat, pcuWhiteMat, pcuWhiteMat, pcuRightBoardMat, pcuWhiteMat]
+    );
+    pcuRightBoard.position.set(-5.38, WH / 2, pcuEntZ + 0.14);
+    g.add(pcuRightBoard);
+
+    // กล่องรับความคิดเห็นสีแดงด้านซ้ายสุดของบอร์ด (เหมือนในรูปจริง)
+    const suggestionBox = M.box(g, 0.28, 0.22, 0.14, M.mat(0xdc2626), -9.82, 0.95, pcuEntZ + 0.18);
+    addEdges(suggestionBox, 0x7f1d1d);
+
+    // ป้ายไม้สีน้ำตาลอ่อนขนาดใหญ่ด้านบนเหนือประตูและบอร์ดทั้ง 2 ข้าง
+    const pcuSignMesh = M.box(
+      g, 5.10, 0.64, 0.16,
+      [pcuHeaderWoodMat, pcuHeaderWoodMat, pcuHeaderWoodMat, pcuHeaderWoodMat, pcuHeaderMat, pcuHeaderMat],
+      pcuEntX, WH + 0.36, pcuEntZ + 0.08
+    );
+    addEdges(pcuSignMesh, 0x78350f);
     workDesk({ x: -5.4, z: 6.3, w: 1.0, d: 0.6, rotY: 0, hasPC: false, label: 'โต๊ะ' });
 
     // โซนขวาของ PCU
