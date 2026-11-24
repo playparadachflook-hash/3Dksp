@@ -655,22 +655,235 @@
     });
 
     L.push({ text: '➔ เส้นทางเดินภายใน ER', pos: V(5.8, 0.35, -0.7), cls: 'int-label walkway-tag' });
-    doorWay(14.0, -0.7, Math.PI / 2, 2.1);
     doorWay(0.4, 7.0, 0, 1.4);
 
-    const signBoardMat = new THREE.MeshStandardMaterial({ map: erDeptSignTexture(), roughness: 0.4 });
-    const sideSignMat = M.mat(0x991b1b);
+    // =========================================================================
+    // ทางเข้าหน้าแผนกอุบัติเหตุ - ฉุกเฉิน (ER Entrance - ตรงตามรูปภาพจริง)
+    // ประตูบานเลื่อนกระจกฝ้าอัตโนมัติกรอบขาว (E ♥ ER | GENCY + ECG + ป้ายกดกริ่ง)
+    // พร้อมป้ายไม้สีน้ำตาลเข้มตัวอักษร 3D สีแดง "แผนกอุบัติเหตุ - ฉุกเฉิน" ด้านบน
+    // =========================================================================
+
+    // 1. Texture ป้ายไม้สีน้ำตาลเข้ม + ตัวอักษร 3D สีแดง "แผนกอุบัติเหตุ - ฉุกเฉิน"
+    const erHeaderSignTex = M.canvasTexture(2048, 384, (c, w, h) => {
+      const bg = c.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#3e2315');
+      bg.addColorStop(0.5, '#2f190e');
+      bg.addColorStop(1, '#231209');
+      c.fillStyle = bg;
+      c.fillRect(0, 0, w, h);
+
+      // รอยต่อแผ่นไม้แนวตั้ง & ลายไม้บางๆ
+      c.fillStyle = 'rgba(0, 0, 0, 0.38)';
+      [w * 0.33, w * 0.67].forEach((px) => c.fillRect(px, 0, 4, h));
+      c.fillStyle = 'rgba(255, 255, 255, 0.03)';
+      for (let y = 10; y < h; y += 14) c.fillRect(0, y, w, 2);
+
+      // ตัวอักษร 3D สีแดงสดนูนหนา: แผนกอุบัติเหตุ - ฉุกเฉิน
+      const title = 'แผนกอุบัติเหตุ - ฉุกเฉิน';
+      c.font = "bold 148px 'Prompt', 'Kanit', 'Sarabun', 'Tahoma', sans-serif";
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+
+      // ความหนามิติ 3D (Extrusion)
+      for (let off = 10; off >= 1; off--) {
+        c.fillStyle = off > 5 ? '#450a0a' : '#7f1d1d';
+        c.fillText(title, w / 2 + off * 0.6, h / 2 + off);
+      }
+
+      // ตัวอักษรหน้าสีแดงสดเงางาม
+      const txtGrd = c.createLinearGradient(0, h * 0.25, 0, h * 0.75);
+      txtGrd.addColorStop(0, '#ef4444');
+      txtGrd.addColorStop(0.5, '#dc2626');
+      txtGrd.addColorStop(1, '#b91c1c');
+      c.shadowColor = 'rgba(0, 0, 0, 0.55)';
+      c.shadowBlur = 12;
+      c.shadowOffsetY = 5;
+      c.fillStyle = txtGrd;
+      c.fillText(title, w / 2, h / 2);
+    });
+
+    // Helper วาดเส้นกราฟชีพจร ECG สีแดงบนบานประตูกระจกฝ้า
+    function drawEcgLine(c, xStart, xEnd, yBase, scale = 1) {
+      c.save();
+      c.strokeStyle = '#b91c1c';
+      c.lineWidth = 4 * scale;
+      c.lineCap = 'round';
+      c.lineJoin = 'round';
+      c.beginPath();
+      const span = xEnd - xStart;
+      const pts = [
+        [0.00, 0], [0.10, 0], [0.14, -10], [0.18, 0],
+        [0.24, 0], [0.27, 14], [0.31, -48], [0.35, 26], [0.39, 0],
+        [0.46, 0], [0.51, -14], [0.56, 0],
+        [0.64, 0], [0.68, -10], [0.72, 0],
+        [0.78, 0], [0.81, 14], [0.85, -44], [0.89, 24], [0.93, 0], [1.00, 0]
+      ];
+      pts.forEach(([px, py], i) => {
+        const x = xStart + px * span;
+        const y = yBase + py * scale;
+        if (i === 0) c.moveTo(x, y);
+        else c.lineTo(x, y);
+      });
+      c.stroke();
+      c.restore();
+    }
+
+    // 2. Texture บานประตูกระจกฝ้าฝั่งซ้าย (E ♥ ER)
+    const erDoorLeftTex = M.canvasTexture(512, 768, (c, w, h) => {
+      const bg = c.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, 'rgba(226, 232, 240, 0.88)');
+      bg.addColorStop(0.5, 'rgba(212, 220, 228, 0.82)');
+      bg.addColorStop(1, 'rgba(203, 213, 225, 0.86)');
+      c.fillStyle = bg;
+      c.fillRect(0, 0, w, h);
+
+      // ข้อความแจ้งเตือนด้านบนสีแดง
+      c.fillStyle = '#b91c1c';
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      c.font = "bold 32px 'Prompt', 'Kanit', 'Sarabun', sans-serif";
+      c.fillText('ประตูล็อคอัตโนมัติ', w / 2, 115);
+      c.fillText('ติดต่อเจ้าหน้าที่', w / 2, 160);
+      c.fillText('กรุณากดกริ่ง', w / 2, 205);
+
+      // โลโก้ E [♥] ER สีแดงเข้มขนาดใหญ่
+      const cy = 435;
+      c.fillStyle = '#b91c1c';
+      c.font = "bold 148px 'Prompt', 'Montserrat', 'Arial', sans-serif";
+      c.fillText('E', 82, cy);
+
+      // ไอคอนรูปหัวใจ + เส้นชีพจรตรงกลาง
+      const hx = 198, hy = cy + 4;
+      c.strokeStyle = '#b91c1c';
+      c.lineWidth = 10;
+      c.beginPath();
+      c.moveTo(hx, hy + 38);
+      c.bezierCurveTo(hx - 62, hy - 2, hx - 58, hy - 54, hx - 26, hy - 54);
+      c.bezierCurveTo(hx - 8, hy - 54, hx, hy - 36, hx, hy - 30);
+      c.bezierCurveTo(hx, hy - 36, hx + 8, hy - 54, hx + 26, hy - 54);
+      c.bezierCurveTo(hx + 58, hy - 54, hx + 62, hy - 2, hx, hy + 38);
+      c.closePath();
+      c.stroke();
+
+      // เส้นชีพจรภายในหัวใจ
+      c.lineWidth = 5;
+      c.beginPath();
+      c.moveTo(hx - 40, hy - 8);
+      c.lineTo(hx - 18, hy - 8);
+      c.lineTo(hx - 10, hy - 26);
+      c.lineTo(hx, hy + 12);
+      c.lineTo(hx + 10, hy - 20);
+      c.lineTo(hx + 18, hy - 8);
+      c.lineTo(hx + 40, hy - 8);
+      c.stroke();
+
+      c.font = "bold 116px 'Prompt', 'Montserrat', 'Arial', sans-serif";
+      c.fillText('ER', 370, cy + 8);
+
+      // เส้นชีพจร ECG ด้านล่าง
+      drawEcgLine(c, 24, w - 24, 548, 0.95);
+    });
+
+    // 3. Texture บานประตูกระจกฝ้าฝั่งขวา (GENCY)
+    const erDoorRightTex = M.canvasTexture(512, 768, (c, w, h) => {
+      const bg = c.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, 'rgba(226, 232, 240, 0.88)');
+      bg.addColorStop(0.5, 'rgba(212, 220, 228, 0.82)');
+      bg.addColorStop(1, 'rgba(203, 213, 225, 0.86)');
+      c.fillStyle = bg;
+      c.fillRect(0, 0, w, h);
+
+      // ข้อความแจ้งเตือนด้านบนสีแดง
+      c.fillStyle = '#b91c1c';
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      c.font = "bold 32px 'Prompt', 'Kanit', 'Sarabun', sans-serif";
+      c.fillText('ประตูล็อคอัตโนมัติ', w / 2, 115);
+      c.fillText('ติดต่อเจ้าหน้าที่', w / 2, 160);
+      c.fillText('กรุณากดกริ่ง', w / 2, 205);
+
+      // ข้อความเล็กเหนือ GENCY
+      c.font = "bold 26px 'Prompt', 'Kanit', 'Sarabun', sans-serif";
+      c.fillText('แผนกอุบัติเหตุ-ฉุกเฉิน', w / 2 + 45, 365);
+
+      // ตัวอักษร GENCY สีแดงขนาดใหญ่
+      c.font = "bold 112px 'Prompt', 'Montserrat', 'Arial', sans-serif";
+      c.fillText('GENCY', w / 2, 443);
+
+      // เส้นชีพจร ECG ด้านล่าง
+      drawEcgLine(c, 24, w - 24, 548, 0.95);
+    });
+
+    // 4. ประกอบโครงสร้าง 3D ประตูเลื่อนอัตโนมัติ & ป้ายไม้ 3D ด้านหน้า ER (x = 14.0, z = -0.7)
+    const erEntX = 14.0;
+    const erEntZ = -0.7;
+    const whiteFrameMat = M.mat(0xf8fafc, { roughness: 0.25, metalness: 0.1 });
+    const doorLeftMat = new THREE.MeshStandardMaterial({
+      map: erDoorLeftTex,
+      transparent: true,
+      opacity: 0.92,
+      roughness: 0.35
+    });
+    const doorRightMat = new THREE.MeshStandardMaterial({
+      map: erDoorRightTex,
+      transparent: true,
+      opacity: 0.92,
+      roughness: 0.35
+    });
+    const erHeaderMat = new THREE.MeshStandardMaterial({ map: erHeaderSignTex, roughness: 0.45 });
+    const erHeaderWoodMat = M.mat(0x2f190e, { roughness: 0.5 });
+
+    // ธรณีประตูและรางเลื่อนพื้นอะลูมิเนียม
+    M.box(g, 0.26, 0.03, 2.24, M.mat(0x94a3b8), erEntX, 0.015, erEntZ);
+
+    // เสาขอบประตูสีขาว 2 ข้าง (z = -1.80 และ z = +0.40)
+    M.box(g, 0.26, WH, 0.08, whiteFrameMat, erEntX, WH / 2, -1.80);
+    M.box(g, 0.26, WH, 0.08, whiteFrameMat, erEntX, WH / 2, 0.40);
+
+    // คานรางประตูเลื่อนอัตโนมัติสีขาวด้านบน (พาดยาวครอบคลุมบานเลื่อนทั้งซ้าย-ขวา)
+    M.box(g, 0.28, 0.16, 4.10, whiteFrameMat, erEntX, WH + 0.06, erEntZ);
+    // กล่องเซ็นเซอร์ประตูอัตโนมัติสีดำตรงกลาง
+    M.box(g, 0.32, 0.06, 0.28, M.mat(0x0f172a), erEntX, WH + 0.06, erEntZ);
+
+    // Helper สร้างบานประตูเลื่อนกระจกฝ้ากรอบขาว
+    function buildErSlidingLeaf(leafZ, glassMat) {
+      const leafW = 1.12;
+      const leafH = WH - 0.04;
+      const leafX = erEntX + 0.16; // วางหน้าผนังเล็กน้อยตามรางเลื่อนอัตโนมัติ
+      const ft = 0.055; // ความหนากรอบอะลูมิเนียมสีขาว
+
+      // กระจกฝ้าพร้อมสติกเกอร์ (หันหน้าออกทาง +X)
+      const glassPane = new THREE.Mesh(
+        new THREE.BoxGeometry(0.025, leafH - ft * 2, leafW - ft * 2),
+        [glassMat, glassMat, whiteFrameMat, whiteFrameMat, whiteFrameMat, whiteFrameMat]
+      );
+      glassPane.position.set(leafX, leafH / 2 + 0.02, leafZ);
+      g.add(glassPane);
+
+      // กรอบอะลูมิเนียมสีขาว 4 ด้าน
+      M.box(g, 0.045, ft, leafW, whiteFrameMat, leafX, leafH + 0.02 - ft / 2, leafZ); // บน
+      M.box(g, 0.045, ft, leafW, whiteFrameMat, leafX, 0.02 + ft / 2, leafZ);         // ล่าง
+      M.box(g, 0.045, leafH, ft, whiteFrameMat, leafX, leafH / 2 + 0.02, leafZ + leafW / 2 - ft / 2); // ขอบซ้าย
+      M.box(g, 0.045, leafH, ft, whiteFrameMat, leafX, leafH / 2 + 0.02, leafZ - leafW / 2 + ft / 2); // ขอบขวา
+    }
+
+    // บานประตูซ้าย (ฝั่ง +Z เปิดแยกออกทางซ้าย เหลือช่องกลางกว้างเดินเข้า-ออกสะดวก)
+    buildErSlidingLeaf(0.56, doorLeftMat);
+    // บานประตูขวา (ฝั่ง -Z เปิดแยกออกทางขวา)
+    buildErSlidingLeaf(-1.96, doorRightMat);
+
+    // ป้ายไม้สีน้ำตาลเข้มตัวอักษร 3D สีแดง "แผนกอุบัติเหตุ - ฉุกเฉิน" เหนือคานรางเลื่อนประตู
     const erSignMesh = M.box(
-      g, 0.16, 0.78, 3.4,
-      [signBoardMat, signBoardMat, sideSignMat, sideSignMat, sideSignMat, sideSignMat],
-      14.0, 2.25, -0.7
+      g, 0.16, 0.64, 3.85,
+      [erHeaderMat, erHeaderMat, erHeaderWoodMat, erHeaderWoodMat, erHeaderWoodMat, erHeaderWoodMat],
+      erEntX, WH + 0.46, erEntZ
     );
-    addEdges(erSignMesh, 0xfef08a);
-    M.box(g, 0.2, 0.65, 0.2, M.mat(0x334155), 14.0, 1.85, -2.25);
-    M.box(g, 0.2, 0.65, 0.2, M.mat(0x334155), 14.0, 1.85, 0.85);
+    addEdges(erSignMesh, 0x1e110b);
+
+    // ป้าย Tag 3D ด้านบน
     L.push({
-      text: '🚑 ป้ายเชื่อมทางเดิน: แผนกอุบัติเหตุฉุกเฉิน',
-      pos: V(14.0, 2.95, -0.7),
+      text: '🚑 แผนกอุบัติเหตุ - ฉุกเฉิน (ER)',
+      pos: V(erEntX, WH + 0.98, erEntZ),
       cls: 'int-label er-sign'
     });
 
