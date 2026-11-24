@@ -1041,48 +1041,646 @@
       }
     );
 
-    // เคาน์เตอร์รับลงทะเบียนด้านหน้า (Front Registration Counter หันหน้าไปทาง ER)
-    const frontRegCounter = rBox(4.8, 0.88, 0.78, M.mat(0xfef08a), 38.4, 0.44, 7.65);
-    addEdges(frontRegCounter, 0xca8a04);
-    rBox(4.9, 0.05, 0.86, M.mat(0xffffff), 38.4, 0.9, 7.65);
-    rBox(4.6, 0.42, 0.04, M.glass(0xdbeafe, 0.35), 38.4, 1.13, 7.98);
+    // =========================================================================
+    // เคาน์เตอร์จุดคัดกรอง (Screening Point Counter - ตรงตามรูปภาพจริง 100%)
+    // โครงสร้างระแนงไม้แนวตั้งสีธรรมชาติ ขอบโค้งมน + ป้ายอักษร 3D "จุดคัดกรอง / SCREENING POINT"
+    // ท็อปเคาน์เตอร์สีขาวหนาโค้งมน + แผงกั้นอะคริลิกใสพร้อมโปสเตอร์ พ.ร.บ.รถ และคำแนะนำ
+    // ฉากหลังไม้สีเข้มพร้อมโลโก้โรงพยาบาลโคกศรีสุพรรณ ตัวอักษรเรืองแสง และลายกิ่งไม้
+    // =========================================================================
+
+    // 1. Texture ลายระแนงไม้แนวตั้งสีธรรมชาติ + ตัวอักษร 3D "จุดคัดกรอง / SCREENING POINT"
+    const screeningWoodSlatTex = M.canvasTexture(2048, 512, (c, w, h) => {
+      const bg = c.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#dfae79');
+      bg.addColorStop(0.5, '#ce9864');
+      bg.addColorStop(1, '#be8752');
+      c.fillStyle = bg;
+      c.fillRect(0, 0, w, h);
+
+      // ระแนงไม้แนวตั้งสีธรรมชาติ (Fluted Slats)
+      const slatW = 28;
+      const numSlats = Math.ceil(w / slatW);
+      for (let i = 0; i < numSlats; i++) {
+        const sx = i * slatW;
+        const slatGrd = c.createLinearGradient(sx, 0, sx + slatW, 0);
+        slatGrd.addColorStop(0, '#edd1aa');
+        slatGrd.addColorStop(0.25, '#dcb080');
+        slatGrd.addColorStop(0.85, '#c5925e');
+        slatGrd.addColorStop(1.0, '#7c4c23');
+        c.fillStyle = slatGrd;
+        c.fillRect(sx, 0, slatW - 4, h);
+
+        c.fillStyle = '#653b19';
+        c.fillRect(sx + slatW - 4, 0, 4, h);
+      }
+
+      // เส้นใยไม้บางๆ
+      c.fillStyle = 'rgba(255, 255, 255, 0.05)';
+      for (let y = 8; y < h; y += 16) {
+        c.fillRect(0, y, w, 2);
+      }
+
+      // ตัวอักษร 3D กลางเคาน์เตอร์: จุดคัดกรอง / SCREENING POINT
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+
+      // บรรทัดที่ 1: จุดคัดกรอง
+      const text1 = 'จุดคัดกรอง';
+      c.font = "bold 96px 'Prompt', 'Kanit', 'Sarabun', 'Tahoma', sans-serif";
+      c.fillStyle = 'rgba(78, 42, 15, 0.9)';
+      for (let off = 7; off >= 1; off--) {
+        c.fillText(text1, w / 2, 205 + off);
+      }
+      c.shadowColor = 'rgba(0, 0, 0, 0.45)';
+      c.shadowBlur = 10;
+      c.shadowOffsetY = 4;
+      c.fillStyle = '#ffffff';
+      c.fillText(text1, w / 2, 205);
+
+      c.shadowColor = 'transparent';
+      c.shadowBlur = 0;
+      c.shadowOffsetY = 0;
+
+      // บรรทัดที่ 2: SCREENING POINT
+      const text2 = 'S C R E E N I N G   P O I N T';
+      c.font = "bold 44px 'Prompt', 'Kanit', 'Montserrat', 'Segoe UI', sans-serif";
+      c.fillStyle = 'rgba(78, 42, 15, 0.85)';
+      for (let off = 5; off >= 1; off--) {
+        c.fillText(text2, w / 2, 320 + off);
+      }
+      c.shadowColor = 'rgba(0, 0, 0, 0.4)';
+      c.shadowBlur = 8;
+      c.shadowOffsetY = 3;
+      c.fillStyle = '#f8fafc';
+      c.fillText(text2, w / 2, 320);
+    });
+
+    // 2. Texture แผงกั้นอะคริลิกใส พร้อมโปสเตอร์และคำแนะนำ
+    const sneezeGuardTex = M.canvasTexture(1024, 512, (c, w, h) => {
+      c.clearRect(0, 0, w, h);
+
+      // เส้นขอบสะท้อนแสงกระจก
+      c.strokeStyle = 'rgba(255, 255, 255, 0.28)';
+      c.lineWidth = 4;
+      c.strokeRect(6, 6, w - 12, h - 12);
+
+      // ช่องส่งเอกสารตรงกลาง
+      c.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+      c.lineWidth = 3;
+      c.beginPath();
+      c.arc(w / 2, h - 10, 80, Math.PI, 0, false);
+      c.stroke();
+
+      // โปสเตอร์ 1: บนซ้าย - คำแนะนำผู้รับบริการ & QR Code
+      const p1x = 55, p1y = 35, p1w = 165, p1h = 205;
+      c.fillStyle = '#ffffff';
+      c.fillRect(p1x, p1y, p1w, p1h);
+      c.strokeStyle = '#0284c7';
+      c.lineWidth = 2;
+      c.strokeRect(p1x, p1y, p1w, p1h);
+
+      c.fillStyle = '#0284c7';
+      c.fillRect(p1x, p1y, p1w, 36);
+      c.fillStyle = '#ffffff';
+      c.font = 'bold 13px Prompt, sans-serif';
+      c.textAlign = 'center';
+      c.fillText('รพ.โคกศรีสุพรรณ', p1x + p1w / 2, p1y + 22);
+
+      // ไอคอนแพทย์
+      c.fillStyle = '#38bdf8';
+      c.beginPath();
+      c.arc(p1x + 35, p1y + 68, 16, 0, Math.PI * 2);
+      c.fill();
+      c.fillStyle = '#ffffff';
+      c.font = 'bold 16px sans-serif';
+      c.fillText('👨‍⚕️', p1x + 35, p1y + 74);
+
+      c.fillStyle = '#334155';
+      c.font = 'bold 10px Prompt, sans-serif';
+      c.textAlign = 'left';
+      c.fillText('คำแนะนำผู้รับบริการ', p1x + 60, p1y + 64);
+      c.font = '9px Prompt, sans-serif';
+      c.fillText('กรุณาเตรียมบัตร ปชช.', p1x + 60, p1y + 78);
+      c.fillText('เพื่อความสะดวกรวดเร็ว', p1x + 14, p1y + 105);
+      c.fillText('ในการตรวจสอบสิทธิ', p1x + 14, p1y + 120);
+
+      // QR Code จำลอง
+      c.fillStyle = '#0f172a';
+      c.fillRect(p1x + p1w - 52, p1y + p1h - 52, 42, 42);
+      c.fillStyle = '#ffffff';
+      c.fillRect(p1x + p1w - 48, p1y + p1h - 48, 12, 12);
+      c.fillRect(p1x + p1w - 26, p1y + p1h - 48, 12, 12);
+      c.fillRect(p1x + p1w - 48, p1y + p1h - 26, 12, 12);
+      c.fillStyle = '#0f172a';
+      c.fillRect(p1x + p1w - 44, p1y + p1h - 44, 4, 4);
+      c.fillRect(p1x + p1w - 22, p1y + p1h - 44, 4, 4);
+      c.fillRect(p1x + p1w - 44, p1y + p1h - 22, 4, 4);
+
+      // โปสเตอร์ 2: ล่างซ้าย - ตรวจสอบความคุ้มครอง พ.ร.บ.รถ
+      const p2x = 55, p2y = 255, p2w = 165, p2h = 215;
+      c.fillStyle = '#ffffff';
+      c.fillRect(p2x, p2y, p2w, p2h);
+      c.strokeStyle = '#0284c7';
+      c.lineWidth = 2;
+      c.strokeRect(p2x, p2y, p2w, p2h);
+
+      c.fillStyle = '#0284c7';
+      c.fillRect(p2x, p2y, p2w, 42);
+      c.fillStyle = '#ffffff';
+      c.font = 'bold 12px Prompt, sans-serif';
+      c.textAlign = 'center';
+      c.fillText('ตรวจสอบความคุ้มครอง', p2x + p2w / 2, p2y + 17);
+      c.font = 'bold 16px Prompt, sans-serif';
+      c.fillText('พ.ร.บ. รถ', p2x + p2w / 2, p2y + 34);
+
+      // Big QR Code
+      const qrx = p2x + 38, qry = p2y + 54, qrs = 88;
+      c.fillStyle = '#0f172a';
+      c.fillRect(qrx, qry, qrs, qrs);
+      c.fillStyle = '#ffffff';
+      c.fillRect(qrx + 6, qry + 6, 26, 26);
+      c.fillRect(qrx + qrs - 32, qry + 6, 26, 26);
+      c.fillRect(qrx + 6, qry + qrs - 32, 26, 26);
+      c.fillStyle = '#0f172a';
+      c.fillRect(qrx + 12, qry + 12, 14, 14);
+      c.fillRect(qrx + qrs - 26, qry + 12, 14, 14);
+      c.fillRect(qrx + 12, qry + qrs - 26, 14, 14);
+      c.fillStyle = '#ffffff';
+      c.fillRect(qrx + 38, qry + 14, 10, 10);
+      c.fillRect(qrx + 14, qry + 38, 10, 10);
+      c.fillRect(qrx + 42, qry + 42, 16, 16);
+      c.fillRect(qrx + qrs - 28, qry + 40, 12, 12);
+      c.fillRect(qrx + 40, qry + qrs - 26, 14, 14);
+
+      c.fillStyle = '#0369a1';
+      c.font = 'bold 11px Prompt, sans-serif';
+      c.fillText('สแกน QR Code ตรวจสอบสิทธิ', p2x + p2w / 2, p2y + 165);
+      c.fillStyle = '#64748b';
+      c.font = '9px Prompt, sans-serif';
+      c.fillText('กองทุนทดแทนผู้ประสบภัย', p2x + p2w / 2, p2y + 185);
+
+      // แถบแจ้งเตือนคิวตรงกลาง
+      c.fillStyle = '#dc2626';
+      c.font = 'bold 16px Prompt, sans-serif';
+      c.textAlign = 'center';
+      c.fillText('ผู้รับบริการ กรุณารอเรียกคิว ณ จุดนี้', w / 2, h - 35);
+    });
+
+    // 3. Texture ฉากหลังไม้สีเข้ม Walnut พร้อมโลโก้โรงพยาบาล ตัวอักษรเรืองแสง และลายกิ่งไม้
+    const screeningBackdropTex = M.canvasTexture(2048, 1024, (c, w, h) => {
+      const bg = c.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#2b1a11');
+      bg.addColorStop(0.35, '#1e110b');
+      bg.addColorStop(0.7, '#24150d');
+      bg.addColorStop(1, '#190d07');
+      c.fillStyle = bg;
+      c.fillRect(0, 0, w, h);
+
+      // แผ่นรอยต่อผนังไม้ (Vertical Wood Panels)
+      const panelW = 340;
+      for (let px = panelW; px < w; px += panelW) {
+        c.fillStyle = 'rgba(0, 0, 0, 0.45)';
+        c.fillRect(px - 2, 0, 4, h);
+        c.fillStyle = 'rgba(255, 255, 255, 0.04)';
+        c.fillRect(px + 2, 0, 1, h);
+      }
+
+      // ลายเสี้ยนไม้
+      c.fillStyle = 'rgba(0, 0, 0, 0.12)';
+      for (let y = 12; y < h; y += 16) {
+        c.fillRect(0, y, w, 2);
+      }
+
+      // โลโก้โรงพยาบาลโคกศรีสุพรรณ
+      const lx = 310, ly = 190;
+      c.fillStyle = '#e2e8f0';
+      c.beginPath();
+      c.moveTo(lx - 50, ly + 65);
+      c.bezierCurveTo(lx - 55, ly - 40, lx + 20, ly - 50, lx + 30, ly - 35);
+      c.bezierCurveTo(lx - 10, ly + 10, lx - 20, ly + 40, lx - 50, ly + 65);
+      c.fill();
+
+      c.fillStyle = '#0f766e';
+      c.beginPath();
+      c.moveTo(lx - 10, ly + 65);
+      c.bezierCurveTo(lx + 55, ly + 50, lx + 70, ly - 20, lx + 25, ly - 45);
+      c.bezierCurveTo(lx + 10, ly + 10, lx + 5, ly + 40, lx - 10, ly + 65);
+      c.fill();
+
+      c.fillStyle = '#ffffff';
+      c.fillRect(lx + 24, ly - 22, 14, 38);
+      c.fillRect(lx + 12, ly - 10, 38, 14);
+
+      c.fillStyle = '#cbd5e1';
+      c.fillRect(lx - 44, ly + 10, 14, 52);
+      c.fillRect(lx - 28, ly - 8, 16, 70);
+      c.fillRect(lx - 10, ly + 22, 14, 40);
+
+      // ตัวอักษรเรืองแสง 3D: โรงพยาบาลโคกศรีสุพรรณ / KHOKSRISUPHAN HOSPITAL
+      c.textAlign = 'left';
+      c.textBaseline = 'middle';
+
+      const line1 = 'โรงพยาบาลโคกศรีสุพรรณ';
+      c.font = "bold 96px 'Prompt', 'Kanit', 'Sarabun', 'Tahoma', sans-serif";
+
+      c.shadowColor = 'rgba(255, 255, 255, 0.9)';
+      c.shadowBlur = 24;
+      c.fillStyle = '#ffffff';
+      c.fillText(line1, 440, 165);
+
+      c.shadowBlur = 0;
+      c.fillStyle = '#94a3b8';
+      for (let o = 5; o >= 1; o--) {
+        c.fillText(line1, 440 + o, 165 + o);
+      }
+      c.fillStyle = '#ffffff';
+      c.fillText(line1, 440, 165);
+
+      const line2 = 'KHOKSRISUPHAN HOSPITAL';
+      c.font = "bold 46px 'Prompt', 'Kanit', 'Montserrat', 'Segoe UI', sans-serif";
+
+      c.shadowColor = 'rgba(255, 255, 255, 0.75)';
+      c.shadowBlur = 16;
+      c.fillStyle = '#f8fafc';
+      c.fillText(line2, 445, 252);
+
+      c.shadowBlur = 0;
+      c.fillStyle = '#64748b';
+      for (let o = 3; o >= 1; o--) {
+        c.fillText(line2, 445 + o, 252 + o);
+      }
+      c.fillStyle = '#f8fafc';
+      c.fillText(line2, 445, 252);
+
+      // ลวดลายกิ่งไม้และใบไม้สีขาว (Stylized Tree Art)
+      c.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+      c.lineWidth = 14;
+      c.lineCap = 'round';
+      c.lineJoin = 'round';
+
+      c.beginPath();
+      c.moveTo(1380, 520);
+      c.bezierCurveTo(1390, 410, 1420, 340, 1450, 275);
+      c.stroke();
+
+      c.lineWidth = 10;
+      c.beginPath();
+      c.moveTo(1415, 360);
+      c.bezierCurveTo(1350, 330, 1310, 310, 1260, 315);
+      c.stroke();
+
+      c.beginPath();
+      c.moveTo(1435, 305);
+      c.bezierCurveTo(1470, 280, 1510, 270, 1560, 280);
+      c.stroke();
+
+      c.fillStyle = '#ffffff';
+      function drawLeaf(x, y, rx, ry, rot) {
+        c.save();
+        c.translate(x, y);
+        c.rotate(rot);
+        c.beginPath();
+        c.ellipse ? c.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2) : c.arc(0, 0, rx, 0, Math.PI * 2);
+        c.fill();
+        c.restore();
+      }
+      drawLeaf(1255, 315, 20, 12, -0.3);
+      drawLeaf(1290, 310, 16, 10, -0.2);
+      drawLeaf(1450, 260, 24, 14, 0.4);
+      drawLeaf(1565, 280, 20, 12, 0.6);
+
+      c.lineWidth = 12;
+      c.beginPath();
+      c.moveTo(560, 480);
+      c.bezierCurveTo(620, 430, 710, 420, 780, 445);
+      c.stroke();
+
+      c.beginPath();
+      c.moveTo(640, 440);
+      c.bezierCurveTo(620, 380, 580, 360, 540, 380);
+      c.stroke();
+
+      drawLeaf(535, 380, 18, 11, -0.7);
+      drawLeaf(785, 450, 20, 12, 0.2);
+
+      // กระจกบานเลื่อนช่องบริการห้องบัตร/เวชระเบียน (Center Sliding Service Window)
+      const wx = 720, wy = 450, ww = 980, wh = 480;
+      c.fillStyle = '#334155';
+      c.fillRect(wx - 8, wy - 8, ww + 16, wh + 16);
+      c.strokeStyle = '#64748b';
+      c.lineWidth = 4;
+      c.strokeRect(wx - 8, wy - 8, ww + 16, wh + 16);
+
+      const winGrad = c.createLinearGradient(wx, wy, wx, wy + wh);
+      winGrad.addColorStop(0, '#0f172a');
+      winGrad.addColorStop(0.5, '#1e293b');
+      winGrad.addColorStop(1, '#0f172a');
+      c.fillStyle = winGrad;
+      c.fillRect(wx, wy, ww, wh);
+
+      c.fillStyle = 'rgba(148, 163, 184, 0.25)';
+      for (let sy = wy + 60; sy < wy + wh; sy += 70) {
+        c.fillRect(wx + 20, sy, ww - 40, 8);
+      }
+
+      c.fillStyle = '#64748b';
+      c.fillRect(wx + ww / 2 - 4, wy, 8, wh);
+      c.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      c.strokeRect(wx + ww / 2 - 4, wy, 8, wh);
+
+      c.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      c.beginPath();
+      c.moveTo(wx + 40, wy);
+      c.lineTo(wx + 240, wy);
+      c.lineTo(wx + 100, wy + wh);
+      c.lineTo(wx - 100, wy + wh);
+      c.fill();
+
+      // นาฬิกาดิจิทัลไฟแดง LED บนซ้าย
+      c.fillStyle = '#0f172a';
+      c.fillRect(70, 70, 160, 80);
+      c.strokeStyle = '#334155';
+      c.lineWidth = 4;
+      c.strokeRect(70, 70, 160, 80);
+      c.fillStyle = '#ef4444';
+      c.font = 'bold 36px monospace';
+      c.textAlign = 'center';
+      c.fillText('10:15', 150, 115);
+
+      // ลำโพงติดผนังขวาบน
+      c.fillStyle = '#020617';
+      c.fillRect(1820, 65, 120, 90);
+      c.strokeStyle = '#334155';
+      c.lineWidth = 3;
+      c.strokeRect(1820, 65, 120, 90);
+    });
+
+    // 4. Texture ป้ายเตือนภัยฉุกเฉิน Fast-Track สีแดงสดด้านซ้าย
+    const fastTrackAlertTex = M.canvasTexture(512, 768, (c, w, h) => {
+      const bg = c.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#7f1d1d');
+      bg.addColorStop(0.5, '#991b1b');
+      bg.addColorStop(1, '#b91c1c');
+      c.fillStyle = bg;
+      c.fillRect(0, 0, w, h);
+
+      c.strokeStyle = '#ffffff';
+      c.lineWidth = 8;
+      c.strokeRect(10, 10, w - 20, h - 20);
+
+      c.fillStyle = '#450a0a';
+      c.fillRect(18, 18, w - 36, 190);
+
+      // โลโก้กาชาด / รพ.
+      c.fillStyle = '#0f766e';
+      c.beginPath();
+      c.arc(w - 60, 55, 24, 0, Math.PI * 2);
+      c.fill();
+      c.fillStyle = '#ffffff';
+      c.font = 'bold 22px sans-serif';
+      c.textAlign = 'center';
+      c.fillText('+', w - 60, 62);
+
+      c.textAlign = 'left';
+      c.fillStyle = '#fef08a';
+      c.font = 'bold 32px Prompt, sans-serif';
+      c.fillText('หากมีอาการเหล่านี้', 36, 60);
+
+      c.fillStyle = '#ffffff';
+      c.font = 'bold 34px Prompt, sans-serif';
+      c.fillText('ต้องแจ้งเจ้าหน้าที่', 36, 105);
+
+      c.fillStyle = '#facc15';
+      c.fillRect(36, 125, 150, 60);
+      c.fillStyle = '#7f1d1d';
+      c.font = 'bold 44px Prompt, sans-serif';
+      c.textAlign = 'center';
+      c.fillText('ทันที', 36 + 75, 168);
+
+      c.font = '54px sans-serif';
+      c.fillText('🫀 🧠', w - 120, 168);
+
+      // กล่องเตือน 1: เจ็บแน่นหน้าอก
+      const c1y = 230, cardH = 210;
+      c.fillStyle = '#ffffff';
+      c.fillRect(24, c1y, w - 48, cardH);
+      c.strokeStyle = '#dc2626';
+      c.lineWidth = 4;
+      c.strokeRect(24, c1y, w - 48, cardH);
+
+      c.fillStyle = '#fee2e2';
+      c.beginPath();
+      c.arc(75, c1y + 65, 38, 0, Math.PI * 2);
+      c.fill();
+      c.font = '40px sans-serif';
+      c.fillText('❤️‍🔥', 75, c1y + 78);
+
+      c.textAlign = 'left';
+      c.fillStyle = '#991b1b';
+      c.font = 'bold 32px Prompt, sans-serif';
+      c.fillText('เจ็บแน่นหน้าอก', 130, c1y + 60);
+
+      c.fillStyle = '#1e293b';
+      c.font = 'bold 24px Prompt, sans-serif';
+      c.fillText('หายใจไม่เต็มอิ่ม', 130, c1y + 100);
+
+      c.fillStyle = '#64748b';
+      c.font = '20px Prompt, sans-serif';
+      c.fillText('• เหงื่อแตก ใจสั่น ร้าวไปกราม/แขน', 40, c1y + 150);
+      c.fillText('• มีประวัติโรคหัวใจหรือความดัน', 40, c1y + 182);
+
+      // กล่องเตือน 2: ปากเบี้ยว แขนขาอ่อนแรง
+      const c2y = 465;
+      c.fillStyle = '#ffffff';
+      c.fillRect(24, c2y, w - 48, cardH);
+      c.strokeStyle = '#dc2626';
+      c.lineWidth = 4;
+      c.strokeRect(24, c2y, w - 48, cardH);
+
+      c.fillStyle = '#fee2e2';
+      c.beginPath();
+      c.arc(75, c2y + 65, 38, 0, Math.PI * 2);
+      c.fill();
+      c.font = '40px sans-serif';
+      c.fillText('🧠', 75, c2y + 78);
+
+      c.fillStyle = '#991b1b';
+      c.font = 'bold 32px Prompt, sans-serif';
+      c.fillText('ปากเบี้ยว พูดไม่ชัด', 130, c2y + 60);
+
+      c.fillStyle = '#1e293b';
+      c.font = 'bold 24px Prompt, sans-serif';
+      c.fillText('แขนขาอ่อนแรง', 130, c2y + 100);
+
+      c.fillStyle = '#64748b';
+      c.font = '20px Prompt, sans-serif';
+      c.fillText('• พูดไม่ออก สับสน นึกคำพูดไม่ได้', 40, c2y + 150);
+      c.fillText('• ทรงตัวไม่ได้ เดินเซ ตามัวเฉียบพลัน', 40, c2y + 182);
+
+      // แถบด้านล่าง
+      c.fillStyle = '#14532d';
+      c.fillRect(18, h - 68, w - 36, 50);
+      c.fillStyle = '#ffffff';
+      c.font = 'bold 20px Prompt, sans-serif';
+      c.textAlign = 'center';
+      c.fillText('🚑 FAST TRACK STROKE & STEMI • รพ.โคกศรีสุพรรณ', w / 2, h - 36);
+    });
+
+    // -------------------------------------------------------------------------
+    // ประกอบโครงสร้าง 3D เคาน์เตอร์จุดคัดกรองขอบมน 3 ชั้น (Plinth, Wood Slat Body, White Fascia)
+    // -------------------------------------------------------------------------
+    const ctrX = WX(38.4, 7.65); // พิกัด World X ≈ 24.757
+    const ctrZ = WZ(38.4);       // พิกัด World Z ≈ 4.391
+    const straightL = 2.40;      // ความยาวช่วงตรงของเคาน์เตอร์
+    const halfL = straightL / 2; // 1.20
+
+    const plinthMat = M.mat(0xf1f5f9, { roughness: 0.25 });
+    const oakWoodMat = M.mat(0xcca072, { roughness: 0.45 });
+    const whiteFasciaMat = M.mat(0xffffff, { roughness: 0.15, metalness: 0.05 });
+    const woodSlatMat = new THREE.MeshStandardMaterial({ map: screeningWoodSlatTex, roughness: 0.45 });
+    const sneezeGuardMat = new THREE.MeshStandardMaterial({
+      map: sneezeGuardTex,
+      transparent: true,
+      opacity: 0.94,
+      roughness: 0.05,
+      metalness: 0.1,
+      depthWrite: false
+    });
+    const backdropMat = new THREE.MeshStandardMaterial({ map: screeningBackdropTex, roughness: 0.35 });
+    const fastTrackMat = new THREE.MeshStandardMaterial({ map: fastTrackAlertTex, roughness: 0.4 });
+
+    // 1. ฐานเคาน์เตอร์สีขาวบัวพื้นขอบมน (Plinth: y = 0 .. 0.09)
+    const plinthR = 0.38, plinthH = 0.09;
+    M.box(g, plinthR * 2, plinthH, straightL, plinthMat, ctrX, plinthH / 2, ctrZ);
+    M.cyl(g, plinthR, plinthR, plinthH, plinthMat, ctrX, plinthH / 2, ctrZ - halfL, 24);
+    M.cyl(g, plinthR, plinthR, plinthH, plinthMat, ctrX, plinthH / 2, ctrZ + halfL, 24);
+
+    // 2. ตัวเคาน์เตอร์ระแนงไม้แนวตั้งสีธรรมชาติ (Wood Fluted Body: y = 0.09 .. 0.74, สูง 0.65m)
+    const bodyR = 0.41, bodyH = 0.65, bodyY = 0.09 + bodyH / 2;
+    M.box(g, bodyR * 2, bodyH, straightL, oakWoodMat, ctrX, bodyY, ctrZ);
+    M.cyl(g, bodyR, bodyR, bodyH, oakWoodMat, ctrX, bodyY, ctrZ - halfL, 24);
+    M.cyl(g, bodyR, bodyR, bodyH, oakWoodMat, ctrX, bodyY, ctrZ + halfL, 24);
+
+    // แผ่นหน้าเคาน์เตอร์ระแนงไม้ + ตัวอักษร 3D "จุดคัดกรอง / SCREENING POINT" หันหน้าไปทาง ER (-X)
+    const frontPlate = new THREE.Mesh(
+      new THREE.BoxGeometry(0.012, bodyH, straightL),
+      [
+        woodSlatMat, // +X
+        woodSlatMat, // -X (หันหน้าออกหาผู้รับบริการทาง ER)
+        oakWoodMat,  // +Y
+        oakWoodMat,  // -Y
+        oakWoodMat,  // +Z
+        oakWoodMat   // -Z
+      ]
+    );
+    frontPlate.position.set(ctrX - bodyR - 0.006, bodyY, ctrZ);
+    g.add(frontPlate);
+
+    // 3. ท็อปเคาน์เตอร์และบัวบนสีขาวเงาหนาขอบมน (White Countertop & Upper Fascia: y = 0.74 .. 0.94, สูง 0.20m)
+    const topR = 0.44, topH = 0.20, topY = 0.74 + topH / 2;
+    M.box(g, topR * 2, topH, straightL, whiteFasciaMat, ctrX, topY, ctrZ);
+    M.cyl(g, topR, topR, topH, whiteFasciaMat, ctrX, topY, ctrZ - halfL, 24);
+    M.cyl(g, topR, topR, topH, whiteFasciaMat, ctrX, topY, ctrZ + halfL, 24);
+
+    // พื้นผิวโต๊ะทำงานระดับในสำหรับวางอุปกรณ์และพิมพ์เอกสาร (y = 0.94)
+    M.box(g, 0.72, 0.02, straightL + 0.40, whiteFasciaMat, ctrX + 0.05, 0.935, ctrZ);
+
+    // 4. แผงกั้นอะคริลิกใสป้องกันละอองฝอย (Acrylic Sneeze Guard: y = 0.94 .. 1.48, สูง 0.54m)
+    const guardH = 0.54, guardY = 0.94 + guardH / 2;
+    const guardMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.015, guardH, straightL + 0.20),
+      sneezeGuardMat
+    );
+    guardMesh.position.set(ctrX - 0.12, guardY, ctrZ);
+    g.add(guardMesh);
+
+    // ขาจับสเตนเลสยึดแผงกั้นอะคริลิก 4 จุด
+    const clampMat = M.mat(0xe2e8f0, { roughness: 0.15, metalness: 0.85 });
+    [-halfL, -0.40, 0.40, halfL].forEach(zOff => {
+      M.box(g, 0.04, 0.12, 0.04, clampMat, ctrX - 0.12, 0.98, ctrZ + zOff);
+    });
+
+    // 5. ป้ายแจ้งเตือนฉุกเฉิน Fast-Track สีแดงสดด้านซ้ายเคาน์เตอร์ (Red Emergency Alert Stand)
+    const standZ = ctrZ - halfL - 0.55;
+    const standX = ctrX - 0.35;
+    M.cyl(g, 0.18, 0.18, 0.025, M.mat(0x475569, { roughness: 0.3, metalness: 0.7 }), standX, 0.0125, standZ, 20);
+    M.cyl(g, 0.02, 0.02, 1.15, clampMat, standX, 0.58, standZ, 16);
+    const alertBoard = new THREE.Mesh(
+      new THREE.BoxGeometry(0.02, 0.72, 0.52),
+      [
+        fastTrackMat, // +X
+        fastTrackMat, // -X (facing ER)
+        M.mat(0x7f1d1d),
+        M.mat(0x7f1d1d),
+        M.mat(0x7f1d1d),
+        M.mat(0x7f1d1d)
+      ]
+    );
+    alertBoard.position.set(standX, 1.25, standZ);
+    g.add(alertBoard);
+
+    // 6. ผนังฉากหลังไม้สีเข้ม Walnut พร้อมโลโก้โรงพยาบาล ตัวอักษรเรืองแสง ลายกิ่งไม้ และช่องกระจกบานเลื่อน
+    const wallZ = 4.25, wallW = 3.25, wallH = 1.85;
+    const backdropMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.03, wallH, wallW),
+      [
+        M.mat(0x1e110b),
+        backdropMat, // -X (หันหน้าออกหาผู้รับบริการ)
+        M.mat(0x1e110b),
+        M.mat(0x1e110b),
+        M.mat(0x1e110b),
+        M.mat(0x1e110b)
+      ]
+    );
+    backdropMesh.position.set(25.46, wallH / 2, wallZ);
+    g.add(backdropMesh);
+
+    // บัวฝ้าเพดานด้านบนผนังไม้ (Overhead Ceiling Soffit) & หลอดไฟดาวน์ไลท์ warm white
+    M.box(g, 0.30, 0.12, wallW + 0.10, M.mat(0x1e110b, { roughness: 0.4 }), 25.35, 1.88, wallZ);
+    const lightGlowMat = M.mat(0xfef08a, { emissive: 0xfef08a, emissiveIntensity: 0.9 });
+    [wallZ - 1.05, wallZ, wallZ + 1.05].forEach(spotZ => {
+      M.cyl(g, 0.05, 0.05, 0.02, lightGlowMat, 25.35, 1.81, spotZ, 12);
+    });
+    const receptionWarmLight = new THREE.PointLight(0xffedd5, 0.85, 4.5);
+    receptionWarmLight.position.set(24.90, 1.85, wallZ);
+    g.add(receptionWarmLight);
 
     // --- ติดตั้งชุดคอมพิวเตอร์โต๊ะ 2 ไว้บนเคาน์เตอร์ด้านหน้า (Front Counter Workstation) ---
     function createCounterWorkstation(cx, cz, pcSpec, labelText) {
       // เก้าอี้สำนักงานพร้อมพนักพิงสำหรับเจ้าหน้าที่
       M.box(g, 0.45 * SX, 0.06, 0.45 * SZ, M.mat(0x1e293b), WX(cx, cz - 0.55), 0.25, WZ(cx));
-      M.box(g, 0.44 * SX, 0.08, 0.44 * SZ, M.mat(0x0284c7), WX(cx, cz - 0.55), 0.46, WZ(cx));
-      M.box(g, 0.06 * SX, 0.44, 0.42 * SZ, M.mat(0x0284c7), WX(cx, cz - 0.72), 0.70, WZ(cx));
+      M.box(g, 0.44 * SX, 0.08, 0.44 * SZ, M.mat(0x0284c7), WX(cx, cz - 0.55), 0.48, WZ(cx));
+      M.box(g, 0.06 * SX, 0.44, 0.42 * SZ, M.mat(0x0284c7), WX(cx, cz - 0.72), 0.72, WZ(cx));
 
       // เจ้าหน้าที่เวชระเบียนนั่งประจำเคาน์เตอร์ด้านหน้า หันหน้าออกหาผู้รับบริการ (+Z ในห้อง)
       const staff = makePerson({ role: 'nurse', pose: 'sit', rotY: 0 });
       staff.position.set(WX(cx, cz - 0.55), 0, WZ(cx));
       g.add(staff);
 
-      // 1. ฐานจอ All-in-One และเสาขาตั้ง วางบนเคาน์เตอร์ความสูง y = 0.90
-      const pcStand = rBox(0.24, 0.02, 0.18, M.mat(0x334155), cx, 0.91, cz);
-      const pcPillar = rBox(0.06, 0.14, 0.04, M.mat(0x475569), cx, 0.98, cz + 0.02);
+      // 1. ฐานจอ All-in-One และเสาขาตั้ง วางบนเคาน์เตอร์ความสูง y = 0.94
+      const pcStand = rBox(0.24, 0.02, 0.18, M.mat(0x334155), cx, 0.95, cz);
+      const pcPillar = rBox(0.06, 0.14, 0.04, M.mat(0x475569), cx, 1.02, cz + 0.02);
 
       // 2. จอภาพ All-in-One ขนาด 23.8 นิ้ว ขอบบาง หันจอเรืองแสงสีฟ้าหาเจ้าหน้าที่ (-Z ในห้อง)
-      const monBody = rBox(0.54, 0.34, 0.03, M.mat(0x0f172a), cx, 1.15, cz);
+      const monBody = rBox(0.54, 0.34, 0.03, M.mat(0x0f172a), cx, 1.19, cz);
       addEdges(monBody, 0x38bdf8);
-      const monScreen = rBox(0.50, 0.30, 0.01, M.mat(0x0284c7, { emissive: 0x0284c7, emissiveIntensity: 0.45 }), cx, 1.15, cz - 0.016);
+      const monScreen = rBox(0.50, 0.30, 0.01, M.mat(0x0284c7, { emissive: 0x0284c7, emissiveIntensity: 0.45 }), cx, 1.19, cz - 0.016);
 
       // 3. แป้นพิมพ์และเมาส์วางบนหน้าโต๊ะเคาน์เตอร์
-      const kbd = rBox(0.40, 0.015, 0.13, M.mat(0x1e293b), cx, 0.91, cz - 0.22);
-      const mousePad = rBox(0.18, 0.005, 0.18, M.mat(0x0f172a), cx + 0.30, 0.905, cz - 0.22);
-      const mouse = rBox(0.06, 0.02, 0.09, M.mat(0x334155), cx + 0.30, 0.915, cz - 0.22);
+      const kbd = rBox(0.40, 0.015, 0.13, M.mat(0x1e293b), cx, 0.95, cz - 0.22);
+      const mousePad = rBox(0.18, 0.005, 0.18, M.mat(0x0f172a), cx + 0.30, 0.945, cz - 0.22);
+      const mouse = rBox(0.06, 0.02, 0.09, M.mat(0x334155), cx + 0.30, 0.955, cz - 0.22);
 
       // 4. เครื่องอ่านบัตรประชาชน Smart Card ThaiID Reader เรืองแสงสีเขียว
-      const smartCardReader = rBox(0.11, 0.025, 0.08, M.mat(0x10b981), cx - 0.28, 0.915, cz - 0.15);
-      const cardSlotTrim = rBox(0.08, 0.008, 0.02, M.mat(0xffffff), cx - 0.28, 0.93, cz - 0.13);
+      const smartCardReader = rBox(0.11, 0.025, 0.08, M.mat(0x10b981), cx - 0.28, 0.955, cz - 0.15);
+      const cardSlotTrim = rBox(0.08, 0.008, 0.02, M.mat(0xffffff), cx - 0.28, 0.97, cz - 0.13);
 
       // 5. เครื่องพิมพ์บาร์โค้ด / สติกเกอร์ OPD (Zebra ZD230)
-      const printer = rBox(0.18, 0.14, 0.20, M.mat(0x334155), cx - 0.32, 0.97, cz + 0.08);
-      const printerSlot = rBox(0.12, 0.015, 0.02, M.mat(0x10b981), cx - 0.32, 0.99, cz - 0.02);
+      const printer = rBox(0.18, 0.14, 0.20, M.mat(0x334155), cx - 0.32, 1.01, cz + 0.08);
+      const printerSlot = rBox(0.12, 0.015, 0.02, M.mat(0x10b981), cx - 0.32, 1.03, cz - 0.02);
 
       // 6. ถาดเอกสารและแฟ้ม OPD Card
-      const docTray = rBox(0.24, 0.06, 0.30, M.mat(0x94a3b8), cx + 0.34, 0.93, cz + 0.06);
+      const docTray = rBox(0.24, 0.06, 0.30, M.mat(0x94a3b8), cx + 0.34, 0.97, cz + 0.06);
 
       // ผูก pcInfo กับชิ้นส่วน 3D ทั้งหมด
       [pcStand, pcPillar, monBody, monScreen, kbd, mousePad, mouse, smartCardReader, cardSlotTrim, printer, printerSlot, docTray].forEach((mesh) => {
@@ -1105,13 +1703,15 @@
     // ป้ายบอกช่องบริการ 1 และ 2 บนหน้าต่างกระจก
     L.push({
       text: '🪪 ช่อง 1: ค้นหา OPD Card/เวชระเบียน',
-      pos: rV(39.4, 1.35, 7.98),
+      pos: rV(39.4, 1.45, 7.98),
       cls: 'int-label sub-tag'
     });
     L.push({
-      text: '🪪 ช่อง 2: ลงทะเบียนผู้มารับบริการ (เคาน์เตอร์ด้านหน้า)',
-      pos: rV(36.8, 1.35, 7.98),
-      cls: 'int-label sub-tag'
+      text: '🪪 ช่อง 2: จุดคัดกรอง & ลงทะเบียน (โต๊ะคอม 2)',
+      pos: rV(36.8, 1.45, 7.98),
+      cls: 'int-label sub-tag',
+      clickable: true,
+      pcInfo: cardPc2Spec
     });
 
     // ผู้รับบริการยืนติดต่อที่เคาน์เตอร์ด้านหน้า ช่อง 2
@@ -1120,9 +1720,11 @@
     g.add(visitor1);
 
     L.push({
-      text: '🪪 เค้าเตอร์ลงทะเบียนผู้มารับบริการ (หันหน้าไปทาง ER)',
-      pos: rV(38.4, 1.85, 7.65),
-      cls: 'int-label room-title'
+      text: '🪪 จุดคัดกรอง • SCREENING POINT (เคาน์เตอร์ด้านหน้าห้องบัตร)',
+      pos: rV(38.4, 1.95, 7.65),
+      cls: 'int-label room-title',
+      clickable: true,
+      pcInfo: cardPc2Spec
     });
 
     const kioskSpec = makePcSpec(
